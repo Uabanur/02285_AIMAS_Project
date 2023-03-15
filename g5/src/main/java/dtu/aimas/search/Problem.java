@@ -22,6 +22,10 @@ public class Problem {
         this.goals = goals;
     }
 
+    public Problem precompute(){
+        return this;
+    }
+
     @Override
     public String toString() {
         var sb = new StringBuilder();

@@ -16,21 +16,16 @@ import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.search.Problem;
 
-public class CourseLevelParser implements LevelParser
+public class CourseLevelParser extends LevelParser
 {
     private CourseLevelParser(){}
     public static final LevelParser Instance = new CourseLevelParser();
 
-    public Result<Problem> parse(Reader level) 
-    {
-        return parse(new BufferedReader(level));
-    }
-
-    public Result<Problem> parse(BufferedReader level) 
+    protected Result<Problem> parseInput(Reader level) 
     {
         try {
-            return Result.ok(parseUnsafe(level));
-        } catch (Exception e) {
+            return Result.ok(parseUnsafe(new BufferedReader(level)));
+        } catch (Throwable e) {
             return Result.error(e);
         }
     }
