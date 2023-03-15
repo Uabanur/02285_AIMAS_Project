@@ -1,9 +1,10 @@
 package dtu.aimas;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.Reader;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,10 +18,10 @@ import dtu.aimas.search.solvers.graphsearch.BFS;
 
 
 public class LevelTester {
-    private Result<BufferedReader> getFileReader(String levelName){
+    private Result<Reader> getFileReader(String levelName){
         try {
             var levelFile = new File(IO.LevelDir.toFile(), levelName + ".lvl");
-            var buffer = new BufferedReader(new FileReader(levelFile));
+            var buffer = new FileReader(levelFile);
             return Result.ok(buffer);
         } catch (FileNotFoundException e) {
             return Result.error(e);
