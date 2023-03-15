@@ -66,6 +66,7 @@ public class IO {
         }
     }
 
+    public static void debug(Object o) {debug(o.toString());}
     public static void debug(String msg){
         if (logLevel == LogLevel.Debug){
             log("[debug] "+msg);
@@ -75,6 +76,7 @@ public class IO {
         debug(String.format(format, args));
     }
 
+    public static void info(Object o){info(o.toString());}
     public static void info(String msg){
         if (logLevel == LogLevel.Information || logLevel == LogLevel.Debug) {
             log("[info] "+msg);
@@ -84,6 +86,7 @@ public class IO {
         info(String.format(format, args));
     }
 
+    public static void warn(Object o){warn(o.toString());}
     public static void warn(String msg){
         if (logLevel == LogLevel.Error) return;
         log("[warn] "+msg);
@@ -92,6 +95,7 @@ public class IO {
         warn(String.format(format, args));
     }
 
+    public static void error(Object o){error(o.toString());}
     public static void error(String msg){
         log("[error] " +msg);
     }
