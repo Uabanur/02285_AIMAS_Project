@@ -42,18 +42,14 @@ public class ArgumentParser {
 
     private static Result<ConfigOption> getConfigOption(String optionName){
         switch (optionName) {
-            case DefaultConfigOption.OptionName -> {
-                return Result.ok(new DefaultConfigOption());
-            }
-            case BFSConfigOption.OptionName -> {
+            case BFSConfigOption.OptionName:
                 return Result.ok(new BFSConfigOption());
-            }
-            case DFSConfigOption.OptionName -> {
+            case DFSConfigOption.OptionName:
                 return Result.ok(new DFSConfigOption());
-            }
-            default -> {
+
+            case DefaultConfigOption.OptionName:
+            default:
                 return Result.error(new UnknownArgument("Unknown argument given: " + optionName));
-            }
         }
     }
 }
