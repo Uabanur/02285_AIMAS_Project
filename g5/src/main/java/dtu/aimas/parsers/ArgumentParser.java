@@ -9,15 +9,15 @@ import lombok.var;
 
 public class ArgumentParser {
     public static Result<Configuration> parse(String[] args){
-        var options = parseArgs(args);
-        if(options.isError()) return Result.error(options.getError());
+        return parseArgs(args)
+            .map(ArgumentParser::applyConfigOptions);
+    }
 
+    private static Configuration applyConfigOptions(Collection<ConfigOption> options){
         var conf = new Configuration();
-
-        for (ConfigOption option : options.get())
+        for (ConfigOption option : options)
             option.apply(conf);
-
-        return Result.ok(conf);
+        return conf;
     }
 
     private static Result<Collection<ConfigOption>> parseArgs(String[] args){

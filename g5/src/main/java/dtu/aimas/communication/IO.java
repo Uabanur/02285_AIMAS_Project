@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dtu.aimas.Constants;
+import dtu.aimas.SearchClient;
 import dtu.aimas.common.Result;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
@@ -171,8 +171,9 @@ public class IO {
     throws IOException{
         assert useServerCommunication;
 
-        sendToServerRaw(Constants.GroupName);
-        info("Client name: " + Constants.GroupName);
+        final String groupName = SearchClient.config.getGroupName();
+        sendToServerRaw(groupName);
+        info("Client name: " + groupName);
         return levelParser.parse(serverMessages);
     }
 

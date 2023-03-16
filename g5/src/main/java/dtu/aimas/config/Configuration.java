@@ -10,13 +10,20 @@ import lombok.Setter;
 public class Configuration {
     public Configuration(){
         solver = new BFS();
+        groupName = "Group5";
     }
+
+    @NonNull
+    private String groupName;
 
     @NonNull
     private Solver solver;
 
     @Override
     public String toString() {
-        return String.format("Configuration{Solver: %s}", solver.getClass().getSimpleName());
+        return String.format("Configuration{Solver=%s; GroupName=%s}", 
+            solver.getClass().getSimpleName(),
+            groupName
+        );
     }
 }
