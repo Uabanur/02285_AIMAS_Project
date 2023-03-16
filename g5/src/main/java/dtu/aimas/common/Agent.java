@@ -21,4 +21,8 @@ public class Agent {
         var other = (Agent)o;
         return this.pos == other.pos && this.color == other.color;
     }
+
+    public String toSimpleString(){
+        return String.format("(%d,%d|%s)", pos.row, pos.col, color.name());
+    }
 }
