@@ -3,7 +3,7 @@ package dtu.aimas.config;
 import java.util.List;
 
 import dtu.aimas.common.Result;
-import dtu.aimas.errors.UnknownArgument;
+import dtu.aimas.errors.UnknownArguments;
 
 public class DefaultConfigOption extends ConfigOption {
     public static final String OptionName = "default";
@@ -20,7 +20,7 @@ public class DefaultConfigOption extends ConfigOption {
     protected Result<ConfigOption> bindInner(List<String> tokens) {
         if(!tokens.isEmpty()) 
             return Result.error(
-                new UnknownArgument("Unknown arguments: " + String.join(", ", tokens)));
+                new UnknownArguments(tokens));
 
         return Result.ok(this);
     }

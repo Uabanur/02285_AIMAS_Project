@@ -13,8 +13,10 @@ public class SearchClient
     public static void main(String[] args) throws Throwable
     {
         IO.logLevel = LogLevel.Debug;
-        handleConfigs(args);
+        IO.useServerCommunication();
 
+        handleConfigs(args);
+        
         var result = IO.initializeServerCommunication(CourseLevelParser.Instance)
             .map(SearchClient::logStart)
             .flatMap(p -> SearchClient.config.getSolver().solve(p))
@@ -38,7 +40,7 @@ public class SearchClient
         if(configuration.isError()){
             IO.error("Invalid arguments.");
             IO.logException(configuration.getError());
-            throw configuration.getError();
+            System.exit(0);
         }
 
         SearchClient.config = configuration.get();

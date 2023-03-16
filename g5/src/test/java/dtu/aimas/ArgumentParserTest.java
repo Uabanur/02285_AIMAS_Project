@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import dtu.aimas.config.Configuration;
 import dtu.aimas.errors.AggregateError;
-import dtu.aimas.errors.UnknownArgument;
+import dtu.aimas.errors.UnknownArguments;
 import dtu.aimas.parsers.ArgumentParser;
 import dtu.aimas.search.solvers.graphsearch.*;
 
@@ -54,7 +54,7 @@ public class ArgumentParserTest {
 
         var errors = ((AggregateError)resultError).getErrors();
         assertEquals("Expected exactly 1 error", errors.length, 1);
-        assertTypeIs(errors[0].getClass(), UnknownArgument.class);
+        assertTypeIs(errors[0].getClass(), UnknownArguments.class);
     }
 
     @Test 

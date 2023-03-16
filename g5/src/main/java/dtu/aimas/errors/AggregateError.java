@@ -12,11 +12,15 @@ public class AggregateError extends Throwable {
     public AggregateError(Throwable... errors){
         super(generateErrorMessage(errors));
         this.errors = errors;
+
+        for (Throwable error : errors) {
+            addSuppressed(error);
+        }
     }
 
     private static String generateErrorMessage(Throwable[] errors){
         return IntStream.range(0, errors.length)
-         .mapToObj(i -> "Error" + String.valueOf(i+1) + ":" + errors[i].getMessage())
+         .mapToObj(i -> "Error " + String.valueOf(i+1) + ": " + errors[i].getMessage())
          .collect(Collectors.joining(" "));
     }
 }

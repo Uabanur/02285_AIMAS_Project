@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.InvalidArgument;
-import dtu.aimas.errors.UnknownArgument;
+import dtu.aimas.errors.UnknownArguments;
 
 public abstract class ConfigOption {
     private static final Map<String, Supplier<ConfigOption>> options = Map.of(
@@ -34,7 +34,7 @@ public abstract class ConfigOption {
     private static Result<ConfigOption> bindConfigOption(String optionName, List<String> tokens){
         var option = Result.ofNullable(
                 options.get(optionName), 
-                () -> new UnknownArgument("Unknown argument given: " + optionName)
+                () -> new UnknownArguments(optionName)
             ).map(o -> o.get());
 
         return option.flatMap(o -> o.bindInner(tokens));

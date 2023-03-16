@@ -32,6 +32,7 @@ public class ArgumentParser {
             i++;
         }
         options.add(DefaultConfigOption.bind(tokens));
+        tokens.clear();
 
         // Parse named options by option name flag '-<optionName>'
         while(i < args.length){
