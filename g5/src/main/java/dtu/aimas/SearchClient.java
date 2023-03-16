@@ -10,7 +10,7 @@ import dtu.aimas.search.Problem;
 public class SearchClient 
 {
     public static Configuration config;
-    public static void main(String[] args) throws Throwable
+    public static void main(String[] args)
     {
         IO.logLevel = LogLevel.Debug;
         IO.useServerCommunication();
@@ -33,7 +33,7 @@ public class SearchClient
         }
     }
 
-    private static void handleConfigs(String[] args) throws Throwable {
+    private static void handleConfigs(String[] args) {
         var configuration = ArgumentParser.parse(args);
         
         IO.debug(configuration);

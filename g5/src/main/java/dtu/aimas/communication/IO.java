@@ -167,8 +167,7 @@ public class IO {
         useServerCommunication = true;
     }
 
-    public static Result<Problem> initializeServerCommunication(LevelParser levelParser) 
-    throws IOException{
+    public static Result<Problem> initializeServerCommunication(LevelParser levelParser) {
         assert useServerCommunication;
 
         final String groupName = SearchClient.config.getGroupName();
