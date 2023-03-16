@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import dtu.aimas.common.Result;
 import dtu.aimas.config.*;
-import lombok.var;
 
 public class ArgumentParser {
     public static Result<Configuration> parse(String[] args){

@@ -113,7 +113,7 @@ public class IO {
             for (Throwable suppressed : e.getSuppressed()) {
                 IO.error("Child error:");
 
-                // Dont child errors are not recursed
+                // Child errors are not recursed
                 IO.logException(suppressed, false, false);
             }
         }
