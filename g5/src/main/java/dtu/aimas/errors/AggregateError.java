@@ -3,9 +3,15 @@ package dtu.aimas.errors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import lombok.Getter;
+
 public class AggregateError extends Throwable {
+    @Getter
+    private Throwable[] errors;
+
     public AggregateError(Throwable... errors){
         super(generateErrorMessage(errors));
+        this.errors = errors;
     }
 
     private static String generateErrorMessage(Throwable[] errors){

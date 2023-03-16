@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import dtu.aimas.common.Result;
 import dtu.aimas.config.*;
-import dtu.aimas.errors.UnknownArgument;
 import lombok.var;
 
 public class ArgumentParser {
@@ -23,33 +22,41 @@ public class ArgumentParser {
 
     private static Result<Collection<ConfigOption>> parseArgs(String[] args){
         var tokens = new ArrayList<String>();
-        Result<ConfigOption> optionConfig = Result.ok(new DefaultConfigOption());
         var options = new ArrayList<Result<ConfigOption>>();
 
-        for (String arg : args) {
+        int i = 0;
+
+        // Parse default options before any named options
+        while(i < args.length && !args[i].startsWith("-")){
+            tokens.add(args[i]);
+            i++;
+        }
+        options.add(DefaultConfigOption.bind(tokens));
+
+        // Parse named options by option name flag '-<optionName>'
+        while(i < args.length){
+            var arg = args[i];
+
+            // Collect tokens until a new config option is specified. 
             if(arg.startsWith("-")){
-                options.add(optionConfig.flatMap(o -> o.bind(tokens)));
-                tokens.clear();
-                optionConfig = getConfigOption(arg.substring(1));
+
+                if(!tokens.isEmpty()){
+                    // Bind the previous config option and collect the new
+                    options.add(ConfigOption.bind(tokens));
+                    tokens.clear();
+                }
             }
 
             tokens.add(arg);
+            i++;
         }
 
-        options.add(optionConfig.flatMap(o -> o.bind(tokens)));
+        // Add potential last parsed option
+        if(!tokens.isEmpty()){
+            options.add(ConfigOption.bind(tokens));
+            tokens.clear();
+        }
+
         return Result.collapse(options);
-    }
-
-    private static Result<ConfigOption> getConfigOption(String optionName){
-        switch (optionName) {
-            case BFSConfigOption.OptionName:
-                return Result.ok(new BFSConfigOption());
-            case DFSConfigOption.OptionName:
-                return Result.ok(new DFSConfigOption());
-
-            case DefaultConfigOption.OptionName:
-            default:
-                return Result.error(new UnknownArgument("Unknown argument given: " + optionName));
-        }
     }
 }
