@@ -11,6 +11,7 @@ public class Problem {
     public Collection<Box> boxes;
     public boolean[][] walls;
     public char[][]goals;
+    public int expectedStateSize;
 
     public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
     {
@@ -18,6 +19,7 @@ public class Problem {
         this.boxes = boxCollection;
         this.walls = walls;
         this.goals = goals;
+        expectedStateSize = 2<<15;
     }
 
     public Problem precompute(){

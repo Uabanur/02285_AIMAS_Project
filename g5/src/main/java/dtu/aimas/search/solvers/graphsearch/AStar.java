@@ -6,17 +6,13 @@ import dtu.aimas.search.Solution;
 import dtu.aimas.search.solvers.Solver;
 
 public class AStar extends GraphSearch implements Solver {
-    private Frontier frontier;
-
-    public AStar(Heuristic heuristic, int expectedStateSpaceSize){
-        this.frontier = new BestFirstFrontier(heuristic, expectedStateSpaceSize);
-    }
+    private Heuristic heuristic;
 
     public AStar(Heuristic heuristic){
-        this.frontier = new BestFirstFrontier(heuristic);
+        this.heuristic = heuristic;
     }
 
     public Result<Solution> solve(Problem initial) {
-        return solve(initial, frontier);
+        return solve(initial, heuristic);
     }
 }

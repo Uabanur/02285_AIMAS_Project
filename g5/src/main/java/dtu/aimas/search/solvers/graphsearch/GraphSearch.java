@@ -10,7 +10,13 @@ import dtu.aimas.search.Solution;
 
 public abstract class GraphSearch
 {
-    public Result<Solution> solve(Problem problem, Frontier frontier) 
+    public Result<Solution> solve(Problem problem, Heuristic heuristic) {
+        return ProblemParser.parse(problem)
+            .map(heuristic::attachStateSpace)
+            .flatMap(space -> solve(space, new BestFirstFrontier(heuristic, problem.expectedStateSize)));
+    }
+
+    public Result<Solution> solve(Problem problem, BasicFrontier frontier) 
     {
         return ProblemParser.parse(problem)
                 .flatMap(space -> solve(space, frontier));
