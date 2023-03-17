@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,10 +23,12 @@ import dtu.aimas.search.Solution;
 
 public class IO {
 
-    public final static String UserDir = System.getProperty("user.dir");
-    public final static String LogDir = String.join(File.separator, UserDir, "logs");
-    // public final static String SearchClientDir = String.join(File.separator, UserDir, "searchclient");
-    // public final static String LevelDir = String.join(File.separator, SearchClientDir, "levels");
+    private final static String CurrentClassPathString = System.getProperty("java.class.path").split(";")[0];
+    private final static Path TargetsPath = Paths.get(CurrentClassPathString).getParent();
+    private final static Path TargetClassesPath = Paths.get(TargetsPath.toString(), "classes");
+
+    public final static Path LogDir = Paths.get(TargetsPath.toString(), "logs");
+    public final static Path LevelDir = Paths.get(TargetClassesPath.toString(), "levels");
 
     public static LogLevel logLevel = LogLevel.Information;
     static boolean debugServerMessages = false;
@@ -109,13 +112,12 @@ public class IO {
 
         var currentDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         var logName = String.format("%s_%s.log", logSpecifier, currentDate);
-        var logPath = String.join(File.separator, LogDir, logName);
-        var logFile = new File(logPath);
+        var logFile = new File(LogDir.toFile(), logName);
 
         try {
             if (!logFile.exists()){
                 info("Creating log file: \n%s", logFile.getAbsolutePath());
-                Files.createDirectories(Paths.get(LogDir));
+                Files.createDirectories(LogDir);
                 logFile.createNewFile();
             }
 
