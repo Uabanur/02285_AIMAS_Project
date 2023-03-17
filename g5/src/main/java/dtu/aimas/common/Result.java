@@ -7,9 +7,15 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import dtu.aimas.errors.AggregateError;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+
+import java.util.Collection;
 
 public interface Result<T> {
 
@@ -52,6 +58,20 @@ public interface Result<T> {
         return nonNull(value)
                 ? ok(value)
                 : error(errorSupplier.get());
+    }
+
+    static <T> Result<Collection<T>> collapse(final Collection<Result<T>> collection) {
+        if(StreamSupport.stream(collection.spliterator(), false).allMatch(r -> r.isOk()))
+            return Result.ok(StreamSupport.stream(collection.spliterator(), false)
+                .map(r -> r.get())
+                .collect(Collectors.toList())
+            );
+
+        var errors = StreamSupport.stream(collection.spliterator(), false)
+            .filter(r -> r.isError())
+            .map(r -> r.getError())
+            .toArray(Throwable[]::new);
+        return Result.error(new AggregateError(errors));
     }
 
     boolean isOk();

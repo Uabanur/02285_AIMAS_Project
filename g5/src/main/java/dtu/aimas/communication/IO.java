@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dtu.aimas.Constants;
+import dtu.aimas.SearchClient;
 import dtu.aimas.common.Result;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
@@ -34,14 +34,14 @@ public class IO {
     static boolean debugServerMessages = false;
 
     private static boolean logOutputToFile = false;
-    private static boolean serverCommunicationInitialized = false;
+    private static boolean useServerCommunication = false;
     private static BufferedWriter writer = null;
     private static BufferedReader serverMessages = new BufferedReader(
         new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 
 
     private static void sendToServerRaw(String msg){
-        if (serverCommunicationInitialized){
+        if (useServerCommunication){
             System.out.println(msg);
         }
     }
@@ -49,7 +49,7 @@ public class IO {
     private static void log(String msg){
         var logMessage = "[client]" + msg;
 
-        if (serverCommunicationInitialized){
+        if (useServerCommunication){
             System.err.println(logMessage);
         } else {
             System.out.println(logMessage);
@@ -69,6 +69,7 @@ public class IO {
         }
     }
 
+    public static void debug(Object o) {debug(o.toString());}
     public static void debug(String msg){
         if (logLevel == LogLevel.Debug){
             log("[debug] "+msg);
@@ -78,6 +79,7 @@ public class IO {
         debug(String.format(format, args));
     }
 
+    public static void info(Object o){info(o.toString());}
     public static void info(String msg){
         if (logLevel == LogLevel.Information || logLevel == LogLevel.Debug) {
             log("[info] "+msg);
@@ -87,6 +89,7 @@ public class IO {
         info(String.format(format, args));
     }
 
+    public static void warn(Object o){warn(o.toString());}
     public static void warn(String msg){
         if (logLevel == LogLevel.Error) return;
         log("[warn] "+msg);
@@ -95,16 +98,36 @@ public class IO {
         warn(String.format(format, args));
     }
 
+    public static void error(Object o){error(o.toString());}
     public static void error(String msg){
         log("[error] " +msg);
     }
     public static void error(String format, Object... args){
         error(String.format(format, args));
     }
-    public static void logException(Throwable e) {
+
+    public static void logException(Throwable e) { logException(e, true, true); }
+    public static void logException(Throwable e, boolean printSuppressed, boolean printCause) {
         var traceElements = Stream.of(e.getStackTrace()).map(t -> t.toString()).collect(Collectors.toList());
         var traceString = String.join("\n\tat ", traceElements);
         error("%s\n%s", e.getMessage(), traceString);
+
+        if(printSuppressed){
+            for (Throwable suppressed : e.getSuppressed()) {
+                IO.error("Child error:");
+
+                // Child errors are not recursed
+                IO.logException(suppressed, false, false);
+            }
+        }
+
+        if(printCause){
+            Throwable cause = e.getCause();
+            if(cause != null){
+                IO.error("With cause:");
+                IO.logException(cause, false, false);
+            }
+        }
     }
 
     public static void logOutputToFile(String logSpecifier) {
@@ -142,11 +165,16 @@ public class IO {
         writer = null;
     }
 
-    public static Result<Problem> initializeServerCommunication(LevelParser levelParser) 
-    throws IOException{
-        serverCommunicationInitialized = true;
-        sendToServerRaw(Constants.GroupName);
-        info("Client name: " + Constants.GroupName);
+    public static void useServerCommunication(){
+        useServerCommunication = true;
+    }
+
+    public static Result<Problem> initializeServerCommunication(LevelParser levelParser) {
+        assert useServerCommunication;
+
+        final String groupName = SearchClient.config.getGroupName();
+        sendToServerRaw(groupName);
+        info("Client name: " + groupName);
         return levelParser.parse(serverMessages);
     }
 
