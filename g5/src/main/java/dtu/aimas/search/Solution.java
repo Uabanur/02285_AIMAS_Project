@@ -1,7 +1,7 @@
 package dtu.aimas.search;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface Solution {
-    List<SolutionStep> steps();
+    public Collection<String> serializeSteps();
 }

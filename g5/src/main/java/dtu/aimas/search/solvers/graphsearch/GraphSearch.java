@@ -7,19 +7,18 @@ import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.Solution;
-import dtu.aimas.search.State;
 
 public abstract class GraphSearch
 {
     public Result<Solution> solve(Problem problem, Frontier frontier) 
     {
         return ProblemParser.parse(problem)
-                .flatMap(init -> solve(problem, frontier, init));
+                .flatMap(space -> solve(space, frontier));
     }
     
-    private Result<Solution> solve(Problem problem, Frontier frontier, State initialState)
+    private Result<Solution> solve(StateSpace space, Frontier frontier)
     {
-        frontier.add(initialState);
+        frontier.add(space.getInitialState());
         HashSet<State> expanded = new HashSet<>();
 
         while (true) 
@@ -28,11 +27,11 @@ public abstract class GraphSearch
                 return Result.error(new SolutionNotFound("Empty frontier"));
 
             State state = frontier.next();
-            if(state.isGoalState(problem)) 
-                return Result.ok(state.getSolution());
+            if(space.isGoalState(state)) 
+                return space.createSolution(state);
 
             expanded.add(state);
-            for (State child : state.expand()) {
+            for (State child : space.expand(state)) {
                 if (!frontier.contains(child) && !expanded.contains(child)){
                     frontier.add(child);
                 }

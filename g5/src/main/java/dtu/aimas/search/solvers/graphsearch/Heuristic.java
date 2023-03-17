@@ -2,12 +2,15 @@ package dtu.aimas.search.solvers.graphsearch;
 
 import java.util.Comparator;
 
-import dtu.aimas.search.State;
-
 public abstract class Heuristic implements Comparator<State> {
-    public abstract float f(State s);
+    private StateSpace space;
+    public Heuristic(StateSpace space){
+        this.space = space;
+    }
+
+    public abstract float f(State s, StateSpace space);
 
     public int compare(State fst, State snd) {
-        return Float.compare(f(fst), f(snd));
+        return Float.compare(f(fst, space), f(snd, space));
     }
 }

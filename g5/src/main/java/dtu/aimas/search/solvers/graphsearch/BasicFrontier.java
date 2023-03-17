@@ -3,8 +3,6 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 
-import dtu.aimas.search.State;
-
 public class BasicFrontier implements Frontier {
     private final ArrayDeque<State> queue = new ArrayDeque<>(65536);
     private final HashSet<State> set = new HashSet<>(65536);
