@@ -22,6 +22,7 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.Solution;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.*;
+import dtu.aimas.search.solvers.heuristics.*;
 
 
 public class LevelTester {
@@ -88,7 +89,7 @@ public class LevelTester {
         }
     }
 
-    static final boolean logOutputToFile = true;
+    static final boolean logOutputToFile = false;
     static final LevelParser parser = CourseLevelParser.Instance;
 
     @Test
@@ -102,6 +103,16 @@ public class LevelTester {
     }
 
     @Test
+    public void TestMAPF00_AStar_GoalCount() {
+        TestMap("MAPF00", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestMAPF00_Greedy_GoalCount() {
+        TestMap("MAPF00", new Greedy(new GoalCount()));
+    }
+
+    @Test
     public void TestMAPF01_BFS() {
         TestMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
     }
@@ -110,4 +121,15 @@ public class LevelTester {
     public void TestMAPF01_DFS() {
         TestMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
     }
+
+    @Test
+    public void TestMAPF01_AStar_GoalCount() {
+        TestMap("MAPF01", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestMAPF01_Greedy_GoalCount() {
+        TestMap("MAPF01", new Greedy(new GoalCount()));
+    }
+
 }

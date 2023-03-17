@@ -1,7 +1,11 @@
 package dtu.aimas.search.solvers.graphsearch;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
+import dtu.aimas.common.Agent;
+import dtu.aimas.common.Box;
+import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.search.ActionSolution;
@@ -36,5 +40,18 @@ public class StateSpace {
     public ArrayList<State> expand(State state) {
         // TODO : this functionality belongs to the state space
         return state.getExpandedStates();
+    }
+
+    public Optional<Agent> getAgentByNumber(State state, int i) {
+        if (i >= state.agentRows.length) return Optional.empty();
+        return Optional.of(
+                new Agent(new Position(state.agentRows[i], state.agentCols[i]), State.agentColors[i]));
+    }
+
+    public Optional<Box> getBoxAt(State state, int row, int col) {
+        var symbol = state.boxes[row][col];
+        if (!Box.isLabel(symbol)) return Optional.empty();
+        var color = State.boxColors[symbol-'A'];
+        return Optional.of(new Box(new Position(row, col), color, symbol));
     }
 }
