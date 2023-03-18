@@ -18,7 +18,7 @@ public class Problem {
     public Collection<Box> boxes;
     public boolean[][] walls;
     public char[][] goals;
-    public int[][][][] distances;
+    private int[][][][] distances;
 
     public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
     {
@@ -109,5 +109,9 @@ public class Problem {
         }
 
         return sb.toString();
+    }
+
+    public int admissibleDist(Position from, Position to) {
+        return distances[from.row][from.col][to.row][to.col];
     }
 }
