@@ -38,8 +38,6 @@ public class Problem {
 
     private void distanceFromPos(Position src) {
         Queue<Position> neighbors = new LinkedList<Position>();
-        Set<Position> visited = new HashSet<Position>();
-        visited.add(src);
         distances[src.row][src.col][src.row][src.col] = 0;
         neighbors.add(src);
         while(!neighbors.isEmpty()) {
@@ -47,26 +45,26 @@ public class Problem {
             int distToCurr = distances[src.row][src.col][curr.row][curr.col];
             
             Position top = new Position(curr.row-1,curr.col);
-            if(top.row >= 0 && !visited.contains(top) && !walls[top.row][top.col]) {
-                visited.add(top);
+            if(top.row >= 0 && !walls[top.row][top.col] 
+                    && distances[src.row][src.col][top.row][top.col] > distToCurr+1) {
                 distances[src.row][src.col][top.row][top.col] = distToCurr+1;
                 neighbors.add(top);             
             }
             Position left = new Position(curr.row,curr.col-1);
-            if (left.col >= 0 && !visited.contains(left) && !walls[left.row][left.col]) {
-                visited.add(left);
+            if (left.col >= 0 && !walls[left.row][left.col] 
+                    && distances[src.row][src.col][left.row][left.col] > distToCurr+1 ) {
                 distances[src.row][src.col][left.row][left.col] = distToCurr+1;
                 neighbors.add(left);
             }
             Position bot = new Position(curr.row+1,curr.col);
-            if (bot.row < walls.length && !visited.contains(bot) && !walls[bot.row][bot.col]) {
-                visited.add(bot);
+            if (bot.row < walls.length && !walls[bot.row][bot.col] 
+                    && distances[src.row][src.col][bot.row][bot.col] > distToCurr+1) {
                 distances[src.row][src.col][bot.row][bot.col] = distToCurr+1;
                 neighbors.add(bot);
             }
             Position right = new Position(curr.row,curr.col+1);
-            if (right.col < walls[right.row].length && !visited.contains(right) && !walls[right.row][right.col]) {
-                visited.add(right);
+            if (right.col < walls[right.row].length && !walls[right.row][right.col] 
+                    && distances[src.row][src.col][right.row][right.col] > distToCurr+1) {
                 distances[src.row][src.col][right.row][right.col] = distToCurr+1;
                 neighbors.add(right);
             }
