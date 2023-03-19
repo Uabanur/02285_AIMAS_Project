@@ -29,6 +29,11 @@ public interface Result<T> {
         return new Error<>(throwable);
     }
 
+    static <T, T2> Result<T> passError(final Result<T2> result) {
+        requireNonNull(result.getError(), "The error of a Result cannot be null");
+        return Result.error(result.getError());
+    }
+
     static <T> Result<T> of(final Supplier<T> supplier) {
         requireNonNull(supplier, "The value supplier cannot be null");
 

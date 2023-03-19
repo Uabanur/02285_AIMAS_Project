@@ -176,6 +176,14 @@ public class Problem {
         return sb.toString();
     }
 
+    public Problem subProblemFor(Agent agent) {
+        /* TODO : Compute a sub problem for agents. 
+            It should only contain the agents given, and their boxes, as it should be solvable. 
+            The boxes may have moved since the initial problem, so the new problem should use the current state/state space.
+        */ 
+        return null;
+    }
+
     public int admissibleDist(Position from, Position to) {
         return distances[from.row][from.col][to.row][to.col];
     }
