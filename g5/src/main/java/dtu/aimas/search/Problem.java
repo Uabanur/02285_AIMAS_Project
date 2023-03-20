@@ -2,13 +2,10 @@ package dtu.aimas.search;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.Queue;
-import java.util.Set;
 import java.util.LinkedList;
 import dtu.aimas.common.Position;
-import dtu.aimas.communication.IO;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
 
