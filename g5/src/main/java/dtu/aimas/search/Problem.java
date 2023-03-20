@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
+import dtu.aimas.common.Goal;
 
 public class Problem {
 
@@ -11,14 +12,18 @@ public class Problem {
     public Collection<Box> boxes;
     public boolean[][] walls;
     public char[][]goals;
+    public Collection<Goal> agentGoals;
+    public Collection<Goal> boxGoals;
     public int expectedStateSize;
 
-    public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
+    public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals, Collection<Goal> agentGoals, Collection<Goal> boxGoals) 
     {
         this.agents = agentCollection;
         this.boxes = boxCollection;
         this.walls = walls;
         this.goals = goals;
+        this.agentGoals = agentGoals;
+        this.boxGoals = boxGoals;
         expectedStateSize = 2<<15;
     }
 
@@ -38,6 +43,14 @@ public class Problem {
 
         sb.append("Boxes: ");
         sb.append(boxes.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
+        sb.append(newline);
+
+        sb.append("Agents goals: ");
+        sb.append(agentGoals.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
+        sb.append(newline);
+
+        sb.append("Box goals: ");
+        sb.append(boxGoals.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
         sb.append(newline);
 
         sb.append("Walls and Goals:").append(newline);

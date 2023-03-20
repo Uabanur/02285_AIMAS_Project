@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
 import dtu.aimas.common.Color;
+import dtu.aimas.common.Goal;
 import dtu.aimas.common.Map;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
@@ -162,7 +163,21 @@ public class CourseLevelParser extends LevelParser
                 boxList.add(new Box(new Position(row, col), boxColors[c-'A'], c));
             }
         }
+
+        var agentGoalList = new ArrayList<Goal>();
+        var boxGoalList = new ArrayList<Goal>();
+        for(var row = 0; row < goals.length; row++){
+            for(var col = 0; col < goals[row].length; col++){
+                var c = goals[row][col];
+                if(Agent.isLabel(c)){
+                    agentGoalList.add(new Goal(c, new Position(row, col)));
+                }
+                else if(Box.isLabel(c)){
+                    boxGoalList.add(new Goal(c, new Position(row, col)));
+                }
+            }
+        }
         
-        return new Problem(agentList, boxList, walls, goals);
+        return new Problem(agentList, boxList, walls, goals, agentGoalList, boxGoalList);
     }
 }
