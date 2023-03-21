@@ -1,8 +1,6 @@
 package dtu.aimas.search.solvers.graphsearch;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import dtu.aimas.common.*;
 import dtu.aimas.search.Action;

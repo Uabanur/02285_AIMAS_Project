@@ -1,10 +1,6 @@
 package dtu.aimas.search.solvers.graphsearch;
 
-import java.lang.reflect.Array;
-import java.rmi.server.RemoteStub;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -128,12 +124,22 @@ public class StateSpace {
                     break;
                 }
             }
-            if(!goalSatisfied){
-                return false;
-            }
+            if(!goalSatisfied) return false;
         }
         // everything is satisfied
         return true;
+    }
+
+    private Position moveAgent(Agent agent, Action action){
+        return new Position(agent.pos.row + action.agentRowDelta, agent.pos.col + action.agentColDelta);
+    }
+
+    private Position moveBox(Box box, Action action){
+        return new Position(box.pos.row + action.agentRowDelta, box.pos.col + action.agentColDelta);
+    }
+
+    private Position getPullSource(Agent agent, Action action){
+        return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
     private boolean isApplicable(Agent agent, Action action){
@@ -147,25 +153,25 @@ public class StateSpace {
                 return true;
 
             case Move:
-                var destination = agent.pos.movePosition(action.agentRowDelta, action.agentColDelta);
-                return isCellFree(destination, currentState);
+                agentDestination = moveAgent(agent, action);
+                return isCellFree(agentDestination, currentState);
 
             case Push:
-                agentDestination = agent.pos.movePosition(action.agentRowDelta, action.agentColDelta);
+                agentDestination = moveAgent(agent, action);
                 boxResult = getBoxAt(currentState, agentDestination);
                 if(!boxResult.isPresent()) return false;
                 box = boxResult.get();
                 if(!canMoveBox(agent, box)) return false;
-                Position boxDestination = box.pos.movePosition(action.boxRowDelta, action.boxColDelta);
+                Position boxDestination = moveBox(box, action);
                 return isCellFree(boxDestination, currentState);
 
             case Pull:
-                Position boxSource = agent.pos.pullPosition(action.boxRowDelta, action.boxColDelta);
+                Position boxSource = getPullSource(agent, action);
                 boxResult = getBoxAt(currentState, boxSource);
                 if(!boxResult.isPresent()) return false;
                 box = boxResult.get();
                 if(!canMoveBox(agent, box)) return false; 
-                agentDestination = agent.pos.movePosition(action.agentRowDelta, action.agentColDelta);
+                agentDestination = moveAgent(agent, action);
                 return isCellFree(agentDestination, currentState);
 
         }
@@ -198,7 +204,7 @@ public class StateSpace {
 
             var stateResult = tryCreateState(state, jointAction);
             if(stateResult.isPresent()){
-                expandedStates.add(stateResult.get())
+                expandedStates.add(stateResult.get());
             }
 
             boolean done = false;
@@ -234,46 +240,83 @@ public class StateSpace {
         return true;
     }
 
+    private Agent copyAgent(Agent agent){
+        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color);
+    }
+
+    private Agent copyAgent(Agent agent, Position newPosition){
+        return new Agent(newPosition, agent.color);
+    }
+
+    private Box copyBox(Box box){
+        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.type);
+    }
+
+    private Box copyBox(Box box, Position newPosition){
+        return new Box(newPosition, box.color, box.type);
+    }
+
     private LiteState applyJointActions(LiteState state, Action[] actionsToApply){
-        // implementation here
-        ArrayList<Agent> destinationAgents = new ArrayList<>(state.agents.size());
-        ArrayList<Box> destinationBoxes = new ArrayList<>(state.boxes.size());
+        ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());
+        ArrayList<Box> updatedBoxes = new ArrayList<>(state.boxes.size());
+        
         for(Box box : state.boxes){
-            destinationBoxes.add(new Box(box.pos, box.color, box.type));
+            updatedBoxes.add(copyBox(box));
         }
+
         for(int action = 0; action < actionsToApply.length; action++){
             Agent agent = getAgentByNumber(state, action);
-            Position destAgentPosition = (Position) agent.pos.clone();
-            Position destBoxPosition;
+            Agent updatedAgent = null;
+            Position agentDestination;
+
             Box box;
             Optional<Box> boxResult;
+            Box updatedBox;
+            Position boxDestination;
+            Position boxSource;
+            
             switch (actionsToApply[action].type)
             {
                 case NoOp:
+                    updatedAgent = copyAgent(agent);
                     break;
                 
                 case Move:
-                    destAgentPosition.updateBy(actionsToApply[action].agentRowDelta, actionsToApply[action].agentColDelta);
+                    agentDestination = moveAgent(agent, actionsToApply[action]);
+
+                    updatedAgent = copyAgent(agent, agentDestination);
                     break;
 
                 case Push:
-                    destAgentPosition.updateBy(actionsToApply[action].agentRowDelta, actionsToApply[action].agentColDelta);
-                    boxResult = getBoxAt(state, destAgentPosition);
+                    agentDestination = moveAgent(agent, actionsToApply[action]);
+                    boxResult = getBoxAt(state, agentDestination);
                     box = boxResult.get();
-                    destBoxPosition = (Position) box.pos.clone();
-                    destBoxPosition.updateBy(actionsToApply[action].boxRowDelta, actionsToApply[action].boxColDelta);
+                    boxDestination = moveBox(box, actionsToApply[action]);
+
+                    updatedAgent = copyAgent(agent, agentDestination);
+                    updatedBox = copyBox(box, boxDestination);
+
+                    // update pushed box by its id
+
                     break;
 
                 case Pull:
-                    boxResult = getBoxAt(state, destAgentPosition.pullPosition(actionsToApply[action].boxRowDelta, actionsToApply[action].boxColDelta));
+                    boxSource = getPullSource(agent, actionsToApply[action]);
+                    agentDestination = moveAgent(agent, actionsToApply[action]);
+                    boxResult = getBoxAt(state, boxSource);
                     box = boxResult.get();
-                    destBoxPosition = (Position) box.pos.clone();
-                    destBoxPosition.updateBy(actionsToApply[action].boxRowDelta, actionsToApply[action].boxColDelta);
-                    destAgentPosition.updateBy(actionsToApply[action].agentRowDelta, actionsToApply[action].agentColDelta);
+                    boxDestination = moveBox(box, actionsToApply[action]);
+
+                    updatedAgent = copyAgent(agent, agentDestination);
+                    updatedBox = copyBox(box, boxDestination);
+
+                    // update pulled box by its id
+
                     break;
             }
-            destinationAgents.add(new Agent(destAgentPosition, agent.color));
-            // add boxes
+
+            updatedAgents.add(updatedAgent);
+            
         }
         return state;
     }
