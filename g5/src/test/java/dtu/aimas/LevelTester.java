@@ -41,7 +41,7 @@ public class LevelTester {
 
     static final boolean logOutputToFile = true;
     static final LevelParser parser = CourseLevelParser.Instance;
-    
+
     @Test
     public void TestMAPF00_BFS() {
         TestMap("MAPF00", new BFS());
