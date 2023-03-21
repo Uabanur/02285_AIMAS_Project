@@ -75,6 +75,25 @@ public class StateSpace {
         this.initialLiteState = initialState;
     }
 
+    public Action[][] extractPlan(LiteState state)
+    { 
+        ArrayList<Action[]> plan = new ArrayList<Action[]>();
+        LiteState iterator = state;
+        while (iterator.jointAction != null)
+        {
+            plan.add(iterator.jointAction);
+            iterator = iterator.parent;
+        }
+        return plan.toArray(new Action[plan.size()][]);
+    }
+
+    public Result<Solution> createSolution(LiteState state){
+        if (!isGoalState(state)) 
+            return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
+
+        return Result.ok(new ActionSolution(extractPlan(state)));
+    }
+
     public Agent getAgentByNumber(LiteState state, int i) {
         return state.agents.get(i);
     }
@@ -107,11 +126,19 @@ public class StateSpace {
         return agent.color == box.color;
     }
 
+    private boolean satisfies(Goal goal, Box box){
+        return box.type == goal.label && box.pos == goal.destination;
+    }
+
+    private boolean satisfies(Goal goal, Agent agent){
+        return agent.pos == goal.destination;
+    }
+
     public boolean isGoalState(LiteState state) {
         // are agents on their goals?
         for(Goal goal : this.problem.agentGoals){
             var agent = getAgentByNumber(state, goal.label);
-            if(!goal.isSatisfied(agent)){
+            if(!satisfies(goal, agent)){
                 return false;
             }
         }
@@ -119,7 +146,7 @@ public class StateSpace {
         for(Goal goal : this.problem.boxGoals) {
             boolean goalSatisfied = false;
             for(Box box : state.boxes){
-                if(!goal.isSatisfied(box)){
+                if(!satisfies(goal, box)){
                     goalSatisfied = true;
                     break;
                 }
@@ -314,11 +341,9 @@ public class StateSpace {
 
                     break;
             }
-
             updatedAgents.add(updatedAgent);
-            
         }
-        return state;
+        return new LiteState(state, updatedAgents, updatedBoxes, actionsToApply);
     }
 
     private Optional<LiteState> tryCreateState(LiteState state, Action[] jointAction){

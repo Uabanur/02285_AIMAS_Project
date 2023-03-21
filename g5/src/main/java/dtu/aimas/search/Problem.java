@@ -11,7 +11,7 @@ public class Problem {
     public Collection<Agent> agents;
     public Collection<Box> boxes;
     public boolean[][] walls;
-    public char[][]goals;
+    public char[][] goals;
     public Collection<Goal> agentGoals;
     public Collection<Goal> boxGoals;
     public int expectedStateSize;
