@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.List;
+
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
@@ -137,14 +139,31 @@ public class Problem {
     }
 
     public Problem subProblemFor(Agent agent) {
-        /* TODO : Compute a sub problem for agents. 
-            It should only contain the agents given, and their boxes, as it should be solvable. 
-            The boxes may have moved since the initial problem, so the new problem should use the current state/state space.
-        */ 
-        return null;
+        // Should only contain the agents given, and their boxes.
+        // Walls are the same, and goals only contain goals for the agent and its boxes.
+
+        var agents = List.of(agent);
+        var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
+        var goals = this.goals.clone();
+
+        for(var row = 0; row < goals.length; row++){
+            for(var col = 0; col < goals[row].length; col++){
+                var symbol = goals[row][col];
+                if (symbol == 0) continue;
+                if (symbol == agent.type) continue;
+                if (boxes.stream().anyMatch(b -> b.type == symbol)) continue;
+                goals[row][col] = 0;
+            }
+        }
+        
+        return new Problem(agents, boxes, walls, goals);
     }
 
     public int admissibleDist(Position from, Position to) {
         return distances[from.row][from.col][to.row][to.col];
+    }
+
+    public boolean isFree(Position pos, Agent agent, int timeStep) {
+        return !walls[pos.row][pos.col];
     }
 }

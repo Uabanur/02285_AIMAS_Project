@@ -5,10 +5,12 @@ import java.util.Objects;
 public class Agent {
     public Position pos;
     public Color color;
+    public char type;
 
-    public Agent(Position pos, Color color) {
+    public Agent(Position pos, Color color, char type) {
         this.pos = pos;
         this.color = color;
+        this.type = type;
     }
 
     public static boolean isLabel(char symbol) {
