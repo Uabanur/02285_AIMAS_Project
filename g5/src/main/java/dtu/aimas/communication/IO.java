@@ -31,7 +31,7 @@ public class IO {
     public final static Path LevelDir = Paths.get(TargetClassesPath.toString(), "levels");
 
     public static LogLevel logLevel = LogLevel.Information;
-    static boolean debugServerMessages = false;
+    public static boolean debugServerMessages = false;
 
     private static boolean logOutputToFile = false;
     private static boolean useServerCommunication = false;
