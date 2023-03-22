@@ -1,5 +1,6 @@
 package dtu.aimas.search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -21,15 +22,28 @@ public class Problem {
     public int expectedStateSize;
     private int[][][][] distances;
 
-    public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals, Collection<Goal> agentGoals, Collection<Goal> boxGoals) 
+    public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
     {
         this.agents = agentCollection;
         this.boxes = boxCollection;
         this.walls = walls;
         this.goals = goals;
-        this.agentGoals = agentGoals;
-        this.boxGoals = boxGoals;
         expectedStateSize = 2<<15;
+      
+        this.agentGoals = new ArrayList<Goal>();
+        this.boxGoals = new ArrayList<Goal>();
+        for(var row = 0; row < goals.length; row++){
+            for(var col = 0; col < goals[row].length; col++){
+                var c = goals[row][col];
+                if(Agent.isLabel(c)){
+                    this.agentGoals.add(new Goal(c, new Position(row, col)));
+                }
+                else if(Box.isLabel(c)){
+                    this.boxGoals.add(new Goal(c, new Position(row, col)));
+                }
+            }
+        }
+        
       
         this.distances = new int[walls.length][walls[0].length][walls.length][walls[0].length];
         for(int i = 0; i < distances.length; i++) {

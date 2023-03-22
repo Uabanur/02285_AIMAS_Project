@@ -8,14 +8,12 @@ import org.junit.Test;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
-import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.search.Problem;
 
 public class PrecomputedManhattenDistanceTest {
     private static final Collection<Agent> NoAgents = new ArrayList<>();
     private static final Collection<Box> NoBoxes = new ArrayList<>();
-    private static final Collection<Goal> NoGoals = new ArrayList<>();
     private int manhattenDistance(Position from, Position to){
         return Math.abs(from.row - to.row) + Math.abs(from.col - to.col);
     }
@@ -27,7 +25,7 @@ public class PrecomputedManhattenDistanceTest {
         var goals = new char[height][width];
         var walls = new boolean[height][width];
 
-        var problem = new Problem(NoAgents, NoBoxes, walls, goals, NoGoals, NoGoals).precompute();
+        var problem = new Problem(NoAgents, NoBoxes, walls, goals).precompute();
 
         var tests = new Position[][]{
             // same place
@@ -62,7 +60,7 @@ public class PrecomputedManhattenDistanceTest {
         for(var row = 0; row < wallHeight; row++) walls[row][width/2] = true;
 
 
-        var problem = new Problem(NoAgents, NoBoxes, walls, goals, NoGoals, NoGoals).precompute();
+        var problem = new Problem(NoAgents, NoBoxes, walls, goals).precompute();
 
         { // Same side. Left of wall
             var col = 1;
@@ -117,7 +115,7 @@ public class PrecomputedManhattenDistanceTest {
         var wallHeight = height;
         for(var row = 0; row < wallHeight; row++) walls[row][width/2] = true;
 
-        var problem = new Problem(NoAgents, NoBoxes, walls, goals, NoGoals, NoGoals).precompute();
+        var problem = new Problem(NoAgents, NoBoxes, walls, goals).precompute();
 
         var row = height/2;
         var from = new Position(row, 1);
