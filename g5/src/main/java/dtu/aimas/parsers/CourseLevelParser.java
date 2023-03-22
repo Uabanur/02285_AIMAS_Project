@@ -162,7 +162,7 @@ public class CourseLevelParser extends LevelParser
                 boxList.add(new Box(new Position(row, col), boxColors[c-'A'], c));
             }
         }
-        
+
         return new Problem(agentList, boxList, walls, goals);
     }
 }

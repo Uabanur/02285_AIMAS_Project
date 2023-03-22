@@ -3,7 +3,7 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
-import dtu.aimas.search.State;
+import dtu.aimas.search.solvers.heuristics.Heuristic;
 
 public class BestFirstFrontier implements Frontier {
     private final PriorityQueue<State> queue;

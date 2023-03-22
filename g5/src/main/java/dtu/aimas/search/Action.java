@@ -1,13 +1,5 @@
 package dtu.aimas.search;
 
-enum ActionType
-{
-    NoOp,
-    Move,
-    Push,
-    Pull
-}
-
 public enum Action
 {
     /*

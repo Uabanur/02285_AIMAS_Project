@@ -1,5 +1,6 @@
 package dtu.aimas.search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
+import dtu.aimas.common.Goal;
 
 public class Problem {
 
@@ -15,6 +17,9 @@ public class Problem {
     public Collection<Box> boxes;
     public boolean[][] walls;
     public char[][] goals;
+    public Collection<Goal> agentGoals;
+    public Collection<Goal> boxGoals;
+    public int expectedStateSize;
     private int[][][][] distances;
 
     public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
@@ -23,6 +28,23 @@ public class Problem {
         this.boxes = boxCollection;
         this.walls = walls;
         this.goals = goals;
+        expectedStateSize = 2<<15;
+      
+        this.agentGoals = new ArrayList<Goal>();
+        this.boxGoals = new ArrayList<Goal>();
+        for(var row = 0; row < goals.length; row++){
+            for(var col = 0; col < goals[row].length; col++){
+                var c = goals[row][col];
+                if(Agent.isLabel(c)){
+                    this.agentGoals.add(new Goal(c, new Position(row, col)));
+                }
+                else if(Box.isLabel(c)){
+                    this.boxGoals.add(new Goal(c, new Position(row, col)));
+                }
+            }
+        }
+        
+      
         this.distances = new int[walls.length][walls[0].length][walls.length][walls[0].length];
         for(int i = 0; i < distances.length; i++) {
             for(int j = 0; j < distances[i].length; j++) {
@@ -89,6 +111,14 @@ public class Problem {
 
         sb.append("Boxes: ");
         sb.append(boxes.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
+        sb.append(newline);
+
+        sb.append("Agents goals: ");
+        sb.append(agentGoals.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
+        sb.append(newline);
+
+        sb.append("Box goals: ");
+        sb.append(boxGoals.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
         sb.append(newline);
 
         sb.append("Walls and Goals:").append(newline);

@@ -181,12 +181,11 @@ public class IO {
     public static Result<Solution> sendSolutionToServer(Solution solution) {
         try {
 
-            for (var step : solution.steps()) {
-                var strategy = step.serialize();
-                sendToServerRaw(strategy);
+            for (var step : solution.serializeSteps()) {
+                sendToServerRaw(step);
 
                 if (debugServerMessages){
-                    debug("Strategy: " + strategy);
+                    debug("Strategy: " + step);
                 }
 
                 var response = serverMessages.readLine();
