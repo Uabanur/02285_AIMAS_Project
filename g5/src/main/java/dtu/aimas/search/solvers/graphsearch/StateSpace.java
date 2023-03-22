@@ -114,7 +114,7 @@ public class StateSpace {
     }
 
     private boolean satisfies(Goal goal, Box box){
-        return box.type == goal.label && box.pos.equals(goal.destination);
+        return box.label == goal.label && box.pos.equals(goal.destination);
     }
 
     private Position moveAgent(Agent agent, Action action){
@@ -308,19 +308,19 @@ public class StateSpace {
     }
 
     private Agent copyAgent(Agent agent){
-        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color);
+        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color, agent.label);
     }
 
     private Agent copyAgent(Agent agent, Position newPosition){
-        return new Agent(newPosition, agent.color);
+        return new Agent(newPosition, agent.color, agent.label);
     }
 
     private Box copyBox(Box box){
-        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.type);
+        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.label);
     }
 
     private Box copyBox(Box box, Position newPosition){
-        return new Box(newPosition, box.color, box.type);
+        return new Box(newPosition, box.color, box.label);
     }
 
     public int getSatisfiedAgentGoalsCount(State state){
