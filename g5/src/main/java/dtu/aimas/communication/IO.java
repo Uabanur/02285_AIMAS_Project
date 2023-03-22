@@ -22,8 +22,8 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.Solution;
 
 public class IO {
-
-    private final static String CurrentClassPathString = System.getProperty("java.class.path").split(";")[0];
+    private final static String CurrentClassPathString = System.getProperty("java.class.path")
+            .split(OsClassPathSeparator.get())[0];
     private final static Path TargetsPath = Paths.get(CurrentClassPathString).getParent();
     private final static Path TargetClassesPath = Paths.get(TargetsPath.toString(), "classes");
 

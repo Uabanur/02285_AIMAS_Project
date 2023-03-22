@@ -25,7 +25,7 @@ import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
 
 
-public class LevelTester {
+public class LevelSolvingTest {
 
     class Task implements Callable<Result<Solution>> {
         private String levelName;
