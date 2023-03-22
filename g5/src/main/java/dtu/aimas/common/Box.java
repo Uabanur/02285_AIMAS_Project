@@ -1,5 +1,7 @@
 package dtu.aimas.common;
 
+import java.util.Objects;
+
 public class Box {
     public final Position pos;
     public final Color color;
@@ -16,6 +18,21 @@ public class Box {
     }
 
     public String toSimpleString(){
-        return String.format("(%d,%d:%c|%s)", pos.row, pos.col, type, color.name());
+        return String.format("(%s:%c|%s)", pos.toSimpleString(), type, color.name());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Box)) return false;
+        Box box = (Box) o;
+        return type == box.type &&
+                Objects.equals(pos, box.pos) &&
+                color == box.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, color, type);
     }
 }
