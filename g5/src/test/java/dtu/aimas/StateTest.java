@@ -35,7 +35,7 @@ public class StateTest {
 
     @Test 
     public void SingleAgentInitialState() {
-        var agent = new Agent(new Position(1, 1), Color.Red);
+        var agent = new Agent(new Position(1, 1), Color.Red, '0');
         var problem = makeProblem(List.of(agent), List.of());
         var stateSpaceResult = ProblemParser.parse(problem);
         Assert.assertTrue(stateSpaceResult.isOk());
@@ -52,7 +52,7 @@ public class StateTest {
     
     @Test
     public void ExpandingSingleAgentNoWalls(){
-        var agent = new Agent(new Position(2, 2), Color.Red);
+        var agent = new Agent(new Position(2, 2), Color.Red, '0');
         var problem = makeProblem(List.of(agent), List.of());
         var stateSpace = ProblemParser.parse(problem).get();
         var initialState = stateSpace.getInitialState();
@@ -91,7 +91,7 @@ public class StateTest {
 
     @Test
     public void ExpandingSingleAgentWithWalls() {
-        var agent = new Agent(new Position(1, 5), Color.Red);
+        var agent = new Agent(new Position(1, 5), Color.Red, '0');
         var problem = makeProblem(List.of(agent), List.of());
         var stateSpace = ProblemParser.parse(problem).get();
         var initialState = stateSpace.getInitialState();
@@ -116,8 +116,8 @@ public class StateTest {
 
     @Test
     public void ExpandingBlockedAgents() {
-        var agent0 = new Agent(new Position(1,5), Color.Red);
-        var agent1 = new Agent(new Position(2,5), Color.Red);
+        var agent0 = new Agent(new Position(1,5), Color.Red, '0');
+        var agent1 = new Agent(new Position(2,5), Color.Red, '0');
 
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent0, agent1), List.of())).get();
         var initialState = stateSpace.getInitialState();
@@ -150,7 +150,7 @@ public class StateTest {
 
     @Test
     public void ExpandingAgentWithBox() {
-        var agent = new Agent(new Position(1, 1), Color.Red);
+        var agent = new Agent(new Position(1, 1), Color.Red, '0');
         var box = new Box(new Position(1, 2), Color.Red, 'A');
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent), List.of(box))).get();
         var initialState = stateSpace.getInitialState();

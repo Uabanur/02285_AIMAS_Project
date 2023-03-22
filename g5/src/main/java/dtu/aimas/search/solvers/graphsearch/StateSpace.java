@@ -308,11 +308,11 @@ public class StateSpace {
     }
 
     private Agent copyAgent(Agent agent){
-        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color);
+        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color, agent.type);
     }
 
     private Agent copyAgent(Agent agent, Position newPosition){
-        return new Agent(newPosition, agent.color);
+        return new Agent(newPosition, agent.color, agent.type);
     }
 
     private Box copyBox(Box box){
