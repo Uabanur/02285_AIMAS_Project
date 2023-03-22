@@ -13,11 +13,6 @@ import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
 
 public class StateTest {
-    private boolean equalPositions(Position a, Position b){
-        // TODO: remove when position equals method is implemented
-        return a.row == b.row && a.col == b.col;
-    }
-
     private Problem makeProblem(List<Agent> agents, List<Box> boxes){
         var x = true; var o = false;
         var walls = new boolean[][] {
@@ -51,8 +46,7 @@ public class StateTest {
     
         var agentQuery = stateSpace.getAgentByNumber(initialState, 0);
         // Assert.assertTrue("Agent 0 should exist", agentQuery.isPresent());
-        Assert.assertTrue("Agent position should be initial position", 
-            equalPositions(agent.pos, agentQuery.pos));
+        Assert.assertEquals("Agent position should be initial position", agent.pos, agentQuery.pos);
         // Assert.assertTrue("Agent 1 should not exist", stateSpace.getAgentByNumber(initialState, 1).isEmpty());
     }
     
@@ -80,7 +74,7 @@ public class StateTest {
         for(var state : expanded) {
             var agent0 = stateSpace.getAgentByNumber(state, 0);
             Assert.assertTrue("Expected valid expanded position", 
-                expectedPositions.stream().anyMatch(p -> equalPositions(p, agent0.pos)));
+                expectedPositions.stream().anyMatch(p -> p.equals(agent0.pos)));
         }
     
         // all expanded positions unique when there are no boxes
@@ -89,8 +83,8 @@ public class StateTest {
                 if (state == other) continue;
                 var stateAgent = stateSpace.getAgentByNumber(state, 0);
                 var otherAgent = stateSpace.getAgentByNumber(other, 0);
-                Assert.assertFalse("Expected unique expanded positions", 
-                    equalPositions(stateAgent.pos, otherAgent.pos));
+                Assert.assertNotEquals("Expected unique expanded positions", 
+                    stateAgent.pos, otherAgent.pos);
             }
         }
     }
@@ -116,7 +110,7 @@ public class StateTest {
         for(var state : expanded) {
             var agent0 = stateSpace.getAgentByNumber(state, 0);
             Assert.assertTrue("Expected valid expanded position", 
-                expectedPositions.stream().anyMatch(p -> equalPositions(p, agent0.pos)));
+                expectedPositions.stream().anyMatch(p -> p.equals(agent0.pos)));
         }
     }
 
@@ -128,11 +122,8 @@ public class StateTest {
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent0, agent1), List.of())).get();
         var initialState = stateSpace.getInitialState();
 
-        Assert.assertTrue(
-            equalPositions(agent0.pos, stateSpace.getAgentByNumber(initialState, 0).pos));
-
-        Assert.assertTrue(
-            equalPositions(agent1.pos, stateSpace.getAgentByNumber(initialState, 1).pos));
+        Assert.assertEquals(agent0.pos, stateSpace.getAgentByNumber(initialState, 0).pos);
+        Assert.assertEquals(agent1.pos, stateSpace.getAgentByNumber(initialState, 1).pos);
 
         var expanded = stateSpace.expand(initialState);
         var expectedPositionsAgent0 = List.of(
@@ -149,11 +140,11 @@ public class StateTest {
         for (var state : expanded) {
             var expandedAgent0 = stateSpace.getAgentByNumber(state, 0);
             Assert.assertTrue(expectedPositionsAgent0.stream().anyMatch(p -> 
-                equalPositions(p, expandedAgent0.pos)));
+                p.equals(expandedAgent0.pos)));
             
             var expandedAgent1 = stateSpace.getAgentByNumber(state, 1);
             Assert.assertTrue(expectedPositionsAgent1.stream().anyMatch(p -> 
-                equalPositions(p, expandedAgent1.pos)));
+                p.equals(expandedAgent1.pos)));
         }
     }
 
@@ -188,9 +179,7 @@ public class StateTest {
                 var expectedAgentPosition = expectedAgentPositions.get(i);
                 var expectedBoxPosition = expectedBoxPositions.get(i);
 
-                var agentCheck = equalPositions(expectedAgentPosition, 
-                        stateSpace.getAgentByNumber(state, 0).pos);
-
+                var agentCheck = expectedAgentPosition.equals(stateSpace.getAgentByNumber(state, 0).pos);
                 var boxCheck = stateSpace.getBoxAt(state, expectedBoxPosition).isPresent();
 
                 if(agentCheck && boxCheck) continue loop;
