@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "BenchmarkRunner",
+            "request": "launch",
+            "mainClass": "dtu.aimas.benchmarks.BenchmarkRunner",
+            "projectName": "g5"
+        },
+        {
+            "type": "java",
             "name": "SearchClient",
             "request": "launch",
             "mainClass": "dtu.aimas.SearchClient",
