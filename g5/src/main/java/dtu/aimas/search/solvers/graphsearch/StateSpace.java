@@ -73,6 +73,7 @@ public class StateSpace {
             plan.add(iterator.jointAction);
             iterator = iterator.parent;
         }
+        Collections.reverse(plan);
         return plan.toArray(new Action[plan.size()][]);
     }
 
