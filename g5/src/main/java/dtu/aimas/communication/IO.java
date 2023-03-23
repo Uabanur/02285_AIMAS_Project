@@ -19,7 +19,7 @@ import dtu.aimas.SearchClient;
 import dtu.aimas.common.Result;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.Solution;
 
 public class IO {
     private final static String CurrentClassPathString = System.getProperty("java.class.path")
