@@ -15,9 +15,9 @@ import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.search.Action;
-import dtu.aimas.search.ActionSolution;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.ActionSolution;
+import dtu.aimas.search.solutions.Solution;
 import lombok.Getter;
 
 public class StateSpace {
@@ -73,6 +73,7 @@ public class StateSpace {
             plan.add(iterator.jointAction);
             iterator = iterator.parent;
         }
+        Collections.reverse(plan);
         return plan.toArray(new Action[plan.size()][]);
     }
 

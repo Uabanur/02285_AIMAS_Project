@@ -6,7 +6,7 @@ import dtu.aimas.common.Result;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
 
 public abstract class GraphSearch
