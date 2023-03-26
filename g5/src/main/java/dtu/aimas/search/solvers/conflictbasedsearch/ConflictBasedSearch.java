@@ -5,14 +5,13 @@ import java.util.PriorityQueue;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
-import dtu.aimas.search.solvers.ConstrainedSolver;
+import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 
 public class ConflictBasedSearch implements Solver {
-    private ConstrainedSolver subSolver;
+    private Solver subSolver;
 
-    public ConflictBasedSearch(ConstrainedSolver subSolver){
+    public ConflictBasedSearch(Solver subSolver){
         this.subSolver = subSolver;
     }
 
@@ -44,11 +43,14 @@ public class ConflictBasedSearch implements Solver {
             for(var agent: conflict.getInvolvedAgents()) {
                 var childNode = node.constrain(agent, conflict.getPosition(), conflict.getTimeStep());
                 
-                var solution = subSolver.solve(initial.subProblemFor(agent), childNode.getConstraint());
+                var constrainedProblem = ConstrainedProblem.from(
+                    initial.subProblemFor(agent), childNode.getConstraint());
+
+                var solution = subSolver.solve(constrainedProblem);
                 childNode.setSolutionFor(agent, solution);
                 childNode.calculateCost();
 
-                if(childNode.getCost() < Integer.MAX_VALUE)
+                if(childNode.isSolvable())
                     frontier.add(childNode);
             }
         }
