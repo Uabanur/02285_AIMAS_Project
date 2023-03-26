@@ -5,7 +5,7 @@ import java.util.PriorityQueue;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 
 public class ConflictBasedSearch implements Solver {

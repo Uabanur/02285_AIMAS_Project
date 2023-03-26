@@ -19,11 +19,11 @@ import dtu.aimas.SearchClient;
 import dtu.aimas.common.Result;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.Solution;
 
 public class IO {
-
-    private final static String CurrentClassPathString = System.getProperty("java.class.path").split(";")[0];
+    private final static String CurrentClassPathString = System.getProperty("java.class.path")
+            .split(OsClassPathSeparator.get())[0];
     private final static Path TargetsPath = Paths.get(CurrentClassPathString).getParent();
     private final static Path TargetClassesPath = Paths.get(TargetsPath.toString(), "classes");
 
@@ -31,7 +31,7 @@ public class IO {
     public final static Path LevelDir = Paths.get(TargetClassesPath.toString(), "levels");
 
     public static LogLevel logLevel = LogLevel.Information;
-    static boolean debugServerMessages = false;
+    public static boolean debugServerMessages = false;
 
     private static boolean logOutputToFile = false;
     private static boolean useServerCommunication = false;

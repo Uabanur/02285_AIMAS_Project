@@ -1,4 +1,4 @@
-package dtu.aimas.search;
+package dtu.aimas.search.solutions;
 
 import java.util.Collection;
 

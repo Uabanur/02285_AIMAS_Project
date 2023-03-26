@@ -19,13 +19,13 @@ import dtu.aimas.communication.IO;
 import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
 
 
-public class LevelTester {
+public class LevelSolvingTest {
 
     class Task implements Callable<Result<Solution>> {
         private String levelName;
@@ -132,4 +132,8 @@ public class LevelTester {
         TestMap("MAPF01", new Greedy(new GoalCount()));
     }
 
+    @Test
+    public void TestSAD1_BFS() {
+        TestMap("SAD1", new BFS());
+    }
 }

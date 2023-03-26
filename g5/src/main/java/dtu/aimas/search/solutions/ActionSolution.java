@@ -1,9 +1,11 @@
-package dtu.aimas.search;
+package dtu.aimas.search.solutions;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import dtu.aimas.search.Action;
 
 public class ActionSolution implements Solution {
 

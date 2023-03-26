@@ -7,10 +7,12 @@ import java.util.stream.Collectors;
 import java.util.Queue;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
+import dtu.aimas.common.Color;
 import dtu.aimas.common.Goal;
 
 public class Problem {
@@ -103,36 +105,72 @@ public class Problem {
 
     @Override
     public String toString() {
+        var height = walls.length;
+        var width = walls[0].length;
+
+        var init = new char[height][width];
+        var goal = new char[height][width];
+        for(var row = 0; row < height; row++){
+            for(var col = 0; col < width; col++){
+                var symbol = walls[row][col] ? '+' : ' ';
+                init[row][col] = symbol;
+                goal[row][col] = symbol;
+            }
+        }
+
+        for(var agent: agents){
+            init[agent.pos.row][agent.pos.col] = agent.label;
+        }
+
+        for(var box: boxes){
+            init[box.pos.row][box.pos.col] = box.label;
+        }
+
+        for(var g: agentGoals){
+            goal[g.destination.row][g.destination.col] = g.label;
+        }
+        for(var g: boxGoals){
+            goal[g.destination.row][g.destination.col] = g.label;
+        }
+
+
         var sb = new StringBuilder();
         var commaSeparate = Collectors.joining(", ");
         var newline = System.lineSeparator();
 
-        sb.append("Agents: ");
-        sb.append(agents.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
-        sb.append(newline);
+        sb.append("#colors:").append(newline);
 
-        sb.append("Boxes: ");
-        sb.append(boxes.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
-        sb.append(newline);
+        Map<Color, List<Agent>> agentColors = agents.stream() .collect(Collectors.groupingBy(a -> a.color));
+        Map<Color, List<Box>> boxColors = boxes.stream() .collect(Collectors.groupingBy(b -> b.color));
 
-        sb.append("Agents goals: ");
-        sb.append(agentGoals.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
-        sb.append(newline);
+        for(var color :Color.values()){
+            if (!agentColors.containsKey(color) && !boxColors.containsKey(color)) continue;
+            sb.append(color.name());
+            sb.append(": ");
 
-        sb.append("Box goals: ");
-        sb.append(boxGoals.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
-        sb.append(newline);
+            for(var agent : agentColors.getOrDefault(color, List.of())) 
+                sb.append(agent.label).append(", ");
 
-        sb.append("Walls and Goals:").append(newline);
-        for(var row = 0; row < walls.length; row++){
-            for(var col = 0; col < walls[row].length; col++){
-                sb.append(
-                    walls[row][col] ? "+" :
-                    goals[row][col] > 0 ? String.valueOf(goals[row][col]) : 
-                    " "
-                );
+            for(var box : boxColors.getOrDefault(color, List.of())) 
+                sb.append(box.label).append(", ");
+
+            sb.setLength(sb.length()-2); // trim last comma
+            sb.append(newline);
+        }
+
+        sb.append("#initial").append(newline);
+        for(var row = 0; row < height; row++ ){
+            for(var col = 0; col < width; col++ ){
+                sb.append(init[row][col]);
             }
-            if(row < walls.length - 1) sb.append(newline);
+            sb.append(newline);
+        }
+        sb.append("#goal").append(newline);
+        for(var row = 0; row < height; row++ ){
+            for(var col = 0; col < width; col++ ){
+                sb.append(goal[row][col]);
+            }
+            if(row < width-1) sb.append(newline);
         }
 
         return sb.toString();
@@ -150,8 +188,8 @@ public class Problem {
             for(var col = 0; col < goals[row].length; col++){
                 var symbol = goals[row][col];
                 if (symbol == 0) continue;
-                if (symbol == agent.type) continue;
-                if (boxes.stream().anyMatch(b -> b.type == symbol)) continue;
+                if (symbol == agent.label) continue;
+                if (boxes.stream().anyMatch(b -> b.label == symbol)) continue;
                 goals[row][col] = 0;
             }
         }

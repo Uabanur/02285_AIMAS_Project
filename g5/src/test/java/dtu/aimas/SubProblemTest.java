@@ -31,8 +31,9 @@ public class SubProblemTest {
 
         var walls = new boolean[width][height];
         var goals = new char[width][height];
-        for(var agent: agents) goals[agent.pos.row][agent.pos.col] = agent.type;
-        for(var box: boxes) goals[box.pos.row][box.pos.col] = box.type;
+        
+        for(var agent: agents) goals[agent.pos.row][agent.pos.col] = agent.label;
+        for(var box: boxes) goals[box.pos.row][box.pos.col] = box.label;
 
         var problem = new Problem(agents, boxes, walls, goals);
         var expectedAgents = new Agent[]{agents.get(0)};
@@ -46,8 +47,10 @@ public class SubProblemTest {
             for(var col = 0; col < goals[row].length; col++) {
                 var symbol = goals[row][col];
                 if (symbol == 0) continue;
-                if (Stream.of(expectedAgents).anyMatch(a -> a.type == symbol)) continue;
-                if (Stream.of(expectedBoxes).anyMatch(b -> b.type == symbol)) continue;
+                
+                if (Stream.of(expectedAgents).anyMatch(a -> a.label == symbol)) continue;
+                if (Stream.of(expectedBoxes).anyMatch(b -> b.label == symbol)) continue;
+                
                 Assert.fail("Goal found not belonging to subproblem. Goal type: " + symbol);
             }
         }
@@ -70,8 +73,10 @@ public class SubProblemTest {
 
         var walls = new boolean[width][height];
         var goals = new char[width][height];
-        for(var agent: agents) goals[agent.pos.row][agent.pos.col] = agent.type;
-        for(var box: boxes) goals[box.pos.row][box.pos.col] = box.type;
+        
+        for(var agent: agents) goals[agent.pos.row][agent.pos.col] = agent.label;
+        for(var box: boxes) goals[box.pos.row][box.pos.col] = box.label;
+        
 
         var problem = new Problem(agents, boxes, walls, goals);
         var expectedAgents = new Agent[]{agents.get(0)};
@@ -85,8 +90,10 @@ public class SubProblemTest {
             for(var col = 0; col < goals[row].length; col++) {
                 var symbol = goals[row][col];
                 if (symbol == 0) continue;
-                if (Stream.of(expectedAgents).anyMatch(a -> a.type == symbol)) continue;
-                if (Stream.of(expectedBoxes).anyMatch(b -> b.type == symbol)) continue;
+                
+                if (Stream.of(expectedAgents).anyMatch(a -> a.label == symbol)) continue;
+                if (Stream.of(expectedBoxes).anyMatch(b -> b.label == symbol)) continue;
+                
                 Assert.fail("Goal found not belonging to subproblem. Goal type: " + symbol);
             }
         }

@@ -10,7 +10,7 @@ import dtu.aimas.common.Agent;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.NotImplemented;
-import dtu.aimas.search.Solution;
+import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Constraint;
 import lombok.Getter;
 

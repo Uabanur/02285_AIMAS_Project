@@ -117,7 +117,7 @@ public class StateTest {
     @Test
     public void ExpandingBlockedAgents() {
         var agent0 = new Agent(new Position(1,5), Color.Red, '0');
-        var agent1 = new Agent(new Position(2,5), Color.Red, '0');
+        var agent1 = new Agent(new Position(2,5), Color.Red, '1');
 
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent0, agent1), List.of())).get();
         var initialState = stateSpace.getInitialState();

@@ -1,7 +1,6 @@
 package dtu.aimas;
 
 import dtu.aimas.communication.IO;
-import dtu.aimas.communication.LogLevel;
 import dtu.aimas.config.Configuration;
 import dtu.aimas.parsers.ArgumentParser;
 import dtu.aimas.parsers.CourseLevelParser;
@@ -12,9 +11,7 @@ public class SearchClient
     public static Configuration config;
     public static void main(String[] args)
     {
-        IO.logLevel = LogLevel.Debug;
         IO.useServerCommunication();
-
         handleConfigs(args);
         
         var result = IO.initializeServerCommunication(CourseLevelParser.Instance)
@@ -44,6 +41,7 @@ public class SearchClient
         }
 
         SearchClient.config = configuration.get();
+        config.configureIO();
     }
 
     private static Problem logStart(Problem p){

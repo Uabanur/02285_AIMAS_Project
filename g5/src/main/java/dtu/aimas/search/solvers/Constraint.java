@@ -20,7 +20,7 @@ public class Constraint {
     }
 
     private String createKey(Agent agent, int timeStep){
-        return String.format("%c|%d", agent.type, timeStep);
+        return String.format("%c|%d", agent.label, timeStep);
     }
 
     public Constraint extend(Agent agent, Position position, int timeStep) {
