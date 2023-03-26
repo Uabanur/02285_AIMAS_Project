@@ -12,6 +12,7 @@ public abstract class ConfigOption {
     private static final Map<String, Supplier<ConfigOption>> options = Map.of(
         BFSConfigOption.OptionName, BFSConfigOption::new,
         DFSConfigOption.OptionName, DFSConfigOption::new,
+        CBSConfigOption.OptionName, CBSConfigOption::new,
         LoggingConfigOption.OptionName, LoggingConfigOption::new
     );
 
