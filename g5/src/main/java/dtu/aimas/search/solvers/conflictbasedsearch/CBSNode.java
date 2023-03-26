@@ -14,7 +14,7 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Constraint;
 import lombok.Getter;
 
-public class CBSNode implements Comparator<CBSNode> {
+public class CBSNode implements Comparable<CBSNode> {
     private static final int MAX_COST = Integer.MAX_VALUE;
     private final Map<Agent, Result<Solution>> solutions;
 
@@ -48,11 +48,6 @@ public class CBSNode implements Comparator<CBSNode> {
         this.cost = 0;
     }
 
-    @Override
-    public int compare(CBSNode o1, CBSNode o2) {
-        return o1.cost - o2.cost;
-    }
-
     public boolean isSolvable() {
         return cost < MAX_COST;
     }
@@ -78,5 +73,10 @@ public class CBSNode implements Comparator<CBSNode> {
         var solutionsCopy = Map.copyOf(this.solutions);
         var extendedConstraints = constraint.extend(agent, position, timeStep);
         return new CBSNode(extendedConstraints, solutionsCopy);
+    }
+
+    @Override
+    public int compareTo(CBSNode other) {
+        return this.cost - other.cost;
     }
 }
