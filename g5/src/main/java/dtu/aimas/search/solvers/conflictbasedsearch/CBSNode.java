@@ -44,7 +44,11 @@ public class CBSNode implements Comparable<CBSNode> {
         }
         
         // TODO : Add a cost function
-        this.cost = 0;
+        // makespan
+        this.cost = solutions.values().stream().mapToInt(r -> r.get().getMakespan()).max().orElse(MAX_COST);
+
+        // flowtime
+        //this.cost = solutions.values().stream().mapToInt(r -> r.get().getFlowtime()).max().orElse(MAX_COST);
     }
 
     public boolean isSolvable() {
