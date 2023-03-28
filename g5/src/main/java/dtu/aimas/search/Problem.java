@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import dtu.aimas.common.Position;
+import dtu.aimas.communication.IO;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
 import dtu.aimas.common.Color;
@@ -182,15 +183,20 @@ public class Problem {
 
         var agents = List.of(agent);
         var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
-        var goals = this.goals.clone();
+
+        // Deep copy of the goals array
+        char[][] goals = new char[this.goals.length][this.goals[0].length];
+        for (int i = 0; i < this.goals.length; i++) {
+            goals[i] = Arrays.copyOf(this.goals[i], this.goals[i].length);
+        }
 
         for(var row = 0; row < goals.length; row++){
             for(var col = 0; col < goals[row].length; col++){
                 var symbol = goals[row][col];
-                if (symbol == 0) continue;
+                if (symbol == '\0')
                 if (symbol == agent.label) continue;
                 if (boxes.stream().anyMatch(b -> b.label == symbol)) continue;
-                goals[row][col] = 0;
+                goals[row][col] = '\0';
             }
         }
         
