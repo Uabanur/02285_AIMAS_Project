@@ -14,6 +14,7 @@ import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.InvalidOperation;
+import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.ActionSolution;
@@ -43,7 +44,8 @@ public class StateSpace {
 
     public boolean isGoalState(State state) {
         for(Goal goal : this.problem.agentGoals){
-            var agent = getAgentByNumber(state, goal.label - '0');
+            // var agent = getAgentByNumber(state, goal.label - '0');
+            var agent = getAgentByLabel(state, goal.label);
             if(!satisfies(goal, agent)){
                 return false;
             }
@@ -79,6 +81,13 @@ public class StateSpace {
 
     public Agent getAgentByNumber(State state, int i) {
         return state.agents.get(i);
+    }
+
+    public Agent getAgentByLabel(State state, char label){ 
+        for(var agent: state.agents){
+            if(agent.label == label) return agent;
+        }
+        throw new UnreachableState();
     }
 
     public Optional<Box> getBoxAt(State state, Position position) {
@@ -171,7 +180,8 @@ public class StateSpace {
         for(int agentId = 0; agentId < agentsCount; agentId++)
         {
             ArrayList<Action> agentActions = new ArrayList<>(Action.values().length);
-            var agent = getAgentByNumber(state, agentId);
+            // var agent = getAgentByNumber(state, agentId);
+            var agent = state.agents.get(agentId);
             for(Action action : Action.values()){
                 if(isApplicable(state, agent, action)){
                     agentActions.add(action);
@@ -244,7 +254,8 @@ public class StateSpace {
         }
 
         for(int action = 0; action < actionsToApply.length; action++){
-            Agent agent = getAgentByNumber(state, action);
+            // Agent agent = getAgentByNumber(state, action);
+            Agent agent = state.agents.get(action);
             Agent updatedAgent = null;
             Position agentDestination;
 
@@ -327,7 +338,7 @@ public class StateSpace {
     public int getSatisfiedAgentGoalsCount(State state){
         var result = 0;
         for(Goal goal : this.problem.agentGoals){
-            var agent = getAgentByNumber(state, goal.label - '0');
+            var agent = getAgentByLabel(state, goal.label);
             if(satisfies(goal, agent)){
                 result++;
             }

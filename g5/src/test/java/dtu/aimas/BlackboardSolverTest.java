@@ -60,7 +60,7 @@ test
 
         var problem = getProblem(level);
         var solution = solver.solve(problem);
-        // Assert.assertTrue(solution.isOk());
+        Assert.assertTrue(solution.isOk());
     }
 
     @Test 
@@ -79,11 +79,12 @@ test
 """;
         var problem = getProblem(level, "red: 0, A");
         var solution = solver.solve(problem);
-        // Assert.assertTrue(solution.isOk());
+        Assert.assertTrue(solution.isOk());
+        // TODO: Validate that solution is valid in statespace
     }
 
     @Test
-    public void TwoAgentsWithBoxesDifferentColors(){
+    public void TwoAgentsNoConflict(){
         var level = 
 """
 #initial
@@ -102,5 +103,29 @@ test
 """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
         var solution = solver.solve(problem);
+        Assert.assertTrue(solution.toString(), solution.isOk());
+    }
+
+    @Test
+    public void TwoAgents_Crossing(){
+        var level = 
+"""
+#initial
++++++
+++0++
++1  +
+++ ++
++++++
+#goal
++++++
+++ ++
++  1+
+++0++
++++++
+#end
+""";
+        var problem = getProblem(level, "red: 0", "blue: 1");
+        var solution = solver.solve(problem);
+        // Assert.assertTrue(solution.isOk());
     }
 }

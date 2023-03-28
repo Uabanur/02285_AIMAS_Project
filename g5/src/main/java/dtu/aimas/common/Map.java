@@ -44,6 +44,13 @@ public class Map {
         cells[row][col] = symbol;
     }
 
+    public char get(Position pos){
+        return get(pos.row, pos.col);
+    }
+    public char get(int row, int col){
+        return cells[row][col];
+    }
+
     public void clear(Position pos){
         clear(pos.row, pos.col);
     }
