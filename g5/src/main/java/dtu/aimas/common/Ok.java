@@ -77,6 +77,11 @@ class Ok<T> implements Result<T> {
     }
 
     @Override
+    public String getErrorMessageOrEmpty(){
+        return "";
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

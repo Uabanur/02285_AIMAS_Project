@@ -34,4 +34,9 @@ public class Agent {
     public int hashCode() {
         return Objects.hash(pos, color);
     }
+
+    @Override
+    public Agent clone() {
+        return new Agent(new Position(pos.row, pos.col), color, label);
+    }
 }
