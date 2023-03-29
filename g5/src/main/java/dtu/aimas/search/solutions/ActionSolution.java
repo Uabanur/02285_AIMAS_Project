@@ -1,12 +1,13 @@
 package dtu.aimas.search.solutions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import dtu.aimas.communication.IO;
 import dtu.aimas.search.Action;
+import dtu.aimas.search.ActionType;
 
 public class ActionSolution implements Solution {
 
@@ -31,17 +32,15 @@ public class ActionSolution implements Solution {
     }
 
     public int getFlowtime() {
-        int cost = 0;
-        if(plan.length == 0){
-            cost = 0;
-        }
-        else{
-            for(int i = 0; i<plan.length; i++){
-                for(int j = 0; j<plan[0].length; j++){
-                    cost++;
-                }
+        if(plan.length == 0) return 0;
+        int[] costs = new int[plan[0].length];
+        for (int agent = 0; agent < plan[0].length; agent++) {
+            int step = plan[agent].length;
+            while(step >= 0 && plan[step][agent].type == ActionType.NoOp){
+                step--;
             }
+            costs[agent] = step + 1;
         }
-        return cost;
+        return Arrays.stream(costs).sum();
     }
 }
