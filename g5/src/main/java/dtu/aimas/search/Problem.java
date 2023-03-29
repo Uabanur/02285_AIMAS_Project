@@ -180,8 +180,9 @@ public class Problem {
     public Problem subProblemFor(Agent agent) {
         // Should only contain the agents given, and their boxes.
         // Walls are the same, and goals only contain goals for the agent and its boxes.
-
-        var agents = List.of(agent);
+        
+        // in order to create a subproblem and stay within domain rules we have to reorder the agents naming
+        var subAgent = new Agent(agent.pos, agent.color, '0');
         var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
 
         // Deep copy of the goals array
@@ -193,14 +194,21 @@ public class Problem {
         for(var row = 0; row < goals.length; row++){
             for(var col = 0; col < goals[row].length; col++){
                 var symbol = goals[row][col];
-                if (symbol == '\0')
-                if (symbol == agent.label) continue;
-                if (boxes.stream().anyMatch(b -> b.label == symbol)) continue;
-                goals[row][col] = '\0';
+                if(boxes.stream().anyMatch(b -> b.label == symbol)){
+                    // boxes can stay like this
+                    continue;
+                }
+                if(symbol == agent.label){
+                    // agent goal has to be renamed
+                    goals[row][col] = subAgent.label;
+                } 
+                else{
+                    goals[row][col] = '\0';
+                }
             }
         }
         
-        return new Problem(agents, boxes, walls, goals);
+        return new Problem(List.of(subAgent), boxes, walls, goals);
     }
 
     public int admissibleDist(Position from, Position to) {
