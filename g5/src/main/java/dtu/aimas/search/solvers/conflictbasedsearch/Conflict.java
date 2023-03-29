@@ -17,4 +17,9 @@ public class Conflict {
         this.timeStep = timeStep;
         this.involvedAgents = involvedAgents;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Position: %d,%d. TimeStep: %d", this.position.row, this.position.col, timeStep);
+    }
 }

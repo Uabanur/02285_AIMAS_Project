@@ -1,16 +1,23 @@
 package dtu.aimas.search.solvers.conflictbasedsearch;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.errors.NotImplemented;
+import dtu.aimas.search.Action;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Constraint;
+import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import lombok.Getter;
 
 public class CBSNode implements Comparable<CBSNode> {
@@ -60,17 +67,14 @@ public class CBSNode implements Comparable<CBSNode> {
         return Result.error(new NotImplemented());
     }
 
-    public Optional<Conflict> findConflict() {
+    public ArrayList<Conflict> findConflicts(StateSpace stateSpace) {
         var subSolutionsResult = Result.collapse(solutions.values());
         assert subSolutionsResult.isOk() : subSolutionsResult.getError().getMessage();
-        return replaySolutionsForConflicts(subSolutionsResult.get());
+
+        // Delegate the conflict detection to the state space
+        return stateSpace.replaySolutionsForConflicts(solutions);
     }
 
-    private Optional<Conflict> replaySolutionsForConflicts(Collection<Solution> solutions){
-        // TODO : Implement conflict logic
-        // simulate the plans from the different solutions
-        return Optional.empty();
-    }
 
     public CBSNode constrain(Agent agent, Position position, int timeStep) {
         var solutionsCopy = Map.copyOf(this.solutions);

@@ -3,7 +3,10 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -13,11 +16,13 @@ import dtu.aimas.common.Box;
 import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import lombok.Getter;
 
 public class StateSpace {
@@ -233,6 +238,82 @@ public class StateSpace {
         var jointActionsToApply = Arrays.copyOf(jointAction, jointAction.length);
         State destinationState = applyJointActions(state, jointActionsToApply);
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
+    }
+
+    public ArrayList<Conflict> replaySolutionsForConflicts(Map solutions) {
+
+        // Sort the solution map by agent's labels, so that the individual agent actions can be applied in correct order
+        List<Map.Entry<Agent, Solution>> entryList = new ArrayList<>(solutions.entrySet());
+        Collections.sort(entryList, new Comparator<Map.Entry<Agent, Solution>>() {
+            @Override
+            public int compare(Map.Entry<Agent, Solution> entry1, Map.Entry<Agent, Solution> entry2) {
+                return entry1.getKey().label - entry2.getKey().label;
+            }
+        });
+
+        var stepIndex = 0;
+        State currentState = this.initialState;
+        boolean longestSolutionReached = false;
+
+        ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
+        
+
+        while (!longestSolutionReached) {
+
+            longestSolutionReached = true;
+
+            ArrayList<Action> agentActions = new ArrayList<Action>();
+
+            for (var mapEntry: entryList) {
+                Result<Solution> agentSolutionResult = (Result) mapEntry.getValue();
+                Solution agentSolution = agentSolutionResult.get();
+
+                var agentSteps = new ArrayList(agentSolution.serializeSteps());
+
+                if (stepIndex < agentSteps.size()) {
+                    String agentStep = (String) agentSteps.get(stepIndex);
+                    agentActions.add(Action.fromName(agentStep));
+                    longestSolutionReached = false;
+                } else {
+                    // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
+                    agentActions.add(Action.fromName("NoOp"));
+                }
+            }
+
+            Action[] actionArray = new Action[agentActions.size()];
+            agentActions.toArray(actionArray);
+
+            currentState = this.applyJointActions(currentState, actionArray);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, stepIndex);
+            allConflicts.addAll(currentStepConflicts);
+
+            stepIndex++;
+        }
+        
+        return allConflicts;
+    }
+
+    private ArrayList<Conflict> checkStateForConflicts(State state, int timeStep) {
+
+        ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
+
+        for (Agent agent: state.agents) {
+            for (Agent otherAgent: state.agents) {
+
+                if (agent == otherAgent) {
+                    continue;
+                }
+
+                if (agent.pos.equals(otherAgent.pos)) {
+                    Conflict newConflict = new Conflict(agent.pos, timeStep, new Agent[] {agent, otherAgent});
+                    foundConflicts.add(newConflict);
+                }
+            }
+        }
+
+        // Check other kinds of conflicts, including boxes
+
+        return foundConflicts;
     }
 
     private State applyJointActions(State state, Action[] actionsToApply){

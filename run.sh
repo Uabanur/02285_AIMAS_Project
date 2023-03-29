@@ -6,4 +6,4 @@ clientName="dtu.aimas.SearchClient"
 arguments="-cbs -log debug servermessages"
 flags="-g"
 
-java -jar ./mavis.jar -l "$levelDir/TwoAgents.lvl" -c "java -cp $classesDir $clientName $arguments" $flags
+java -jar ./mavis.jar -l "$levelDir/TwoAgentsConflict.lvl" -c "java -cp $classesDir $clientName $arguments" $flags
