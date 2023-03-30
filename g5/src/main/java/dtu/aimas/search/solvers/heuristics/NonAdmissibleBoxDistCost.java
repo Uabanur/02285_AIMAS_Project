@@ -1,22 +1,22 @@
 package dtu.aimas.search.solvers.heuristics;
 
-import java.net.CookieStore;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import dtu.aimas.common.Box;
-import dtu.aimas.common.Goal;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 
-public class GoalDistanceCost implements Cost {
+/*
+ * This cost is not admissible because it can overestimate the cost of an optimal solution
+ * However, the cost it returns is the correct cost for some solution 
+ * (the solution depends on ordering of boxes and goals in the problem)
+ */
+public class NonAdmissibleBoxDistCost implements Cost {
     public int calculate(State state, StateSpace space) {
         Problem problem = space.getProblem();
-        return simpleBoxDistances(state, space, problem) + agentDistances(state, space, problem);
+        return simpleBoxDistances(state, space, problem);
     }
 
     private int simpleBoxDistances(State state, StateSpace space, Problem problem) {
@@ -38,15 +38,6 @@ public class GoalDistanceCost implements Cost {
             }
             usedBox.add(closestBox);
             totalDistance += distToClosest;
-        }
-        return totalDistance;
-    }
-
-    private int agentDistances(State state, StateSpace space, Problem problem) {
-        int totalDistance = 0;
-        for(var goal : problem.agentGoals) {
-            var agent = space.getAgentByNumber(state, Character.getNumericValue(goal.label));
-            totalDistance += problem.admissibleDist(agent.pos, goal.destination);
         }
         return totalDistance;
     }
