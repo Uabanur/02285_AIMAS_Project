@@ -68,7 +68,8 @@ public class State {
         if (!(o instanceof State)) return false;
         State state = (State) o;
         return Objects.equals(agents, state.agents) &&
-               Objects.equals(boxes, state.boxes);
+               Objects.equals(boxes, state.boxes) && 
+               g == state.g();
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
-import dtu.aimas.common.Map;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.NotImplemented;
 import dtu.aimas.parsers.ProblemParser;
@@ -17,8 +16,11 @@ import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
+import dtu.aimas.search.solvers.heuristics.ConflictPenalizedCost;
 import dtu.aimas.search.solvers.heuristics.Cost;
 import dtu.aimas.search.solvers.heuristics.GoalCount;
 
@@ -56,47 +58,64 @@ public class BlackboardSolver implements Solver {
         }
 
         // Go through each agent solution, and check if it conflicts with another agent
-        var map = Map.from(fullProblem);
         for(var plan: plans){
-            plan.setConflicts(getConflicts(plan, plans, map));
+            plan.setConflicts(getConflicts(plan, plans, space));
         }
 
-        var validSolutions = true;
-        for(var plan: plans){
-            if(plan.getSolution().isOk() && plan.getConflicts().isEmpty()) continue;
-            validSolutions = false;
-            break;
-        }
-        if(validSolutions) return Result.ok(mergeSolutions(plans));
+        if(validSolutions(plans)) 
+            return Result.ok(mergeSolutions(plans));
 
         // Make a heuristic to avoid using resources in the other agents plan
         // Solve both conflicting agents again with this heuristic. Hopefully finding non conflicting solutions
+        for(var i = 0; i < plans.length; i++) {
+            if(plans[i].getConflicts().isEmpty()) continue;
+            var solution = subSolverGenerator
+                    .apply(new ConflictPenalizedCost(cost, plans[i]))
+                    .solve(plans[i].getProblem());
+            plans[i] = new Plan(plans[i].getAgent(), plans[i].getProblem(), solution);
+        }
+
+        for(var plan: plans){
+            plan.setConflicts(getConflicts(plan, plans, space));
+        }
+
+        if(validSolutions(plans)) 
+            return Result.ok(mergeSolutions(plans));
+
 
         return Result.error(new NotImplemented());
     }
 
+    private boolean validSolutions(Plan[] plans){
+        for(var plan: plans){
+            if (plan.getSolution().isError()) return false;
+            if (!plan.getConflicts().isEmpty()) return false;
+        }
+        return true;
+    }
+
     private Solution mergeSolutions(Plan[] plans) {
         //TODO : Manage any solition types
-        var actionSolutions = Arrays.stream(plans)
-            .map(p -> (ActionSolution)p.getSolution().get())
-            .toArray(ActionSolution[]::new);
+        var solutions = Arrays.stream(plans)
+            .map(p -> (StateSolution)p.getSolution().get())
+            .toArray(StateSolution[]::new);
 
         var agentCount = plans.length;
-        var solutionLength = Arrays.stream(actionSolutions)
+        var solutionLength = Arrays.stream(solutions)
             .mapToInt(s -> s.size())
             .max()
             .orElse(0);
 
         var jointActions = new Action[solutionLength][agentCount];
-        for(var step = 0; step < solutionLength; step++){
+        for(var step = 1; step < solutionLength; step++){
             for(var i = 0; i < agentCount; i++){
-                var solution = actionSolutions[i];
+                var solution = solutions[i];
                 if(solution.size() <= step){
                     jointActions[step][i] = Action.NoOp;
                     continue;
                 }
 
-                var action = solution.getJointAction(step);
+                var action = solution.getState(step).jointAction;
                 assert action.length == 1;
                 jointActions[step][i] = action[0];
             }
@@ -106,13 +125,12 @@ public class BlackboardSolver implements Solver {
     }
 
 
-    private List<Solution> getConflicts(Plan plan, Plan[] plans, Map map) {
+    private List<Solution> getConflicts(Plan plan, Plan[] plans, StateSpace space) {
         // TODO maybe move to a conflict resolver for any generic solutions
         var conflicts = new ArrayList<Solution>();
         for(var other: plans){
             if (plan == other)continue;
-            map.reset();
-            var conflict = getConflict(plan, other, map);
+            var conflict = getConflict(plan, other, space);
             if(conflict.isEmpty()) continue;
             conflicts.add(conflict.get());
         }
@@ -120,177 +138,54 @@ public class BlackboardSolver implements Solver {
     }
 
 
-    private Optional<Solution> getConflict(Plan plan, Plan other, Map map) {
+    private Optional<Solution> getConflict(Plan plan, Plan other, StateSpace space) {
         if(plan.getSolution().isError() || other.getSolution().isError())
             return Optional.empty();
 
-        // Add main problem agents to the map
-        var mainProblem = plan.getProblem();
-        var mainAgents = mainProblem.agents.stream().map(a -> a.clone()).toArray(Agent[]::new);
-        var mainSolution = (ActionSolution)plan.getSolution().get();
-        for(var agent: mainProblem.agents){
-            assert map.isFree(agent.pos) : "Agent positions should not conflict";
-            map.set(agent.pos, agent.label);
-        }
-
-        // Add main problem boxes to the map
-        for(var box: mainProblem.boxes){
-            assert map.isFree(box.pos)  : "Agent and box positions should not conflict";
-            map.set(box.pos, box.label);
-        }
-
-
-        // Add other problem agents to the map
-        var otherProblem = other.getProblem();
-        var otherAgents = otherProblem.agents.stream().map(a -> a.clone()).toArray(Agent[]::new);
-        var otherSolution = (ActionSolution)other.getSolution().get();
-        for(var agent: otherProblem.agents){
-            assert map.isFree(agent.pos) : "Initial states of subproblems should not conflict";
-            map.set(agent.pos, agent.label);
-        }
-
-        // Add other problem boxes to the map
-        for(var box: otherProblem.boxes){
-            if (map.isFree(box.pos)) {
-                map.set(box.pos, box.label);
-            }
-            else {
-                assert map.get(box.pos) == box.label: "Initial states of subproblems should not conflict";
-            }
-        }
-
-        // Step through solutions and check if there are conflicts
+        var mainSolution = (StateSolution)plan.getSolution().get();
+        var otherSolution = (StateSolution)other.getSolution().get();
         var maxSolutionLength = Math.max(mainSolution.size(), otherSolution.size());
-        for(var step = 0; step < maxSolutionLength; step++){
-            // If main solution has steps, check that the agents can perform the actions
-            if(step < mainSolution.size()){
-                var valid = validateJointAction(mainAgents, mainSolution.getJointAction(step), map);
-                if(!valid) return Optional.of(mainSolution);
+        for(var step = 1; step < maxSolutionLength; step++){
+            var mainStep = Math.min(mainSolution.size()-1, step);
+            var mainState = mainSolution.getState(mainStep);
+            var otherStep = Math.min(otherSolution.size()-1, step);
+            var otherState = otherSolution.getState(otherStep);
+            
+            var prevMainState = step < mainSolution.size() ? mainState.parent : mainState;
+            var prevOtherState = step < otherSolution.size() ? otherState.parent : otherState;
+
+            var previousState = combineState(prevMainState, prevOtherState);
+            if(!space.isValid(previousState)) return Optional.of(otherSolution);
+            
+            if(step < mainSolution.size()){ // If main solution is finished its noop'ing
+                for(var i = 0; i < mainState.agents.size(); i++){
+                    if(space.isApplicable(previousState, mainState.parent.agents.get(i), mainState.jointAction[i])) continue;
+                    return Optional.of(otherSolution);
+                }
             }
 
-            // If other solution has steps, check that the agents can perform the actions
-            if(step < otherSolution.size()){
-                var valid = validateJointAction(otherAgents, otherSolution.getJointAction(step), map);
-                if(!valid) return Optional.of(otherSolution);
-            }
-        }
-
-        // Apply actions and verify that no step conflicts
-        for(var step = 0; step < maxSolutionLength; step++){
-            // If main solution has steps, check that the agents can perform the actions
-            if(step < mainSolution.size()){
-                var jointAction = mainSolution.getJointAction(step);
-                var valid = validateJointAction(mainAgents, jointAction, map);
-                if(!valid) return Optional.of(mainSolution);
-                applyJointAction(mainAgents, jointAction, map);
-            }
-
-            // If other solution has steps, check that the agents can perform the actions
-            if(step < otherSolution.size()){
-                var jointAction = otherSolution.getJointAction(step);
-                var valid = validateJointAction(otherAgents, otherSolution.getJointAction(step), map);
-                if(!valid) return Optional.of(otherSolution);
-                applyJointAction(otherAgents, jointAction, map);
+            if(step < otherSolution.size()){ // If other solution is finished its noop'ing
+                for(var i = 0; i < otherState.agents.size(); i++){
+                    if(space.isApplicable(previousState, otherState.parent.agents.get(i), otherState.jointAction[i])) continue;
+                    return Optional.of(otherSolution);
+                }
             }
         }
 
         return Optional.empty();
     }
 
-    public void applyJointAction(Agent[] agents, Action[] jointAction, Map map){
-        for(var i = 0; i < jointAction.length; i++){
-            var agent = agents[i];
-            var action = jointAction[i];
-            applyAction(action, agent, map);
-        }
+    private State combineState(State mainState, State otherState){
+        var agents = new ArrayList<Agent>();
+        var boxes = new ArrayList<Box>();
+        agents.addAll(mainState.agents);
+        boxes.addAll(mainState.boxes);
+
+        agents.addAll(otherState.agents);
+        boxes.addAll(otherState.boxes);
+
+        return new State(agents, boxes);
     }
-
-    public void applyAction(Action action, Agent agent, Map map){
-        switch(action.type){
-            case NoOp:
-            {
-                return;
-            }
-
-            case Move:
-            {
-                assert agent.label == map.get(agent.pos);
-                map.clear(agent.pos);
-                map.set(
-                    agent.pos.row + action.agentRowDelta, 
-                    agent.pos.col + action.agentColDelta,
-                    agent.label);
-                return;
-            }
-
-            case Pull:
-            {
-                assert agent.label == map.get(agent.pos);
-                var boxRow = agent.pos.row - action.boxRowDelta;
-                var boxCol = agent.pos.col - action.boxColDelta;
-                var boxLabel = map.get(boxRow, boxCol);
-                // TODO: Can/Should we check that it is the correct box?
-                assert Box.isLabel(boxLabel);
-            
-                map.clear(boxRow, boxCol);
-                map.set(agent.pos, boxLabel);
-                map.set(agent.pos.row + action.agentRowDelta, agent.pos.col + action.agentColDelta, agent.label);
-                return;
-            }
-
-            case Push:
-                assert agent.label == map.get(agent.pos);
-                var boxRow = agent.pos.row + action.agentRowDelta;
-                var boxCol = agent.pos.col + action.agentColDelta;
-                var boxLabel = map.get(boxRow, boxCol);
-                assert Box.isLabel(boxLabel);
-            
-                map.clear(agent.pos);
-                map.set(boxRow, boxCol, agent.label);
-                map.set(agent.pos.row + action.agentRowDelta + action.boxRowDelta,
-                    agent.pos.col + action.agentColDelta + action.boxColDelta,
-                    boxLabel);
-
-                return;
-        }
-
-    }
-
-    public boolean validateJointAction(Agent[] agents, Action[] jointAction, Map map){
-        for(var i = 0; i < jointAction.length; i++){
-            var agent = agents[i];
-            var action = jointAction[i];
-            var valid = validateAction(action, agent, map);
-            if(!valid) return false;
-        }
-        return true;
-    }
-
-    public boolean validateAction(Action action, Agent agent, Map map){
-        // TODO: Potentially reuse validation logic from state space
-        switch(action.type){
-            case NoOp:
-                return true;
-
-            case Move:
-                return map.isFree(
-                    agent.pos.row + action.agentRowDelta, 
-                    agent.pos.col + action.agentColDelta);
-
-            case Pull:
-                return map.isFree(
-                    agent.pos.row + action.agentRowDelta, 
-                    agent.pos.col + action.agentColDelta);
-
-            case Push:
-                return map.isFree(
-                    agent.pos.row + action.agentRowDelta + action.boxRowDelta, 
-                    agent.pos.col + action.agentColDelta + action.boxColDelta);
-        }
-
-        return true;
-    }
-
 
     private Problem subProblemFor(Problem source, Agent agent) {
         // TODO use problem.subProblemFor from cbs branch

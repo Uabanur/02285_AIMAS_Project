@@ -19,6 +19,7 @@ import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
 
 public class StateSpace {
@@ -39,7 +40,8 @@ public class StateSpace {
         if (!isGoalState(state)) 
             return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
 
-        return Result.ok(new ActionSolution(extractPlan(state)));
+        // return Result.ok(new ActionSolution(extractPlan(state)));
+        return Result.ok(new StateSolution(extractStates(state)));
     }
 
     public boolean isGoalState(State state) {
@@ -64,6 +66,19 @@ public class StateSpace {
             }
         }
         return true;
+    }
+
+    private State[] extractStates(State state){
+        var length = state.g()+1;
+        var states = new State[length];
+        var current = state;
+
+        for(var i = length-1; i >= 0; i--){
+            states[i] = current;
+            current = current.parent;
+        }
+    
+        return states;
     }
 
     public Action[][] extractPlan(State state)
@@ -139,7 +154,7 @@ public class StateSpace {
         return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
-    private boolean isApplicable(State state, Agent agent, Action action){
+    public boolean isApplicable(State state, Agent agent, Action action){
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
@@ -228,7 +243,7 @@ public class StateSpace {
         return expandedStates;
     }
 
-    private boolean isValid(State state){
+    public boolean isValid(State state){
         Set<Position> occupiedPositions = new HashSet<>();
         for (Agent agent : state.agents){
             if(!occupiedPositions.add(agent.pos)) return false;
