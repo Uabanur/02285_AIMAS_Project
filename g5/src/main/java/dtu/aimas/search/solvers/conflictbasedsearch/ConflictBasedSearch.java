@@ -54,7 +54,7 @@ public class ConflictBasedSearch implements Solver {
             }
 
             if (issues.isEmpty())
-                return node.getSolution();
+                return node.getSolution(stateSpace);
 
             var conflict = issues.get(0);
             for(var agent: conflict.getInvolvedAgents()) {

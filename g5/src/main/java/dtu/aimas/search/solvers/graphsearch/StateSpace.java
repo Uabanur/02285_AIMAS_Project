@@ -43,7 +43,7 @@ public class StateSpace {
         if (!isGoalState(state)) 
             return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
 
-        return Result.ok(new ActionSolution(extractPlan(state)));
+        return Result.ok(new ActionSolution(extractPlanFromState(state)));
     }
 
     public boolean isGoalState(State state) {
@@ -69,7 +69,7 @@ public class StateSpace {
         return true;
     }
 
-    public Action[][] extractPlan(State state)
+    public Action[][] extractPlanFromState(State state)
     { 
         ArrayList<Action[]> plan = new ArrayList<Action[]>();
         State iterator = state;
@@ -79,6 +79,44 @@ public class StateSpace {
             iterator = iterator.parent;
         }
         Collections.reverse(plan);
+        return plan.toArray(new Action[plan.size()][]);
+    }
+
+    public Action[][] extractPlanFromSubsolutions(List<Map.Entry<Agent, Result<Solution>>> solutions) {
+
+        ArrayList<Action[]> plan = new ArrayList<Action[]>();
+
+        var stepIndex = 0;
+        boolean longestSolutionReached = false;
+
+        while (!longestSolutionReached) {
+            longestSolutionReached = true;
+            ArrayList<Action> agentActions = new ArrayList<Action>();
+
+            for (var solutionEntry: solutions) {
+                Result<Solution> result = solutionEntry.getValue();
+                Solution agentSolution = result.get();
+
+                var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
+
+                if (stepIndex < agentSteps.size()) {
+                    String agentStep = (String) agentSteps.get(stepIndex);
+                    agentActions.add(Action.fromName(agentStep));
+                    longestSolutionReached = false;
+                } else {
+                    // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
+                    agentActions.add(Action.fromName("NoOp"));
+                }
+            }
+
+            Action[] actionArray = new Action[agentActions.size()];
+            agentActions.toArray(actionArray);
+
+            plan.add(actionArray);
+
+            stepIndex++;
+        }
+
         return plan.toArray(new Action[plan.size()][]);
     }
 
@@ -240,35 +278,23 @@ public class StateSpace {
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
 
-    public ArrayList<Conflict> replaySolutionsForConflicts(Map solutions) {
+    public ArrayList<Conflict> replaySolutionsForConflicts(List<Map.Entry<Agent, Result<Solution>>> solutions) {
 
-        // Sort the solution map by agent's labels, so that the individual agent actions can be applied in correct order
-        List<Map.Entry<Agent, Solution>> entryList = new ArrayList<>(solutions.entrySet());
-        Collections.sort(entryList, new Comparator<Map.Entry<Agent, Solution>>() {
-            @Override
-            public int compare(Map.Entry<Agent, Solution> entry1, Map.Entry<Agent, Solution> entry2) {
-                return entry1.getKey().label - entry2.getKey().label;
-            }
-        });
-
+        ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
+        
         var stepIndex = 0;
         State currentState = this.initialState;
         boolean longestSolutionReached = false;
 
-        ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
-        
-
-        while (!longestSolutionReached) {
-
+        while (!longestSolutionReached) {            
             longestSolutionReached = true;
-
             ArrayList<Action> agentActions = new ArrayList<Action>();
 
-            for (var mapEntry: entryList) {
-                Result<Solution> agentSolutionResult = (Result) mapEntry.getValue();
-                Solution agentSolution = agentSolutionResult.get();
+            for (var solutionEntry: solutions) {
+                Result<Solution> result = solutionEntry.getValue();
+                Solution agentSolution = result.get();
 
-                var agentSteps = new ArrayList(agentSolution.serializeSteps());
+                var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
 
                 if (stepIndex < agentSteps.size()) {
                     String agentStep = (String) agentSteps.get(stepIndex);
