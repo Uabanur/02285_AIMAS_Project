@@ -26,11 +26,14 @@ public class MAAdmissibleCost implements Cost {
                 // Find shortest way to get box to goal
                 int minBoxGoalDist = Integer.MAX_VALUE;
                 int boxGoalDist = problem.admissibleDist(box.pos, goal.destination);
-                List<Agent> agents = allAgents.stream().filter(a -> a.label == box.label).collect(Collectors.toList());
+                List<Agent> agents = allAgents.stream().filter(a -> a.color == box.color).collect(Collectors.toList());
                 for(Agent agent : agents) {
-                    Goal agentGoal = problem.agentGoals.stream().filter(ag -> ag.label == agent.label).collect(Collectors.toList()).get(0);
+                    int agentGoalDist = 0;
+                    List<Goal> agentGoals = problem.agentGoals.stream().filter(agoal -> agoal.label == agent.label).collect(Collectors.toList());
+                    // Agents don't have to have goals, but if they do, they only have one
+                    if(!agentGoals.isEmpty()) agentGoalDist = problem.admissibleDist(goal.destination, agentGoals.get(0).destination);
                     //the cost for agent to take box to goal is the distance between agent -> box -> goal + agent -> agentGoal
-                    int dist = boxGoalDist + problem.admissibleDist(agent.pos, box.pos) + problem.admissibleDist(goal.destination, agentGoal.destination);
+                    int dist = problem.admissibleDist(agent.pos, box.pos) + boxGoalDist + agentGoalDist;
                     if(dist < minBoxGoalDist) minBoxGoalDist = dist;
                 }
                 if(minBoxGoalDist < minGoalCompleteDist) minGoalCompleteDist = minBoxGoalDist;
