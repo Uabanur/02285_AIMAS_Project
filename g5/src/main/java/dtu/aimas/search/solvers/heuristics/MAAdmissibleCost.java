@@ -1,0 +1,42 @@
+package dtu.aimas.search.solvers.heuristics;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import dtu.aimas.common.Agent;
+import dtu.aimas.common.Box;
+import dtu.aimas.common.Goal;
+import dtu.aimas.search.Problem;
+import dtu.aimas.search.solvers.graphsearch.State;
+import dtu.aimas.search.solvers.graphsearch.StateSpace;
+
+public class MAAdmissibleCost implements Cost {
+    public int calculate(State state, StateSpace space) {
+        Problem problem = space.getProblem();
+        var allBoxes = state.boxes;
+        var allAgents = state.agents;
+        // We want the cost of completing the longest goal in the shortest way possible
+        // All other goals will (should) be completed while the longest one is completed, so cost is admissible
+        int longestGoalCompletionDist = 0;
+        for(Goal goal : problem.boxGoals) {
+            // Find shortest way to complete goal (test the best box-agent combination to do so)
+            int minGoalCompleteDist = Integer.MAX_VALUE;
+            List<Box> boxes = allBoxes.stream().filter(b -> b.label == goal.label).collect(Collectors.toList());
+            for(Box box : boxes) {
+                // Find shortest way to get box to goal
+                int minBoxGoalDist = Integer.MAX_VALUE;
+                int boxGoalDist = problem.admissibleDist(box.pos, goal.destination);
+                List<Agent> agents = allAgents.stream().filter(a -> a.label == box.label).collect(Collectors.toList());
+                for(Agent agent : agents) {
+                    Goal agentGoal = problem.agentGoals.stream().filter(ag -> ag.label == agent.label).collect(Collectors.toList()).get(0);
+                    //the cost for agent to take box to goal is the distance between agent -> box -> goal + agent -> agentGoal
+                    int dist = boxGoalDist + problem.admissibleDist(agent.pos, box.pos) + problem.admissibleDist(goal.destination, agentGoal.destination);
+                    if(dist < minBoxGoalDist) minBoxGoalDist = dist;
+                }
+                if(minBoxGoalDist < minGoalCompleteDist) minGoalCompleteDist = minBoxGoalDist;
+            }
+            if(minGoalCompleteDist > longestGoalCompletionDist) longestGoalCompletionDist = minGoalCompleteDist;
+        }
+        return longestGoalCompletionDist;
+    }
+}
