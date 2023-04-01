@@ -3,7 +3,6 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import dtu.aimas.common.Box;
 import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
-import dtu.aimas.communication.IO;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
@@ -149,8 +147,9 @@ public class StateSpace {
         return this.problem.walls[position.row][position.col];
     }
 
-    private boolean isCellFree(Position position, State state){
-        return !isWallAt(position) && !getAgentAt(state, position).isPresent() && !getBoxAt(state, position).isPresent();
+    private boolean isCellFree(Position position, State state, Agent agent, int timeStep){
+        return !isWallAt(position) && !getAgentAt(state, position).isPresent() && 
+        !getBoxAt(state, position).isPresent() && this.problem.isFree(position, agent, timeStep);
     }
 
     private boolean canMoveBox(Agent agent, Box box){
@@ -173,7 +172,7 @@ public class StateSpace {
         return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
-    private boolean isApplicable(State state, Agent agent, Action action){
+    private boolean isApplicable(State state, Agent agent, Action action, int timeStep){
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
@@ -183,7 +182,7 @@ public class StateSpace {
 
             case Move:
                 agentDestination = moveAgent(agent, action);
-                return isCellFree(agentDestination, state);
+                return isCellFree(agentDestination, state, agent, timeStep);
 
             case Push:
                 agentDestination = moveAgent(agent, action);
@@ -192,7 +191,7 @@ public class StateSpace {
                 box = boxResult.get();
                 if(!canMoveBox(agent, box)) return false;
                 Position boxDestination = moveBox(box, action);
-                return isCellFree(boxDestination, state);
+                return isCellFree(boxDestination, state, agent, timeStep);
 
             case Pull:
                 Position boxSource = getPullSource(agent, action);
@@ -201,7 +200,7 @@ public class StateSpace {
                 box = boxResult.get();
                 if(!canMoveBox(agent, box)) return false; 
                 agentDestination = moveAgent(agent, action);
-                return isCellFree(agentDestination, state);
+                return isCellFree(agentDestination, state, agent, timeStep);
 
         }
         // unreachable
@@ -209,6 +208,14 @@ public class StateSpace {
     }
 
     public ArrayList<State> expand(State state) {
+
+        int timeStep = 0;
+        State iterator = state;
+        while (iterator.parent != null) {
+            iterator = iterator.parent;
+            timeStep++;
+        }
+
         int agentsCount = state.agents.size();
         Action[][] applicableActions = new Action[agentsCount][];
         for(int agentId = 0; agentId < agentsCount; agentId++)
@@ -216,7 +223,7 @@ public class StateSpace {
             ArrayList<Action> agentActions = new ArrayList<>(Action.values().length);
             var agent = getAgentByNumber(state, agentId);
             for(Action action : Action.values()){
-                if(isApplicable(state, agent, action)){
+                if(isApplicable(state, agent, action, timeStep)){
                     agentActions.add(action);
                 }
             }
@@ -283,6 +290,7 @@ public class StateSpace {
         ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
         
         var stepIndex = 0;
+
         State currentState = this.initialState;
         boolean longestSolutionReached = false;
 
@@ -310,16 +318,14 @@ public class StateSpace {
             agentActions.toArray(actionArray);
 
             currentState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, stepIndex);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, stepIndex++);
             allConflicts.addAll(currentStepConflicts);
-
-            stepIndex++;
         }
-        
+
         return allConflicts;
     }
 
-    private ArrayList<Conflict> checkStateForConflicts(State state, int timeStep) {
+    private ArrayList<Conflict> checkStateForConflicts(State state, Action[] previousActions, int timeStep) {
 
         ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
 
@@ -331,8 +337,17 @@ public class StateSpace {
                 }
 
                 if (agent.pos.equals(otherAgent.pos)) {
-                    Conflict newConflict = new Conflict(agent.pos, timeStep, new Agent[] {agent, otherAgent});
+
+                    ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
+                    for (var initialAgent: initialState.agents) {
+                        if (initialAgent.label == agent.label || initialAgent.label == agent.label) {
+                            involvedAgents.add(initialAgent);
+                        }
+                    }
+
+                    Conflict newConflict = new Conflict(agent.pos, timeStep, involvedAgents.toArray(new Agent[0]));
                     foundConflicts.add(newConflict);
+                    return foundConflicts;
                 }
             }
         }

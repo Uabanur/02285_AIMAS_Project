@@ -10,7 +10,6 @@ import java.util.Map;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
-import dtu.aimas.errors.NotImplemented;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
@@ -95,7 +94,7 @@ public class CBSNode implements Comparable<CBSNode> {
     }
 
     public CBSNode constrain(Agent agent, Position position, int timeStep) {
-        var solutionsCopy = Map.copyOf(this.solutions);
+        var solutionsCopy = new HashMap<>(this.solutions);
         var extendedConstraints = constraint.extend(agent, position, timeStep);
         return new CBSNode(extendedConstraints, solutionsCopy);
     }

@@ -10,6 +10,7 @@ import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.Constraint;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
@@ -49,17 +50,13 @@ public class ConflictBasedSearch implements Solver {
             var node = frontier.poll();
             var issues = node.findConflicts(stateSpace);
 
-            for (Conflict issue: issues) {
-                IO.info(issue);
-            }
-
             if (issues.isEmpty())
                 return node.getSolution(stateSpace);
 
-            var conflict = issues.get(0);
-            for(var agent: conflict.getInvolvedAgents()) {
-                var childNode = node.constrain(agent, conflict.getPosition(), conflict.getTimeStep());
-                
+            var firstConflict = issues.get(0);
+            for(var agent: firstConflict.getInvolvedAgents()) {
+                var childNode = node.constrain(agent, firstConflict.getPosition(), firstConflict.getTimeStep());
+
                 var constrainedProblem = ConstrainedProblem.from(
                     initialProblem.subProblemFor(agent), childNode.getConstraint());
 

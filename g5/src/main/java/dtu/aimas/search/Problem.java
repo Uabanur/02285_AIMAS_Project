@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import dtu.aimas.common.Position;
-import dtu.aimas.communication.IO;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
 import dtu.aimas.common.Color;
