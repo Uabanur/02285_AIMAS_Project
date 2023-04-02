@@ -318,7 +318,7 @@ public class StateSpace {
             agentActions.toArray(actionArray);
 
             currentState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, stepIndex++);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, ++stepIndex);
             allConflicts.addAll(currentStepConflicts);
         }
 
