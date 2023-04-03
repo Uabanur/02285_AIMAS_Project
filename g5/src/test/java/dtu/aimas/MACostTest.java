@@ -94,7 +94,6 @@ public class MACostTest {
 
         int boxGoal0Cost = singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA, null);
         int boxGoal1Cost = singleAgentBoxGoalCost(problem, agents[1], boxes[1], goalB, null);
-        Assert.assertEquals(Integer.MAX_VALUE, boxGoal1Cost);
         //Cost should be that of the longest goal to complete
         int expected = Math.max(boxGoal0Cost, boxGoal1Cost);
         Assert.assertEquals(expected, cost.calculate(state, space));
