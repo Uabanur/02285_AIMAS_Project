@@ -11,6 +11,7 @@ import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 
 public class MAAdmissibleCost implements Cost {
+    //Not accurate if there are more boxgoals than agents
     public int calculate(State state, StateSpace space) {
         Problem problem = space.getProblem();
         var allBoxes = state.boxes;
@@ -26,14 +27,22 @@ public class MAAdmissibleCost implements Cost {
                 // Find shortest way to get box to goal
                 int minBoxGoalDist = Integer.MAX_VALUE;
                 int boxGoalDist = problem.admissibleDist(box.pos, goal.destination);
+                if(boxGoalDist == Integer.MAX_VALUE) continue;
                 List<Agent> agents = allAgents.stream().filter(a -> a.color == box.color).collect(Collectors.toList());
                 for(Agent agent : agents) {
                     int agentGoalDist = 0;
                     List<Goal> agentGoals = problem.agentGoals.stream().filter(agoal -> agoal.label == agent.label).collect(Collectors.toList());
                     // Agents don't have to have goals, but if they do, they only have one
-                    if(!agentGoals.isEmpty()) agentGoalDist = problem.admissibleDist(goal.destination, agentGoals.get(0).destination);
+                    if(!agentGoals.isEmpty()) {
+                        agentGoalDist = problem.admissibleDist(goal.destination, agentGoals.get(0).destination);
+                        if(agentGoalDist == Integer.MAX_VALUE) continue;
+                    }
                     //the cost for agent to take box to goal is the distance between agent -> box -> goal + agent -> agentGoal
-                    int dist = problem.admissibleDist(agent.pos, box.pos) + boxGoalDist + agentGoalDist;
+                    int agentBoxDist = problem.admissibleDist(agent.pos, box.pos);
+                    if(agentBoxDist == Integer.MAX_VALUE) continue;
+                    int dist =  agentBoxDist + boxGoalDist + agentGoalDist;
+                    //if one of the costs is max value, then the sum will be negative.
+                    if(dist < 0) continue;
                     if(dist < minBoxGoalDist) minBoxGoalDist = dist;
                 }
                 if(minBoxGoalDist < minGoalCompleteDist) minGoalCompleteDist = minBoxGoalDist;
