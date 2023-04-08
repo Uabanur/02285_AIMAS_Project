@@ -213,8 +213,9 @@ public class Problem {
     public int admissibleDist(Position from, Position to) {
         return distances[from.row][from.col][to.row][to.col];
     }
-
+    
     public boolean isFree(Position pos, Agent agent, int timeStep) {
         return !walls[pos.row][pos.col];
     }
+
 }

@@ -60,7 +60,7 @@ public class ConflictsTest {
         // Assert conflict's position, agents and timestep
         var expectedPosition = new Position(5, 5);
         var expectedInvolvedAgents = agents.toArray(new Agent[0]);
-        var expectedTimestep = 1;
+        var expectedTimestep = 0;
 
         var involvedAgents = conflict.getInvolvedAgents();
         for (var i = 0; i < involvedAgents.length; i++) {

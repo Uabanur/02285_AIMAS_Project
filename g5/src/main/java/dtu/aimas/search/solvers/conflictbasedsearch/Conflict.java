@@ -20,6 +20,6 @@ public class Conflict {
 
     @Override
     public String toString() {
-        return String.format("Position: %d,%d. TimeStep: %d", this.position.row, this.position.col, timeStep);
+        return String.format("Position: %d,%d. TimeStep: %d. Num of agents: %d.", this.position.row, this.position.col, timeStep, involvedAgents.length);
     }
 }

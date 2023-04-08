@@ -3,6 +3,7 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -318,7 +319,8 @@ public class StateSpace {
             agentActions.toArray(actionArray);
 
             currentState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, ++stepIndex);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, stepIndex++);
+
             allConflicts.addAll(currentStepConflicts);
         }
 
@@ -329,32 +331,46 @@ public class StateSpace {
 
         ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
 
-        for (Agent agent: state.agents) {
-            for (Agent otherAgent: state.agents) {
-
-                if (agent == otherAgent) {
-                    continue;
-                }
-
-                if (agent.pos.equals(otherAgent.pos)) {
-
-                    ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
-                    for (var initialAgent: initialState.agents) {
-                        if (initialAgent.label == agent.label || initialAgent.label == agent.label) {
-                            involvedAgents.add(initialAgent);
-                        }
-                    }
-
-                    Conflict newConflict = new Conflict(agent.pos, timeStep, involvedAgents.toArray(new Agent[0]));
-                    foundConflicts.add(newConflict);
-                    return foundConflicts;
-                }
+        // Check for basic conflicts: agents moving to the same destination
+        var agentPositions = new HashMap<Position, ArrayList<Agent>>();
+        for (var agent : state.agents) {
+            if (agentPositions.containsKey(agent.pos)) {
+                agentPositions.get(agent.pos).add(agent);
+            } else {
+                var agentsAtPos = new ArrayList<Agent>();
+                agentsAtPos.add(agent);
+                agentPositions.put(agent.pos, agentsAtPos);
             }
         }
 
-        // Check other kinds of conflicts, including boxes
+        for (var entry : agentPositions.entrySet()) {
+            var position = entry.getKey();
+            var agentsAtPos = entry.getValue();
+            if (agentsAtPos.size() > 1) {
+                Agent[] matchingInitialStateAgents = getInitialStateAgents(agentsAtPos).toArray(new Agent[agentsAtPos.size()]);
+                Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
+                foundConflicts.add(newConflict);
+            }
+        }
+
+        // TODO: Check other kinds of conflicts, including boxes, once agent-box ownership is implemented
 
         return foundConflicts;
+    }
+
+    private ArrayList<Agent> getInitialStateAgents(ArrayList<Agent> agentCopies) {
+
+        ArrayList<Agent> matchingInitialAgents = new ArrayList<>();
+
+        for (var initialAgent: initialState.agents) {
+            for (var agentCopy: agentCopies) {
+                if (agentCopy.label == initialAgent.label) {
+                    matchingInitialAgents.add(initialAgent);
+                }
+            }  
+        }
+
+        return matchingInitialAgents;
     }
 
     private State applyJointActions(State state, Action[] actionsToApply){
