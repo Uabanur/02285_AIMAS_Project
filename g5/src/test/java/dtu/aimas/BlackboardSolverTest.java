@@ -129,9 +129,32 @@ public class BlackboardSolverTest {
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
         var solution = solver.solve(problem);
-         Assert.assertTrue(solution.isOk());
+        Assert.assertTrue(solution.isOk());
     }
 
+    @Test
+    public void MultipleAgentsDifferentColors(){
+        var level = """
+                #initial
+                ++++++++++
+                +01A    3+
+                +  B     +
+                +        +
+                +   2C   +
+                ++++++++++
+                #goal
+                ++++++++++
+                +       C+
+                +        +
+                +       A+
+                +B      3+
+                ++++++++++
+                #end
+                """;
+        var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
+        var solution = solver.solve(problem);
+        Assert.assertTrue(solution.isOk());
+    }
 
 
     @Test
