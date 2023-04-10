@@ -1,23 +1,24 @@
 package dtu.aimas.search.solvers.heuristics;
 
-import java.util.ArrayList;
-
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
+import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.solutions.StateSolution;
-import dtu.aimas.search.solvers.blackboard.Plan;
+import dtu.aimas.search.solvers.blackboard.Attempt;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 
+import java.util.ArrayList;
+
 public class ConflictPenalizedCost implements Cost {
 
-    private Cost baseCost;
-    private Plan plan;
+    private final Cost baseCost;
+    private final Attempt attempt;
 
-    public ConflictPenalizedCost(Cost baseCost, Plan plan){
+    public ConflictPenalizedCost(Cost baseCost, Attempt attempt){
         // TODO right now its a mix of StateSolution and ActionSolution. Clean it up.
         this.baseCost = baseCost;
-        this.plan = plan;
+        this.attempt = attempt;
     }
 
     @Override
@@ -29,9 +30,8 @@ public class ConflictPenalizedCost implements Cost {
 
         var problem = space.getProblem();
         var conflictPenalty = problem.walls.length * problem.walls[0].length;
-        for (var conflictingSolution : plan.getConflicts()) {
-            var solution = (StateSolution)conflictingSolution;
-            if(solutionStepConflicts(state, space, solution, step)){
+        for (var conflictingSolution : attempt.getConflicts()) {
+            if(solutionStepConflicts(state, space, conflictingSolution, step)){
                 result += conflictPenalty;
             }
         }
@@ -47,6 +47,8 @@ public class ConflictPenalizedCost implements Cost {
 
         var currentState = combineState(state, otherState);
         if(!space.isValid(currentState)) return true;
+
+        if(state.parent == null || otherState.parent == null) throw new UnreachableState();
 
         var prevMainState = state.parent;
         var prevOtherState = step < solution.size() ? otherState.parent : otherState;

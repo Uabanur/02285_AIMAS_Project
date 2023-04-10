@@ -1,11 +1,11 @@
 package dtu.aimas.search.solutions;
 
+import dtu.aimas.search.solvers.graphsearch.State;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import dtu.aimas.search.solvers.graphsearch.State;
 
 public class StateSolution implements Solution {
     private State[] states;
