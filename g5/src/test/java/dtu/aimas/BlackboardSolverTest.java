@@ -14,6 +14,7 @@ import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.graphsearch.State;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringReader;
@@ -152,6 +153,30 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
+        var solution = solver.solve(problem);
+        Assert.assertTrue(solution.isOk());
+    }
+
+    @Ignore // TODO: for now it cannot manage agents of same color with boxes
+    @Test
+    public void SameColorAgentsWithBoxes(){
+        var level = """
+                #initial
+                +++++
+                +01 +
+                +AB +
+                +   +
+                +++++
+                #goal
+                +++++
+                +   +
+                +   +
+                +AB +
+                +++++
+                #end
+                """;
+
+        var problem = getProblem(level, "red: 0,1,A,B");
         var solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
