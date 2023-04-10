@@ -254,7 +254,7 @@ public class StateSpace {
         return true;
     }
 
-    private Optional<State> tryCreateState(State state, Action[] jointAction){
+    public Optional<State> tryCreateState(State state, Action[] jointAction){
         var jointActionsToApply = Arrays.copyOf(jointAction, jointAction.length);
         State destinationState = applyJointActions(state, jointActionsToApply);
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();

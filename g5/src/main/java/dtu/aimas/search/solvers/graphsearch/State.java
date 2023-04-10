@@ -1,6 +1,7 @@
 package dtu.aimas.search.solvers.graphsearch;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -45,11 +46,11 @@ public class State {
         var newline = System.lineSeparator();
 
         sb.append("Agents: ");
-        sb.append(agents.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
+        sb.append(agents.stream().map(x -> x.toString()).collect(commaSeparate));
         sb.append(newline);
 
         sb.append("Boxes: ");
-        sb.append(boxes.stream().map(x -> x.toSimpleString()).collect(commaSeparate));
+        sb.append(boxes.stream().map(x -> x.toString()).collect(commaSeparate));
         sb.append(newline);
 
         return sb.toString();
@@ -60,6 +61,22 @@ public class State {
         for (Action action : jointAction)
             sb.append(action.name + " ");
         return sb.toString();
+    }
+
+    public boolean equivalent(State other){
+        // same step
+        if(this.g != other.g) return false;
+
+        // All agents must be equal and in the same order, due to joint action order
+        if(!other.agents.equals(this.agents)) return false;
+
+        // Joint actions must be identical
+        if(!Arrays.equals(other.jointAction, this.jointAction)) return false;
+
+        // All boxes must be there, but order may vary
+        for(var box: other.boxes) if(!this.boxes.contains(box)) return false;
+
+        return true;
     }
 
     @Override
@@ -74,7 +91,7 @@ public class State {
 
     @Override
     public int hashCode() {
-        return Objects.hash(agents, boxes);
+        return Objects.hash(agents, boxes, g);
     }
     
 }
