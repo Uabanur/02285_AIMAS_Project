@@ -61,12 +61,13 @@ public class ConflictBasedSearch implements Solver {
                 var constrainedProblem = ConstrainedProblem.from(
                     initialProblem.subProblemFor(agent), childNode.getConstraint());
 
-                var problemToSolve = initialProblem;
-                if (agent.label == '0') {
-                    problemToSolve = constrainedProblem;
-                }
+                //TODO: Implement the contraint-extending properly
+                // var problemToSolve = initialProblem;
+                // if (agent.label == '0') {
+                //     problemToSolve = constrainedProblem;
+                // }
 
-                var solution = subSolver.solve(problemToSolve);
+                var solution = subSolver.solve(constrainedProblem);
                 childNode.setSolutionFor(agent, solution);
                 childNode.calculateCost();
 
