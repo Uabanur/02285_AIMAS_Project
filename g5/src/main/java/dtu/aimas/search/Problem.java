@@ -3,8 +3,10 @@ package dtu.aimas.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.Queue;
+import java.util.Set;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,8 @@ public class Problem {
     public Collection<Goal> boxGoals;
     public int expectedStateSize;
     private int[][][][] distances;
+    private Goal[] agentAssignedGoal;
+    private Box[] agentAssignedBox;
 
     public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
     {
@@ -208,6 +212,47 @@ public class Problem {
         }
         
         return new Problem(List.of(subAgent), boxes, walls, goals);
+    }
+
+    public void assignGoals() {
+        //this can be used for the initial subproblem generation
+        agentAssignedBox = new Box[agents.size()];
+        agentAssignedGoal = new Goal[agents.size()];
+        Set<Box> assignedBoxes = new HashSet<>();
+        
+        //simple assignation to start off, it's dependent on boxGoal ordering
+        for(Goal goal : boxGoals) {
+            List<Box> compatibleBoxes = this.boxes.stream().filter(b -> b.label == goal.label && !assignedBoxes.contains(b)).collect(Collectors.toList());
+            if(compatibleBoxes.size() == 0) continue;
+            Box closestBox = compatibleBoxes.get(0);
+            int closestBoxDist = Integer.MAX_VALUE;
+            for(Box box : compatibleBoxes) {
+                int dist = admissibleDist(box.pos, goal.destination);
+                if(dist < closestBoxDist) {
+                    closestBox = box;
+                    closestBoxDist = dist;
+                }
+            }
+            //idk why this needs to be done, but otherwise there is an error
+            Box theBox = closestBox;
+            List<Agent> compatibleAgents = this.agents.stream().filter(
+                a -> a.color == theBox.color && agentAssignedGoal[Character.getNumericValue(a.label)] == null
+            ).collect(Collectors.toList());
+            if(compatibleAgents.size() == 0) continue;
+            Agent closestAgent = compatibleAgents.get(0);
+            int closestAgentDist = Integer.MAX_VALUE;
+            for(Agent agent : compatibleAgents) {
+                int dist = admissibleDist(agent.pos, closestBox.pos);
+                if(dist < closestAgentDist) {
+                    closestAgent = agent;
+                    closestAgentDist = dist;
+                }
+            }
+            int agentIndex = Character.getNumericValue(closestAgent.label);
+            agentAssignedBox[agentIndex] = closestBox;
+            agentAssignedGoal[agentIndex] = goal;
+            assignedBoxes.add(closestBox);
+        }
     }
 
     public int admissibleDist(Position from, Position to) {
