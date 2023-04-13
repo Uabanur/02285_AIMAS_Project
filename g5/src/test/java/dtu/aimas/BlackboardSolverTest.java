@@ -1,15 +1,14 @@
 package dtu.aimas;
 
-import dtu.aimas.common.Agent;
-import dtu.aimas.common.Box;
-import dtu.aimas.common.Color;
-import dtu.aimas.common.Position;
+import dtu.aimas.common.*;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
+import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
+import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.AStar;
@@ -23,19 +22,25 @@ import java.util.List;
 
 public class BlackboardSolverTest {
     private final LevelParser levelParser = CourseLevelParser.Instance;
+    private Result<Solution> solution;
     private long startTimeMs = 0;
     private BlackboardSolver solver;
 
     @Before
     public void setup(){
-        // IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         solver = new BlackboardSolver(AStar::new);
         startTimeMs = System.currentTimeMillis();
+        solution = Result.error(new SolutionNotFound());
     }
 
     @After
     public void after(){
         IO.debug("Test time: %d ms", System.currentTimeMillis() - startTimeMs);
+        solution.ifOk(s -> {
+            IO.info("Solution of size %d found:\n", s.size());
+            s.serializeSteps().forEach(IO::info);
+        });
     }
     
     private Problem getProblem(String level, String... colors){
@@ -74,7 +79,7 @@ public class BlackboardSolverTest {
                     """;
 
         var problem = getProblem(level);
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
@@ -92,7 +97,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A");
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
@@ -114,7 +119,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
 
@@ -136,7 +141,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
@@ -160,7 +165,7 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
@@ -171,23 +176,19 @@ public class BlackboardSolverTest {
                 +++++++
                 +01   +
                 +++ +++
-                +  2  +
+                + 324 +
                 +++++++
                 #goal
                 +++++++
-                +    2+
+                +   32+
                 +++ +++
-                +   01+
+                +4  01+
                 +++++++
                 #end
                 """;
-        var problem = getProblem(level, "red: 0, 1");
-        var solution = solver.solve(problem);
+        var problem = getProblem(level, "red: 0,1,2,3,4");
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
-        if(solution.isOk()) {
-            IO.debug("Solution found:\n");
-            solution.get().serializeSteps().forEach(IO::debug);
-        }
     }
 
     @Ignore
@@ -207,7 +208,7 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0, 1");
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
@@ -231,7 +232,7 @@ public class BlackboardSolverTest {
                 """;
 
         var problem = getProblem(level, "red: 0,1,A,B");
-        var solution = solver.solve(problem);
+        solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
@@ -365,16 +366,16 @@ public class BlackboardSolverTest {
             var state = result.getState(1);
 
             // PushEE
-            var agent0 = new Agent(new Position(0, 0+1), Color.Blue, '0');
-            var box0 = new Box(new Position(0, 1+1), Color.Blue, 'A');
+            var agent0 = new Agent(new Position(0, 1), Color.Blue, '0');
+            var box0 = new Box(new Position(0, 2), Color.Blue, 'A');
 
             // NoOp
-            var agent1 = new Agent(new Position(4, 3+0), Color.Green, '1');
-            var box1 = new Box(new Position(4, 4+0), Color.Green, 'B');
+            var agent1 = new Agent(new Position(4, 3), Color.Green, '1');
+            var box1 = new Box(new Position(4, 4), Color.Green, 'B');
 
             // PushEE
-            var agent2 = new Agent(new Position(2, 0+1), Color.Red, '2');
-            var box2 = new Box(new Position(2, 1+1), Color.Red, 'C');
+            var agent2 = new Agent(new Position(2, 1), Color.Red, '2');
+            var box2 = new Box(new Position(2, 2), Color.Red, 'C');
 
             // PushEE
             var agent3 = new Agent(new Position(5, 3+1), Color.Grey, '3');
@@ -400,20 +401,20 @@ public class BlackboardSolverTest {
             var state = result.getState(2);
 
             // NoOp
-            var agent0 = new Agent(new Position(0, 0+1+0), Color.Blue, '0');
-            var box0 = new Box(new Position(0, 1+1+0), Color.Blue, 'A');
+            var agent0 = new Agent(new Position(0, 1), Color.Blue, '0');
+            var box0 = new Box(new Position(0, 1 + 1), Color.Blue, 'A');
 
             // PushEE
-            var agent1 = new Agent(new Position(4, 3+0+1), Color.Green, '1');
-            var box1 = new Box(new Position(4, 4+0+1), Color.Green, 'B');
+            var agent1 = new Agent(new Position(4, 3 + 1), Color.Green, '1');
+            var box1 = new Box(new Position(4, 4 + 1), Color.Green, 'B');
 
             // NoOp
-            var agent2 = new Agent(new Position(2, 0+1+0), Color.Red, '2');
-            var box2 = new Box(new Position(2, 1+1+0), Color.Red, 'C');
+            var agent2 = new Agent(new Position(2, 1), Color.Red, '2');
+            var box2 = new Box(new Position(2, 1 + 1), Color.Red, 'C');
 
             // MoveW
             var agent3 = new Agent(new Position(5, 3+1-1), Color.Grey, '3');
-            var box3 = new Box(new Position(5, 4+1+0), Color.Grey, 'D');
+            var box3 = new Box(new Position(5, 4 + 1), Color.Grey, 'D');
 
             // require order of agents
             var expectedAgents = new ArrayList<>(List.of(agent0, agent1, agent2, agent3));

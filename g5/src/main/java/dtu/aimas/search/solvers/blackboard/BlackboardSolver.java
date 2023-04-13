@@ -88,43 +88,19 @@ public class BlackboardSolver implements Solver {
                 return Result.ok(mergeAttempts(attempts));
 
             // Calculate all neighbor attempts
-            var attemptTime = 0;
-            var permutationTime = 0;
-            var combinationsTime = 0;
-            var attemptPermutationTime = 0;
-            var setQueueAddTime = 0;
-            var neighborStart = System.currentTimeMillis();
             for(var i = 0; i < planCount; i++) {
                 if(attempts.get(i).getConflicts().isEmpty()) continue;
-                var attemptStart = System.currentTimeMillis();
                 var solution = subSolverGenerator
                         .apply(new ConflictPenalizedCost(cost, attempts.get(i)))
                         .solve(plans[i].getProblem())
                         .map(s -> (StateSolution)s);
                 plans[i].addAttempt(new Attempt(solution));
-                attemptTime += System.currentTimeMillis() - attemptStart;
 
-                var combinationStart = System.currentTimeMillis();
-                var options = Arrays.stream(plans).mapToInt(p -> p.getAttempts().size()).toArray();
-                var permutations = combinations(options, i, plans[i].lastAttemptIndex());
-                combinationsTime += System.currentTimeMillis() - combinationStart;
-                var permutationStart = System.currentTimeMillis();
-                for(var permutation: permutations){
-                    var attemptPermutationStart = System.currentTimeMillis();
-                    var next = new AttemptPermutation(permutation, plans);
-                    attemptPermutationTime += System.currentTimeMillis() - attemptPermutationStart;
-                    var setQueueAddStart = System.currentTimeMillis();
-                    if(set.add(next)){
-                        queue.add(next);
-                    }
-                    setQueueAddTime += System.currentTimeMillis() - setQueueAddStart;
-                }
-                permutationTime += System.currentTimeMillis() - permutationStart;
+                var next = attemptPermutation.transfer(i, plans[i].lastAttemptIndex(), plans);
+                if (set.contains(next)) continue;
+                queue.add(next);
+                set.add(next);
             }
-            var neighborTime = System.currentTimeMillis() - neighborStart;
-
-            IO.debug("total: %d ms. attempt: %d ms. combinations: %d ms. permutations: %d ms. attempt permutation: %d ms. set/queue add: %d ms",
-                    neighborTime, attemptTime, combinationsTime, permutationTime, attemptPermutationTime, setQueueAddTime);
         }
     }
 

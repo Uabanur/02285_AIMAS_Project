@@ -25,6 +25,12 @@ public class AttemptPermutation {
                 .toList();
     }
 
+    public AttemptPermutation transfer(int position, int value, Plan[] plans){
+        var indices = this.indices.clone();
+        indices[position] = value;
+        return new AttemptPermutation(indices, plans);
+    }
+
     @Override
     public String toString() {
         return Arrays.toString(indices);

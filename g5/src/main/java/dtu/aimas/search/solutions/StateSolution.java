@@ -1,6 +1,5 @@
 package dtu.aimas.search.solutions;
 
-import dtu.aimas.communication.IO;
 import dtu.aimas.search.solvers.graphsearch.State;
 
 import java.util.ArrayList;
@@ -40,12 +39,6 @@ public class StateSolution implements Solution {
 
     @Override
     public int hashCode() {
-//        Arrays.stream(states).map(s -> Arrays.hashCode(s.jointAction))
-//        return Arrays.deepHashCode(states);
-//        var jointActions = Arrays.stream(states).map(s -> s.jointAction).toArray();
-//        return Arrays.deepHashCode(jointActions);
-//        return Objects.hash(serializeSteps().toArray());
-        IO.debug("state solution hash");
         return hash;
     }
 
