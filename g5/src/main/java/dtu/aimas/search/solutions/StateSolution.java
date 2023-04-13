@@ -1,16 +1,22 @@
 package dtu.aimas.search.solutions;
 
+import dtu.aimas.communication.IO;
 import dtu.aimas.search.solvers.graphsearch.State;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StateSolution implements Solution {
     private State[] states;
+    private final int hash;
     public StateSolution(State[] states) {
         this.states = states;
+
+        var jointActions = Arrays.stream(states).map(s -> s.jointAction).toArray();
+        hash = Arrays.deepHashCode(jointActions);
     }
 
     public int size() {
@@ -30,5 +36,21 @@ public class StateSolution implements Solution {
             );
         }
         return steps;
+    }
+
+    @Override
+    public int hashCode() {
+//        Arrays.stream(states).map(s -> Arrays.hashCode(s.jointAction))
+//        return Arrays.deepHashCode(states);
+//        var jointActions = Arrays.stream(states).map(s -> s.jointAction).toArray();
+//        return Arrays.deepHashCode(jointActions);
+//        return Objects.hash(serializeSteps().toArray());
+        IO.debug("state solution hash");
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return hashCode() == obj.hashCode();
     }
 }

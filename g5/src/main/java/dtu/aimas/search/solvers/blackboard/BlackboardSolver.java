@@ -1,8 +1,8 @@
 package dtu.aimas.search.solvers.blackboard;
 
 import dtu.aimas.common.Agent;
-import dtu.aimas.common.Box;
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.parsers.ProblemParser;
@@ -24,12 +24,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class BlackboardSolver implements Solver {
-
-    /* Ideas: 
-        Rank boxes in order they need to be solved.
-        They could be ranked such that if their goal blocks another box, they are ranked lower
-    */
-
     private final Cost cost;
     private final Function<Cost, Solver> subSolverGenerator;
     public BlackboardSolver(Function<Cost, Solver> subSolverGenerator){
@@ -37,13 +31,12 @@ public class BlackboardSolver implements Solver {
         cost = new GoalCount(); // change to precomputed dist cost
     }
 
-
     public Result<Solution> solve(Problem problem) {
-        return ProblemParser.parse(problem)
-                .flatMap(this::solve);
+        return ProblemParser.parse(problem).flatMap(this::solve);
     }
 
     private Result<Solution> solve(StateSpace space) {
+        IO.debug("Starting blackboard search");
         var initialState = space.getInitialState();
         var fullProblem = space.getProblem();
 
@@ -51,9 +44,12 @@ public class BlackboardSolver implements Solver {
         var planCount = Math.max(1, initialState.agents.size());
         var plans = new Plan[planCount];
         if(initialState.agents.isEmpty()){
+            IO.debug("No agents found. Initial state solution attempt with no actions.");
             var solution = new StateSolution(new State[]{initialState});
             plans[0] = new Plan(null, fullProblem, Result.ok(solution));
         } else {
+            IO.debug("Found %d agents. Solving sub problems independently.", initialState.agents.size());
+            var startTime = System.currentTimeMillis();
             for(var i = 0; i < plans.length; i++){
                 var agent = initialState.agents.get(i);
                 var subProblem = subProblemFor(fullProblem, agent);
@@ -62,21 +58,28 @@ public class BlackboardSolver implements Solver {
                         .map(s -> (StateSolution)s);
                 plans[i] = new Plan(agent, subProblem, solution);
             }
+            var endTime = System.currentTimeMillis();
+            IO.debug("Average time per naive solution: %,.2f ms", (endTime-startTime)/(float)planCount);
         }
+
+        IO.debug("Searching for conflict free solution permutations");
 
         var set = new HashSet<AttemptPermutation>();
         var queue = new ArrayDeque<AttemptPermutation>();
-        queue.add(new AttemptPermutation(new int[planCount]));
+        queue.add(new AttemptPermutation(new int[planCount], plans));
 
         while(true){
 
             // Verify that we can continue
-            if(queue.isEmpty())
+            if(queue.isEmpty()){
+                IO.error("All unique solution combinations have been exhausted");
                 return Result.error(new SolutionNotFound("No more attempt permutations"));
+            }
 
             // Check if goal is found
             var attemptPermutation = queue.poll();
             var attempts = attemptPermutation.getAttempts(plans);
+            IO.debug("Next solution permutation: %s", attemptPermutation);
 
             for(var attempt: attempts)
                 attempt.setConflicts(getConflicts(attempt, attempts, space));
@@ -85,61 +88,44 @@ public class BlackboardSolver implements Solver {
                 return Result.ok(mergeAttempts(attempts));
 
             // Calculate all neighbor attempts
+            var attemptTime = 0;
+            var permutationTime = 0;
+            var combinationsTime = 0;
+            var attemptPermutationTime = 0;
+            var setQueueAddTime = 0;
+            var neighborStart = System.currentTimeMillis();
             for(var i = 0; i < planCount; i++) {
                 if(attempts.get(i).getConflicts().isEmpty()) continue;
+                var attemptStart = System.currentTimeMillis();
                 var solution = subSolverGenerator
                         .apply(new ConflictPenalizedCost(cost, attempts.get(i)))
                         .solve(plans[i].getProblem())
                         .map(s -> (StateSolution)s);
                 plans[i].addAttempt(new Attempt(solution));
+                attemptTime += System.currentTimeMillis() - attemptStart;
 
+                var combinationStart = System.currentTimeMillis();
                 var options = Arrays.stream(plans).mapToInt(p -> p.getAttempts().size()).toArray();
-                for(var permutation: combinations(options, i, plans[i].lastAttemptIndex())){
-                    var next = new AttemptPermutation(permutation);
-                    if(set.contains(next)) continue;
-                    queue.add(next);
-                    set.add(next);
+                var permutations = combinations(options, i, plans[i].lastAttemptIndex());
+                combinationsTime += System.currentTimeMillis() - combinationStart;
+                var permutationStart = System.currentTimeMillis();
+                for(var permutation: permutations){
+                    var attemptPermutationStart = System.currentTimeMillis();
+                    var next = new AttemptPermutation(permutation, plans);
+                    attemptPermutationTime += System.currentTimeMillis() - attemptPermutationStart;
+                    var setQueueAddStart = System.currentTimeMillis();
+                    if(set.add(next)){
+                        queue.add(next);
+                    }
+                    setQueueAddTime += System.currentTimeMillis() - setQueueAddStart;
                 }
+                permutationTime += System.currentTimeMillis() - permutationStart;
             }
+            var neighborTime = System.currentTimeMillis() - neighborStart;
+
+            IO.debug("total: %d ms. attempt: %d ms. combinations: %d ms. permutations: %d ms. attempt permutation: %d ms. set/queue add: %d ms",
+                    neighborTime, attemptTime, combinationsTime, permutationTime, attemptPermutationTime, setQueueAddTime);
         }
-//
-//        var attempts = IntStream.range(0, planCount)
-//                .mapToObj(i -> plans[i].getAttempts().get(attemptIndices[i])).collect(Collectors.toList());
-//
-//        // Go through each agent solution, and check if it conflicts with another agent
-//        // TODO: this may be redundant now. We could just check if solutions are valid
-//        for(var attempt: attempts){
-//            attempt.setConflicts(getConflicts(attempt, attempts, space));
-//        }
-//
-////        if(validSolutions(plans, space))
-////            return Result.ok(mergeSolutions(plans));
-//        if(validAttempts(attempts, space))
-//            return Result.ok(mergeAttempts(attempts));
-//
-//        // Make a heuristic to avoid using resources in the other agents plan
-//        // Solve both conflicting agents again with this heuristic. Hopefully finding non conflicting solutions
-//        for(var i = 0; i < attempts.size(); i++) {
-//            if(attempts.get(i).getConflicts().isEmpty()) continue;
-//            var solution = subSolverGenerator
-//                    .apply(new ConflictPenalizedCost(cost, attempts.get(i)))
-//                    .solve(plans[i].getProblem())
-//                    .map(s -> (StateSolution)s);
-//            plans[i].addAttempt(new Attempt(solution));
-//            attemptIndices[i] += 1;
-//        }
-//
-//        attempts = IntStream.range(0, planCount)
-//                .mapToObj(i -> plans[i].getAttempts().get(attemptIndices[i])).collect(Collectors.toList());
-//
-//        for(var attempt: attempts){
-//            attempt.setConflicts(getConflicts(attempt, attempts, space));
-//        }
-//
-//        if(validAttempts(attempts, space))
-//            return Result.ok(mergeAttempts(attempts));
-//
-//        return Result.error(new NotImplemented());
     }
 
     public StateSolution mergeAttempts(List<Attempt> attempts){
@@ -212,18 +198,6 @@ public class BlackboardSolver implements Solver {
         }
     }
 
-//    private boolean validSolutions(Plan[] plans, StateSpace space){
-//        for(var plan: plans){
-//            if (plan.getSolution().isError()) return false;
-//            if (!plan.getConflicts().isEmpty()) return false;
-//        }
-//
-//        var solutions = Stream.of(plans).map(p -> (StateSolution)p.getSolution().get())
-//                            .toArray(StateSolution[]::new);
-//        var mergedSolution = mergeSolutions(solutions);
-//        return validSolution(mergedSolution, space);
-//    }
-
     private boolean validAttempts(List<Attempt> attempts, StateSpace space){
         for(var attempt: attempts){
             if (attempt.getSolution() == null) return false;
@@ -268,37 +242,6 @@ public class BlackboardSolver implements Solver {
         return space.isGoalState(solution.getState(solution.size()-1));
     }
 
-//    private Solution mergeSolutions(Plan[] plans) {
-//        //TODO : Manage any solution types
-//        var solutions = Arrays.stream(plans)
-//            .map(p -> (StateSolution)p.getSolution().get())
-//            .toArray(StateSolution[]::new);
-//
-//        var agentCount = plans.length;
-//        var solutionLength = Arrays.stream(solutions)
-//            .mapToInt(s -> s.size())
-//            .max()
-//            .orElse(0);
-//
-//        var jointActions = new Action[solutionLength][agentCount];
-//        for(var step = 1; step < solutionLength; step++){
-//            for(var i = 0; i < agentCount; i++){
-//                var solution = solutions[i];
-//                if(solution.size() <= step){
-//                    jointActions[step][i] = Action.NoOp;
-//                    continue;
-//                }
-//
-//                var action = solution.getState(step).jointAction;
-//                assert action.length == 1;
-//                jointActions[step][i] = action[0];
-//            }
-//        }
-//
-//        return new ActionSolution(jointActions);
-//    }
-
-
     private List<StateSolution> getConflicts(Attempt attempt, List<Attempt> attempts, StateSpace space) {
         // TODO maybe move to a conflict resolver for any generic solutions
         var conflicts = new ArrayList<StateSolution>();
@@ -333,14 +276,14 @@ public class BlackboardSolver implements Solver {
             var previousState = combineState(prevMainState, prevOtherState);
             if(!space.isValid(previousState)) return Optional.of(otherSolution);
             
-            if(step < mainSolution.size()){ // If main solution is finished its noop'ing
+            if(step < mainSolution.size()){ // If main solution is finished its NoOp
                 for(var i = 0; i < mainState.agents.size(); i++){
                     if(space.isApplicable(previousState, mainState.parent.agents.get(i), mainState.jointAction[i])) continue;
                     return Optional.of(otherSolution);
                 }
             }
 
-            if(step < otherSolution.size()){ // If other solution is finished its noop'ing
+            if(step < otherSolution.size()){ // If other solution is finished its NoOp
                 for(var i = 0; i < otherState.agents.size(); i++){
                     if(space.isApplicable(previousState, otherState.parent.agents.get(i), otherState.jointAction[i])) continue;
                     return Optional.of(otherSolution);
@@ -352,10 +295,8 @@ public class BlackboardSolver implements Solver {
     }
 
     private State combineState(State mainState, State otherState){
-        var agents = new ArrayList<Agent>();
-        var boxes = new ArrayList<Box>();
-        agents.addAll(mainState.agents);
-        boxes.addAll(mainState.boxes);
+        var agents = new ArrayList<>(mainState.agents);
+        var boxes = new ArrayList<>(mainState.boxes);
 
         agents.addAll(otherState.agents);
         boxes.addAll(otherState.boxes);
@@ -376,18 +317,15 @@ public class BlackboardSolver implements Solver {
                 if (symbol == 0) continue;
                 if (symbol == agent.label){
                     goals[row][col] = symbol;
-                    continue;
-                } 
-
+                }  else
                 if (boxes.stream().anyMatch(b -> b.label == symbol)) {
                     goals[row][col] = symbol;
-                    continue;
                 }
             }
         }
 
         // TODO no need to precompute again. 
-        // Just pass from parent problem when creating subproblems assuming walls are static.
+        // Just pass from parent problem when creating sub problems assuming walls are static.
         return new Problem(agents, boxes, source.walls, goals).precompute();
     }
 

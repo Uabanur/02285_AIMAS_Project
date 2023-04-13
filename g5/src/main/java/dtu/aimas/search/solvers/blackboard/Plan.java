@@ -26,6 +26,9 @@ public class Plan {
     }
 
 
+    public Attempt getAttempt(int i){
+        return attempts.get(i);
+    }
     public void addAttempt(Attempt attempt){
         attempts.add(attempt);
     }

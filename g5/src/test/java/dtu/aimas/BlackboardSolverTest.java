@@ -4,6 +4,8 @@ import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
 import dtu.aimas.common.Color;
 import dtu.aimas.common.Position;
+import dtu.aimas.communication.IO;
+import dtu.aimas.communication.LogLevel;
 import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Action;
@@ -12,10 +14,7 @@ import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.graphsearch.State;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -24,11 +23,19 @@ import java.util.List;
 
 public class BlackboardSolverTest {
     private final LevelParser levelParser = CourseLevelParser.Instance;
+    private long startTimeMs = 0;
     private BlackboardSolver solver;
 
     @Before
     public void setup(){
+        // IO.logLevel = LogLevel.Debug;
         solver = new BlackboardSolver(AStar::new);
+        startTimeMs = System.currentTimeMillis();
+    }
+
+    @After
+    public void after(){
+        IO.debug("Test time: %d ms", System.currentTimeMillis() - startTimeMs);
     }
     
     private Problem getProblem(String level, String... colors){
@@ -155,6 +162,53 @@ public class BlackboardSolverTest {
         var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
         var solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
+    }
+
+    @Test
+    public void MoreAgentsCrossing(){
+        var level = """
+                #initial
+                +++++++
+                +01   +
+                +++ +++
+                +  2  +
+                +++++++
+                #goal
+                +++++++
+                +    2+
+                +++ +++
+                +   01+
+                +++++++
+                #end
+                """;
+        var problem = getProblem(level, "red: 0, 1");
+        var solution = solver.solve(problem);
+        Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
+        if(solution.isOk()) {
+            IO.debug("Solution found:\n");
+            solution.get().serializeSteps().forEach(IO::debug);
+        }
+    }
+
+    @Ignore
+    @Test
+    public void BlockingFinish(){
+        var level = """
+                #initial
+                +++++++
+                +0    +
+                +++1+++
+                +++++++
+                #goal
+                +++++++
+                +  1 0+
+                +++ +++
+                +++++++
+                #end
+                """;
+        var problem = getProblem(level, "red: 0, 1");
+        var solution = solver.solve(problem);
+        Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
     @Ignore // TODO: for now it cannot manage agents of same color with boxes
