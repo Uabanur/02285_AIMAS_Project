@@ -64,6 +64,10 @@ public class BlackboardSolver implements Solver {
 
         IO.debug("Searching for conflict free solution permutations");
 
+        // TODO: Change queue to BestFirst priority queue,
+        //      sorting by least amount of conflicts in the attempt permutation (find speed),
+        //      or combined solution size (best solution)
+
         var set = new HashSet<AttemptPermutation>();
         var queue = new ArrayDeque<AttemptPermutation>();
         queue.add(new AttemptPermutation(new int[planCount], plans));
