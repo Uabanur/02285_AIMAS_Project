@@ -11,6 +11,7 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.SolverMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import dtu.aimas.search.solvers.heuristics.ConflictPenalizedCost;
@@ -25,8 +26,8 @@ import java.util.stream.Stream;
 
 public class BlackboardSolver implements Solver {
     private final Cost cost;
-    private final Function<Cost, Solver> subSolverGenerator;
-    public BlackboardSolver(Function<Cost, Solver> subSolverGenerator){
+    private final Function<Cost, SolverMinLength> subSolverGenerator;
+    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator){
         this.subSolverGenerator = subSolverGenerator;
         cost = new GoalCount(); // change to precomputed dist cost
     }
@@ -94,9 +95,17 @@ public class BlackboardSolver implements Solver {
             // Calculate all neighbor attempts
             for(var i = 0; i < planCount; i++) {
                 if(attempts.get(i).getConflicts().isEmpty()) continue;
+
+                var attemptSolutionLength = 0;
+                for(var j = 0; j < planCount; j++){
+                    if(i == j) continue;
+                    var solutionSize = attempts.get(j).getSolution().map(StateSolution::size).getOrElse(() -> 0);
+                    if(solutionSize > attemptSolutionLength) attemptSolutionLength = solutionSize;
+                }
+
                 var solution = subSolverGenerator
                         .apply(new ConflictPenalizedCost(cost, attempts.get(i)))
-                        .solve(plans[i].getProblem())
+                        .solve(plans[i].getProblem(), attemptSolutionLength)
                         .map(s -> (StateSolution)s);
                 plans[i].addAttempt(new Attempt(solution));
 

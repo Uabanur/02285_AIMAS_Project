@@ -11,7 +11,7 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
-import dtu.aimas.search.solvers.graphsearch.AStar;
+import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
 import org.junit.*;
 
@@ -28,8 +28,8 @@ public class BlackboardSolverTest {
 
     @Before
     public void setup(){
-        IO.logLevel = LogLevel.Information;
-        solver = new BlackboardSolver(AStar::new);
+        IO.logLevel = LogLevel.Debug;
+        solver = new BlackboardSolver(AStarMinLength::new);
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
     }

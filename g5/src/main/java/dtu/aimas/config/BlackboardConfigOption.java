@@ -4,6 +4,7 @@ import dtu.aimas.common.Result;
 import dtu.aimas.errors.UnknownArguments;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.AStar;
+import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class BlackboardConfigOption extends ConfigOption{
     public String getOptionName() {return OptionName;}
 
     public void apply(Configuration conf) {
-        conf.setSolver(new BlackboardSolver(AStar::new));
+        conf.setSolver(new BlackboardSolver(AStarMinLength::new));
     }
 
     public Result<ConfigOption> bindInner(List<String> tokens) {

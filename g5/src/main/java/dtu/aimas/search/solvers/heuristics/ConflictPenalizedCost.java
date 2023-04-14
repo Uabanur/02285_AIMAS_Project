@@ -46,7 +46,9 @@ public class ConflictPenalizedCost implements Cost {
         var otherState = solution.getState(solutionStep);
 
         var currentState = combineState(state, otherState);
-        if(!space.isValid(currentState)) return true;
+        if(!space.isValid(currentState)) {
+            return true;
+        }
 
         if(state.parent == null || otherState.parent == null) throw new UnreachableState();
 

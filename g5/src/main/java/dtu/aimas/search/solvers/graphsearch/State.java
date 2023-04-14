@@ -11,9 +11,10 @@ import lombok.Getter;
 
 public class State {
     public final State parent;
-    public ArrayList<Agent> agents;
-    public ArrayList<Box> boxes;
-    public Action[] jointAction;
+    public final ArrayList<Agent> agents;
+    public final ArrayList<Box> boxes;
+    public final Action[] jointAction;
+    private final int hash;
     
     @Getter
     private final int g;
@@ -23,15 +24,17 @@ public class State {
         this.agents = agents;
         this.boxes = boxes;
         this.jointAction = jointActions;
-        this.g = parent.g + 1;
+        this.g = parent == null ? 0 : parent.g + 1;
+        this.hash = Objects.hash(agents, boxes, g, Arrays.hashCode(jointActions), parent == null ? null: parent.hash);
     }
 
     public State(ArrayList<Agent> agents, ArrayList<Box> boxes){
-        this.parent = null;
-        this.agents = agents;
-        this.boxes = boxes;
-        this.jointAction = null;
-        this.g = 0;
+        this(null, agents, boxes, null);
+//        this.parent = null;
+//        this.agents = agents;
+//        this.boxes = boxes;
+//        this.jointAction = null;
+//        this.g = 0;
     }
 
     public int g()
@@ -83,15 +86,16 @@ public class State {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof State)) return false;
-        State state = (State) o;
-        return Objects.equals(agents, state.agents) &&
-               Objects.equals(boxes, state.boxes) && 
-               g == state.g();
+        return hashCode() == o.hashCode();
+//        return Objects.equals(agents, state.agents) &&
+//               Objects.equals(boxes, state.boxes) &&
+//               g == state.g();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agents, boxes, g);
+//        return Objects.hash(agents, boxes, g);
+        return hash;
     }
     
 }
