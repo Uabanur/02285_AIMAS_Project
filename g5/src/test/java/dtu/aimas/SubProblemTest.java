@@ -43,9 +43,9 @@ public class SubProblemTest {
         Assert.assertArrayEquals(expectedAgents, subProblem.agents.toArray(Agent[]::new));
         Assert.assertArrayEquals(expectedBoxes, subProblem.boxes.toArray(Box[]::new));
 
-        for(var row = 0; row < goals.length; row++) {
-            for(var col = 0; col < goals[row].length; col++) {
-                var symbol = goals[row][col];
+        for(var row = 0; row < subProblem.goals.length; row++) {
+            for(var col = 0; col < subProblem.goals[row].length; col++) {
+                var symbol = subProblem.goals[row][col];
                 if (symbol == 0) continue;
                 
                 if (Stream.of(expectedAgents).anyMatch(a -> a.label == symbol)) continue;
@@ -86,9 +86,9 @@ public class SubProblemTest {
         Assert.assertArrayEquals(expectedAgents, subProblem.agents.toArray(Agent[]::new));
         Assert.assertArrayEquals(expectedBoxes, subProblem.boxes.toArray(Box[]::new));
 
-        for(var row = 0; row < goals.length; row++) {
-            for(var col = 0; col < goals[row].length; col++) {
-                var symbol = goals[row][col];
+        for(var row = 0; row < subProblem.goals.length; row++) {
+            for(var col = 0; col < subProblem.goals[row].length; col++) {
+                var symbol = subProblem.goals[row][col];
                 if (symbol == 0) continue;
                 
                 if (Stream.of(expectedAgents).anyMatch(a -> a.label == symbol)) continue;
