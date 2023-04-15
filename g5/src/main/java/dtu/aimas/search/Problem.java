@@ -214,6 +214,35 @@ public class Problem {
         return new Problem(List.of(subAgent), boxes, walls, goals);
     }
 
+    public Problem subProblemFor2(Agent agent) {
+        var subAgent = new Agent(agent.pos, agent.color, '0');
+        var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
+
+        int agentNum = Character.getNumericValue(agent.label);
+        char[][] goals = new char[this.goals.length][this.goals[0].length];
+        //only leave the assigned goal
+        Goal boxGoal = agentAssignedGoal[agentNum];
+        if(boxGoal != null) {
+            goals[boxGoal.destination.row][boxGoal.destination.col] = boxGoal.label;
+        }
+        else {
+            //if no box goal assigned, go to the agent goal
+            var agentGoalOption = agentGoals.stream().filter(agoal -> agoal.label == agent.label).findAny();
+            if(agentGoalOption.isPresent()) {
+                Goal agentGoal = agentGoalOption.get();
+                goals[agentGoal.destination.row][agentGoal.destination.col] = subAgent.label;
+            }
+        }
+
+        Box assignedBox = agentAssignedBox[agentNum];
+        if(assignedBox != null) {
+            //if agent has a box assigned, only leave that one in the subproblem
+            boxes = List.of(assignedBox);
+        }
+
+        return new Problem(List.of(subAgent), boxes, walls, goals);
+    }
+
     public void assignGoals() {
         //this can be used for the initial subproblem generation
         agentAssignedBox = new Box[agents.size()];
@@ -223,7 +252,7 @@ public class Problem {
         //simple assignation to start off, it's dependent on boxGoal ordering
         for(Goal goal : boxGoals) {
             List<Box> compatibleBoxes = this.boxes.stream().filter(b -> b.label == goal.label && !assignedBoxes.contains(b)).collect(Collectors.toList());
-            if(compatibleBoxes.size() == 0) continue;
+            if(compatibleBoxes.isEmpty()) continue;
             Box closestBox = compatibleBoxes.get(0);
             int closestBoxDist = Integer.MAX_VALUE;
             for(Box box : compatibleBoxes) {
@@ -238,7 +267,7 @@ public class Problem {
             List<Agent> compatibleAgents = this.agents.stream().filter(
                 a -> a.color == theBox.color && agentAssignedGoal[Character.getNumericValue(a.label)] == null
             ).collect(Collectors.toList());
-            if(compatibleAgents.size() == 0) continue;
+            if(compatibleAgents.isEmpty()) continue;
             Agent closestAgent = compatibleAgents.get(0);
             int closestAgentDist = Integer.MAX_VALUE;
             for(Agent agent : compatibleAgents) {
