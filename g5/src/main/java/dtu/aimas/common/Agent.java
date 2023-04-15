@@ -2,7 +2,7 @@ package dtu.aimas.common;
 
 import java.util.Objects;
 
-public class Agent {
+public class Agent extends DomainObject {
     public Position pos;
     public Color color;
     public char label;

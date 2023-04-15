@@ -2,7 +2,7 @@ package dtu.aimas.common;
 
 import java.util.Objects;
 
-public class Box {
+public class Box extends DomainObject {
     public final Position pos;
     public final Color color;
     public final char label;

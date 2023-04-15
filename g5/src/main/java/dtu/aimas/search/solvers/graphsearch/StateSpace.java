@@ -13,6 +13,7 @@ import java.util.Set;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
+import dtu.aimas.common.DomainObject;
 import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
@@ -331,29 +332,55 @@ public class StateSpace {
 
         ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
 
-        // Check for basic conflicts: agents moving to the same destination
-        var agentPositions = new HashMap<Position, ArrayList<Agent>>();
+        // Construct a map of box and agent positions
+        var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
         for (var agent : state.agents) {
-            if (agentPositions.containsKey(agent.pos)) {
-                agentPositions.get(agent.pos).add(agent);
+            if (agentAndBoxPositions.containsKey(agent.pos)) {
+                agentAndBoxPositions.get(agent.pos).add(agent);
             } else {
-                var agentsAtPos = new ArrayList<Agent>();
+                var agentsAtPos = new ArrayList<DomainObject>();
                 agentsAtPos.add(agent);
-                agentPositions.put(agent.pos, agentsAtPos);
+                agentAndBoxPositions.put(agent.pos, agentsAtPos);
             }
         }
 
-        for (var entry : agentPositions.entrySet()) {
+        for (var box : state.boxes) {
+            if (agentAndBoxPositions.containsKey(box.pos)) {
+                agentAndBoxPositions.get(box.pos).add(box);
+            } else {
+                var boxesAtPos = new ArrayList<DomainObject>();
+                boxesAtPos.add(box);
+                agentAndBoxPositions.put(box.pos, boxesAtPos);
+            }
+        }
+
+        // Report the conflicts
+        for (var entry : agentAndBoxPositions.entrySet()) {
             var position = entry.getKey();
-            var agentsAtPos = entry.getValue();
-            if (agentsAtPos.size() > 1) {
-                Agent[] matchingInitialStateAgents = getInitialStateAgents(agentsAtPos).toArray(new Agent[agentsAtPos.size()]);
-                Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
-                foundConflicts.add(newConflict);
-            }
-        }
+            var objectsAtPos = entry.getValue();
 
-        // TODO: Check other kinds of conflicts, including boxes, once agent-box ownership is implemented
+            // No domain objects conflict at the current position
+            if (objectsAtPos.size() <= 1) {
+                continue;
+            }
+
+            // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
+            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
+            for (var domainObject: objectsAtPos) {
+                if (domainObject instanceof Agent) {
+                    involvedAgents.add((Agent) domainObject);
+                } else if (domainObject instanceof Box) {
+                    // TODO: We currently don't have enough information to determine with certainty which agent moved the box.
+                    // Additionally we don't have a strategy of generally dealing with box conflicts. 
+                    // For example, what if no agent moved the box, which objects should be involved in the conflict.
+                    continue;
+                }
+            } 
+
+            Agent[] matchingInitialStateAgents = getInitialStateAgents(involvedAgents).toArray(new Agent[involvedAgents.size()]);
+            Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
+            foundConflicts.add(newConflict);
+        }
 
         return foundConflicts;
     }

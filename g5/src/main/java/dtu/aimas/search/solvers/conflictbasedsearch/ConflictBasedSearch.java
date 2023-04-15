@@ -1,13 +1,11 @@
 package dtu.aimas.search.solvers.conflictbasedsearch;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.PriorityQueue;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
 import dtu.aimas.common.Result;
-import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
