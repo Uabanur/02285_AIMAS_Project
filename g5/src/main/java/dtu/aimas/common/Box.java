@@ -17,7 +17,7 @@ public class Box {
         return 'A' <= symbol && symbol <= 'Z';
     }
 
-    public String toSimpleString(){
+    public String toString(){
         return String.format("(%s:%c|%s)", pos.toSimpleString(), label, color.name());
     }
 
@@ -34,5 +34,9 @@ public class Box {
     @Override
     public int hashCode() {
         return Objects.hash(pos, color, label);
+    }
+
+    public Box clone() {
+        return new Box(new Position(pos.row, pos.col), color, label);
     }
 }

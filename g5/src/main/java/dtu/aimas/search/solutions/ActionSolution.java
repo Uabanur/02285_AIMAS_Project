@@ -14,6 +14,14 @@ public class ActionSolution implements Solution {
         this.plan = plan;
     }
 
+    public int size() {
+        return plan.length;
+    }
+
+    public Action[] getJointAction(int step){
+        return plan[step];
+    }
+
     public Collection<String> serializeSteps() {
         var steps = new ArrayList<String>();
         for(Action[] jointAction : plan){

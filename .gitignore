@@ -4,6 +4,9 @@
 # Target directory
 target
 
+# intellij idea folder
+.idea
+
 # Log file
 *.log
 

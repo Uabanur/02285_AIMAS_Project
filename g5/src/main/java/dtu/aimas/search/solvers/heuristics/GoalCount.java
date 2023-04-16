@@ -6,7 +6,10 @@ import dtu.aimas.search.solvers.graphsearch.StateSpace;
 public class GoalCount implements Cost {
 
     public int calculate(State state, StateSpace space) {
-        return space.getSatisfiedAgentGoalsCount(state) + space.getSatisfiedBoxGoalsCount(state);
-    }
+        var problem = space.getProblem();
+        var goals = problem.agentGoals.size() + problem.boxGoals.size();
+        var satisfiedGoals = space.getSatisfiedAgentGoalsCount(state) + space.getSatisfiedBoxGoalsCount(state);
 
+        return goals - satisfiedGoals;
+    }
 }

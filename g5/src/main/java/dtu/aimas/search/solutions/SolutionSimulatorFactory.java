@@ -9,6 +9,9 @@ public class SolutionSimulatorFactory {
         if(solution instanceof ActionSolution){
             return new ActionSolutionSimulator((ActionSolution)solution);
         }
+        if(solution instanceof StateSolution){
+            return new StateSolutionSimulator((StateSolution)solution);
+        }
 
         throw new UnreachableState();
     }

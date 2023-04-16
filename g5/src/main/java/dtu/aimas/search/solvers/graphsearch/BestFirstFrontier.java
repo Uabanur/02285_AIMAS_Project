@@ -32,6 +32,8 @@ public class BestFirstFrontier implements Frontier {
     }
 
     public State next() {
-        return queue.poll();
+        var state = queue.poll();
+        set.remove(state);
+        return state;
     }
 }
