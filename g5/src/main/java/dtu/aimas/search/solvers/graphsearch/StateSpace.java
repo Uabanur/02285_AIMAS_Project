@@ -197,6 +197,13 @@ public class StateSpace {
         return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
+    public boolean isApplicable(State state, Agent agent, Action action) {
+        // Users of this method that don't care about timestamp redirect to the method with extended signature -- 
+        // The argument of -1 ensures that time constraints do not restrict applicability: 
+        // Reserving a cell at timestep of -1 should never happen
+        return isApplicable(state, agent, action, -1);
+    }
+
     public boolean isApplicable(State state, Agent agent, Action action, int timeStep){
         Position agentDestination;
         Optional<Box> boxResult;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.config.*;
 
 public class ArgumentParser {
@@ -30,6 +31,7 @@ public class ArgumentParser {
             tokens.add(args[i]);
             i++;
         }
+        IO.info(tokens);
         options.add(DefaultConfigOption.bind(tokens));
         tokens.clear();
 
