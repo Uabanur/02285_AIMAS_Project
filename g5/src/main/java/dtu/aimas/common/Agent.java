@@ -17,8 +17,8 @@ public class Agent extends DomainObject {
         return '0' <= symbol && symbol <= '9';
     }
 
-    public String toSimpleString(){
-        return String.format("(%s|%s)", pos.toSimpleString(), color.name());
+    public String toString(){
+        return String.format("(%s:%c|%s)", pos.toSimpleString(), label, color.name());
     }
 
     @Override
@@ -33,5 +33,10 @@ public class Agent extends DomainObject {
     @Override
     public int hashCode() {
         return Objects.hash(pos, color);
+    }
+
+    @Override
+    public Agent clone() {
+        return new Agent(new Position(pos.row, pos.col), color, label);
     }
 }

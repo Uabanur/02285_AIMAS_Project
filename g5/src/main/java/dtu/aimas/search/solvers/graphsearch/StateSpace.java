@@ -18,11 +18,12 @@ import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.errors.InvalidOperation;
+import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
+import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
 
 public class StateSpace {
@@ -43,12 +44,14 @@ public class StateSpace {
         if (!isGoalState(state)) 
             return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
 
-        return Result.ok(new ActionSolution(extractPlanFromState(state)));
+        // return Result.ok(new ActionSolution(extractPlanFromState(state)));
+        return Result.ok(new StateSolution(extractStates(state)));
     }
 
     public boolean isGoalState(State state) {
         for(Goal goal : this.problem.agentGoals){
-            var agent = getAgentByNumber(state, goal.label - '0');
+            // var agent = getAgentByNumber(state, goal.label - '0');
+            var agent = getAgentByLabel(state, goal.label);
             if(!satisfies(goal, agent)){
                 return false;
             }
@@ -67,6 +70,19 @@ public class StateSpace {
             }
         }
         return true;
+    }
+
+    private State[] extractStates(State state){
+        var length = state.g()+1;
+        var states = new State[length];
+        var current = state;
+
+        for(var i = length-1; i >= 0; i--){
+            states[i] = current;
+            current = current.parent;
+        }
+    
+        return states;
     }
 
     public Action[][] extractPlanFromState(State state)
@@ -124,6 +140,13 @@ public class StateSpace {
         return state.agents.get(i);
     }
 
+    public Agent getAgentByLabel(State state, char label){ 
+        for(var agent: state.agents){
+            if(agent.label == label) return agent;
+        }
+        throw new UnreachableState();
+    }
+
     public Optional<Box> getBoxAt(State state, Position position) {
         for(Box box : state.boxes){
             if (position.equals(box.pos)){
@@ -174,7 +197,7 @@ public class StateSpace {
         return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
-    private boolean isApplicable(State state, Agent agent, Action action, int timeStep){
+    public boolean isApplicable(State state, Agent agent, Action action, int timeStep){
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
@@ -223,7 +246,8 @@ public class StateSpace {
         for(int agentId = 0; agentId < agentsCount; agentId++)
         {
             ArrayList<Action> agentActions = new ArrayList<>(Action.values().length);
-            var agent = getAgentByNumber(state, agentId);
+            // var agent = getAgentByNumber(state, agentId);
+            var agent = state.agents.get(agentId);
             for(Action action : Action.values()){
                 if(isApplicable(state, agent, action, timeStep)){
                     agentActions.add(action);
@@ -270,7 +294,7 @@ public class StateSpace {
         return expandedStates;
     }
 
-    private boolean isValid(State state){
+    public boolean isValid(State state){
         Set<Position> occupiedPositions = new HashSet<>();
         for (Agent agent : state.agents){
             if(!occupiedPositions.add(agent.pos)) return false;
@@ -281,7 +305,7 @@ public class StateSpace {
         return true;
     }
 
-    private Optional<State> tryCreateState(State state, Action[] jointAction){
+    public Optional<State> tryCreateState(State state, Action[] jointAction){
         var jointActionsToApply = Arrays.copyOf(jointAction, jointAction.length);
         State destinationState = applyJointActions(state, jointActionsToApply);
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
@@ -372,7 +396,7 @@ public class StateSpace {
                 } else if (domainObject instanceof Box) {
                     // TODO: We currently don't have enough information to determine with certainty which agent moved the box.
                     // Additionally we don't have a strategy of generally dealing with box conflicts. 
-                    // For example, what if no agent moved the box, which objects should be involved in the conflict.
+                    // For example, what if no agent moved the box, which objects should be involved in the conflict?
                     continue;
                 }
             } 
@@ -409,7 +433,8 @@ public class StateSpace {
         }
 
         for(int action = 0; action < actionsToApply.length; action++){
-            Agent agent = getAgentByNumber(state, action);
+            // Agent agent = getAgentByNumber(state, action);
+            Agent agent = state.agents.get(action);
             Agent updatedAgent = null;
             Position agentDestination;
 
@@ -492,7 +517,7 @@ public class StateSpace {
     public int getSatisfiedAgentGoalsCount(State state){
         var result = 0;
         for(Goal goal : this.problem.agentGoals){
-            var agent = getAgentByNumber(state, goal.label - '0');
+            var agent = getAgentByLabel(state, goal.label);
             if(satisfies(goal, agent)){
                 result++;
             }

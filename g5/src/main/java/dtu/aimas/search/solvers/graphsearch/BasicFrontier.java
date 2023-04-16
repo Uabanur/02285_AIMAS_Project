@@ -33,9 +33,8 @@ public class BasicFrontier implements Frontier {
     }
 
     public State next() {
-        if(this.fifo) 
-            return queue.pollFirst();
-
-        return queue.pollLast();
+        var state = this.fifo ? queue.pollFirst() : queue.pollLast();
+        set.remove(state);
+        return state;
     }
 }

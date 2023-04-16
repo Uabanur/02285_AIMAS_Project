@@ -60,33 +60,35 @@ public class Problem {
     }
 
     private void distanceFromPos(Position src) {
+        if(walls[src.row][src.col]) return;
         Queue<Position> neighbors = new LinkedList<Position>();
         distances[src.row][src.col][src.row][src.col] = 0;
         neighbors.add(src);
         while(!neighbors.isEmpty()) {
             Position curr = neighbors.remove();
             int distToCurr = distances[src.row][src.col][curr.row][curr.col];
-            
+            if(distToCurr == Integer.MAX_VALUE) continue;
+
             Position top = new Position(curr.row-1,curr.col);
-            if(top.row >= 0 && !walls[top.row][top.col] 
+            if(top.row >= 0 && !walls[top.row][top.col]
                     && distances[src.row][src.col][top.row][top.col] > distToCurr+1) {
                 distances[src.row][src.col][top.row][top.col] = distToCurr+1;
                 neighbors.add(top);             
             }
             Position left = new Position(curr.row,curr.col-1);
-            if (left.col >= 0 && !walls[left.row][left.col] 
+            if (left.col >= 0 && !walls[left.row][left.col]
                     && distances[src.row][src.col][left.row][left.col] > distToCurr+1 ) {
                 distances[src.row][src.col][left.row][left.col] = distToCurr+1;
                 neighbors.add(left);
             }
             Position bot = new Position(curr.row+1,curr.col);
-            if (bot.row < walls.length && !walls[bot.row][bot.col] 
+            if (bot.row < walls.length && !walls[bot.row][bot.col]
                     && distances[src.row][src.col][bot.row][bot.col] > distToCurr+1) {
                 distances[src.row][src.col][bot.row][bot.col] = distToCurr+1;
                 neighbors.add(bot);
             }
             Position right = new Position(curr.row,curr.col+1);
-            if (right.col < walls[right.row].length && !walls[right.row][right.col] 
+            if (right.col < walls[right.row].length && !walls[right.row][right.col]
                     && distances[src.row][src.col][right.row][right.col] > distToCurr+1) {
                 distances[src.row][src.col][right.row][right.col] = distToCurr+1;
                 neighbors.add(right);
