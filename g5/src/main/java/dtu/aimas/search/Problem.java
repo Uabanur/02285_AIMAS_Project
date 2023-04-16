@@ -251,9 +251,12 @@ public class Problem {
         
         //simple assignation to start off, it's dependent on boxGoal ordering
         for(Goal goal : boxGoals) {
+            if(Arrays.stream(agentAssignedGoal).anyMatch(g -> goal.equals(g))) continue;
+            
             List<Box> compatibleBoxes = this.boxes.stream().filter(b -> b.label == goal.label && !assignedBoxes.contains(b)).collect(Collectors.toList());
             if(compatibleBoxes.isEmpty()) continue;
             Box closestBox = compatibleBoxes.get(0);
+
             int closestBoxDist = Integer.MAX_VALUE;
             for(Box box : compatibleBoxes) {
                 int dist = admissibleDist(box.pos, goal.destination);
@@ -262,6 +265,7 @@ public class Problem {
                     closestBoxDist = dist;
                 }
             }
+
             //idk why this needs to be done, but otherwise there is an error
             Box theBox = closestBox;
             List<Agent> compatibleAgents = this.agents.stream().filter(
@@ -269,6 +273,7 @@ public class Problem {
             ).collect(Collectors.toList());
             if(compatibleAgents.isEmpty()) continue;
             Agent closestAgent = compatibleAgents.get(0);
+
             int closestAgentDist = Integer.MAX_VALUE;
             for(Agent agent : compatibleAgents) {
                 int dist = admissibleDist(agent.pos, closestBox.pos);
