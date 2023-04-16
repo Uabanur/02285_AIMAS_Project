@@ -226,11 +226,19 @@ public class Problem {
             goals[boxGoal.destination.row][boxGoal.destination.col] = boxGoal.label;
         }
         else {
-            //if no box goal assigned, go to the agent goal
-            var agentGoalOption = agentGoals.stream().filter(agoal -> agoal.label == agent.label).findAny();
-            if(agentGoalOption.isPresent()) {
-                Goal agentGoal = agentGoalOption.get();
-                goals[agentGoal.destination.row][agentGoal.destination.col] = subAgent.label;
+            //if no box goal assigned, try to see if a new one can be assigned
+            assignGoals();
+            boxGoal = agentAssignedGoal[agentNum];
+            if(boxGoal != null) {
+                goals[boxGoal.destination.row][boxGoal.destination.col] = boxGoal.label;
+            }
+            //otherwise assign agentGoal
+            else {
+                var agentGoalOption = agentGoals.stream().filter(agoal -> agoal.label == agent.label).findAny();
+                if(agentGoalOption.isPresent()) {
+                    Goal agentGoal = agentGoalOption.get();
+                    goals[agentGoal.destination.row][agentGoal.destination.col] = subAgent.label;
+                }
             }
         }
 
