@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Queue;
 import java.util.Set;
 import java.util.LinkedList;
@@ -51,8 +53,7 @@ public class Problem {
                 }
             }
         }
-        
-      
+              
         this.distances = new int[walls.length][walls[0].length][walls.length][walls[0].length];
         for(int i = 0; i < distances.length; i++) {
             for(int j = 0; j < distances[i].length; j++) {
@@ -61,6 +62,7 @@ public class Problem {
                 }
             }
         }
+        precompute();
     }
 
     private void distanceFromPos(Position src) {
@@ -255,16 +257,21 @@ public class Problem {
         //this can be used for the initial subproblem generation
         agentAssignedBox = new Box[agents.size()];
         agentAssignedGoal = new Goal[agents.size()];
-        Set<Box> assignedBoxes = new HashSet<>();
+        Set<Box> assignedBoxes = Arrays.stream(agentAssignedBox).collect(Collectors.toSet());
+        Set<Goal> assignedGoals = Arrays.stream(agentAssignedGoal).collect(Collectors.toSet());
+        Collection<Agent> freeAgents = agents.stream().filter(a -> agentAssignedGoal[Character.getNumericValue(a.label)] == null).collect(Collectors.toList());
         
         //simple assignation to start off, it's dependent on boxGoal ordering
         for(Goal goal : boxGoals) {
-            if(Arrays.stream(agentAssignedGoal).anyMatch(g -> goal.equals(g))) continue;
+            if(assignedGoals.contains(goal)) continue;
             
-            List<Box> compatibleBoxes = this.boxes.stream().filter(b -> b.label == goal.label && !assignedBoxes.contains(b)).collect(Collectors.toList());
+            List<Box> compatibleBoxes = this.boxes.stream().filter(
+                b -> b.label == goal.label && !assignedBoxes.contains(b) 
+                && freeAgents.stream().anyMatch(a -> a.color.equals(b.color))
+                ).collect(Collectors.toList());
             if(compatibleBoxes.isEmpty()) continue;
-            Box closestBox = compatibleBoxes.get(0);
 
+            Box closestBox = compatibleBoxes.get(0);
             int closestBoxDist = Integer.MAX_VALUE;
             for(Box box : compatibleBoxes) {
                 int dist = admissibleDist(box.pos, goal.destination);
