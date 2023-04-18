@@ -349,9 +349,10 @@ public class StateSpace {
 
             Action[] actionArray = new Action[agentActions.size()];
             agentActions.toArray(actionArray);
+            
 
-            currentState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, stepIndex++);
+            var nextState = this.applyJointActions(currentState, actionArray);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, nextState, actionArray, stepIndex++);
 
             allConflicts.addAll(currentStepConflicts);
         }
@@ -359,11 +360,12 @@ public class StateSpace {
         return allConflicts;
     }
 
-    private ArrayList<Conflict> checkStateForConflicts(State state, Action[] previousActions, int timeStep) {
-
+    private ArrayList<Conflict> checkStateForConflicts(State previousState, State state, Action[] previousActions, int timeStep) {
+        // TODO: WIP - just to pass between computers
         ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
 
         // Construct a map of box and agent positions
+        // CONFLICT TYPE 1: Two objects on the same position
         var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
         for (var agent : state.agents) {
             if (agentAndBoxPositions.containsKey(agent.pos)) {
@@ -384,19 +386,72 @@ public class StateSpace {
                 agentAndBoxPositions.put(box.pos, boxesAtPos);
             }
         }
+        // // CONFLICT TYPE 2: Object stepping on the other object's previous position
+        // var previousAgentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>(); 
+        // for (var agent : previousState.agents){
+        //     if (previousAgentAndBoxPositions.containsKey(agent.pos)) {
+        //         previousAgentAndBoxPositions.get(agent.pos).add(agent);
+        //     } else {
+        //         var agentsAtPos = new ArrayList<DomainObject>();
+        //         agentsAtPos.add(agent);
+        //         previousAgentAndBoxPositions.put(agent.pos, agentsAtPos);
+        //     }
+        // }
+        // for (var box : previousState.boxes) {
+        //     if (previousAgentAndBoxPositions.containsKey(box.pos)) {
+        //         previousAgentAndBoxPositions.get(box.pos).add(box);
+        //     } else {
+        //         var boxesAtPos = new ArrayList<DomainObject>();
+        //         boxesAtPos.add(box);
+        //         previousAgentAndBoxPositions.put(box.pos, boxesAtPos);
+        //     }
+        // }
+
 
         // Report the conflicts
         for (var entry : agentAndBoxPositions.entrySet()) {
             var position = entry.getKey();
             var objectsAtPos = entry.getValue();
+            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
 
-            // No domain objects conflict at the current position
+            // TODO: Delete this, previous version
             if (objectsAtPos.size() <= 1) {
                 continue;
+
+            // // No domain objects at the current position
+            // if (objectsAtPos.size() == 0) {
+            //     continue;
+            // }
+            // // Domain objects at the current position, but may be stepping on a different object
+            // else if(objectsAtPos.size() == 1){
+            //     var objectAtPos = objectsAtPos.get(0);
+            //     if(previousAgentAndBoxPositions.containsKey(position)){
+            //         var previousObjectsAtPos = previousAgentAndBoxPositions.get(position);
+            //         if(previousObjectsAtPos.size() > 1){
+            //             var previousObjectAtPos = previousObjectsAtPos.get(0);
+            //             if(previousObjectAtPos instanceof Agent){
+            //                 if(objectAtPos instanceof Agent){
+            //                     // CASE 1: The same agent (FINE)
+            //                     if(((Agent) objectAtPos).label == ((Agent) previousObjectAtPos).label){
+            //                         continue;
+            //                     }
+            //                     else{
+            //                         // CASE 2: Different agents (CONFLICT)
+            //                         involvedAgents.add((Agent) objectAtPos);
+            //                         Agent[] matchingInitialStateAgents = getInitialStateAgents(objectsAtPos).toArray(new Agent[objectsAtPos.size()]);
+            //                         Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
+            //                         foundConflicts.add(newConflict);
+            //                         continue;
+            //                     }
+
+            //                     }
+            //                 }
+            //             }
+                        
+            //     }
             }
 
             // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
-            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
             for (var domainObject: objectsAtPos) {
                 if (domainObject instanceof Agent) {
                     involvedAgents.add((Agent) domainObject);

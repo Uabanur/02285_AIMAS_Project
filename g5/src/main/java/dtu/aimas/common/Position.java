@@ -28,4 +28,9 @@ public class Position {
         return c.row == this.row && c.col == this.col;
     }
 
+    @Override
+    public String toString() {
+        return String.format("(%d,%d)", row, col);
+    }
+
 }
