@@ -63,6 +63,8 @@ public class Problem {
             }
         }
         precompute();
+        //since goal assignation depends on ordering (for now), sorting can affect priority
+        orderGoalsByPriority();
     }
 
     private void distanceFromPos(Position src) {
@@ -180,6 +182,25 @@ public class Problem {
         }
 
         return sb.toString();
+    }
+
+    public void orderGoalsByPriority() {
+        ArrayList<Goal> newBoxGoals = new ArrayList<Goal>();
+        //We want goals in dead-ends to be solved first and those in chokepoints last
+        for(Goal goal : boxGoals) {
+            if(isDeadEnd(goal.destination)) {
+                newBoxGoals.add(0, goal);
+            }
+            else if(isChokepoint(goal.destination)) {
+                newBoxGoals.add(newBoxGoals.size()-1, goal);
+            }
+            else {
+                int insertPosition = Math.ceilDiv((newBoxGoals.size()-1),2);
+                newBoxGoals.add(insertPosition, goal);
+            }
+        }
+
+        this.boxGoals = newBoxGoals;
     }
 
     public Problem subProblemFor(Agent agent) {
@@ -310,6 +331,28 @@ public class Problem {
     
     public boolean isFree(Position pos, Agent agent, int timeStep) {
         return !walls[pos.row][pos.col];
+    }
+
+    public boolean isChokepoint(Position pos) {
+        int row = pos.row; int col = pos.col;
+        boolean firstRow = row == 0;
+        boolean lastRow = row == walls.length-1;
+        boolean firstCol = col == 0;
+        boolean lastCol = col == walls[0].length-1;
+        if(isDeadEnd(pos)) return false;
+        return (firstRow || walls[row-1][col]) && (lastRow || walls[row+1][col])
+            || (firstCol || walls[row][col-1]) && (lastCol || walls[row][col+1]) 
+            || (   (firstRow || ((firstCol || walls[row-1][col-1]) && (lastCol || walls[row-1][col+1])))
+                && (lastRow  || ((firstCol || walls[row+1][col-1]) && (lastCol || walls[row+1][col+1]))));
+    }
+
+    public boolean isDeadEnd(Position pos) {
+        int freeNeighbors = 0;
+        if(pos.row > 0 && !walls[pos.row-1][pos.col]) freeNeighbors++;
+        if(pos.row < walls.length-1 && !walls[pos.row+1][pos.col]) freeNeighbors++;
+        if(pos.col > 0 && !walls[pos.row][pos.col-1]) freeNeighbors++;
+        if(pos.col < walls[0].length-1 && !walls[pos.row][pos.col+1]) freeNeighbors++;
+        return freeNeighbors < 2;
     }
 
 }
