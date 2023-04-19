@@ -25,7 +25,7 @@ public abstract class GraphSearch
     
     private Result<Solution> solve(StateSpace space, Frontier frontier)
     {
-        frontier.add(space.getInitialState());
+        frontier.add(space.initialState());
         HashSet<State> expanded = new HashSet<>();
 
         while (true) 

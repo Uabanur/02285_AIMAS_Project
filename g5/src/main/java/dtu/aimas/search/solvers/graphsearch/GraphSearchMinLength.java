@@ -7,12 +7,15 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 public abstract class GraphSearchMinLength {
 
     public Result<Solution> solve(Problem problem, Heuristic heuristic, int minSolutionLength) {
-        return ProblemParser.parse(problem)
+        var uniquePathHashConfig =  new StateConfig(s -> Objects.hash(Arrays.hashCode(s.jointAction), s.parent));
+        return ProblemParser.parse(problem, uniquePathHashConfig)
                 .map(heuristic::attachStateSpace)
                 .flatMap(space -> solve(space, new BestFirstFrontier(heuristic, problem.expectedStateSize), minSolutionLength));
     }
@@ -25,7 +28,7 @@ public abstract class GraphSearchMinLength {
 
     private Result<Solution> solve(StateSpace space, Frontier frontier, int minSolutionLength)
     {
-        frontier.add(space.getInitialState());
+        frontier.add(space.initialState());
         HashSet<State> expanded = new HashSet<>();
 
         while (true)

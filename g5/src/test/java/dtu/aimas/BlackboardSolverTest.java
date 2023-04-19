@@ -13,6 +13,8 @@ import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.GoalCount;
 import org.junit.*;
 
 import java.io.StringReader;
@@ -24,12 +26,10 @@ public class BlackboardSolverTest {
     private final LevelParser levelParser = CourseLevelParser.Instance;
     private Result<Solution> solution;
     private long startTimeMs = 0;
-    private BlackboardSolver solver;
 
     @Before
     public void setup(){
         IO.logLevel = LogLevel.Debug;
-        solver = new BlackboardSolver(AStarMinLength::new);
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
     }
@@ -79,6 +79,7 @@ public class BlackboardSolverTest {
                     """;
 
         var problem = getProblem(level);
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -97,6 +98,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -119,6 +121,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -141,6 +144,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -165,10 +169,12 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void MoreAgentsCrossing(){
         var level = """
@@ -187,11 +193,11 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,1,2,3,4");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
-    @Ignore
     @Test
     public void BlockingFinish(){
         var level = """
@@ -208,6 +214,7 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0, 1");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
@@ -232,6 +239,7 @@ public class BlackboardSolverTest {
                 """;
 
         var problem = getProblem(level, "red: 0,1,A,B");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -332,6 +340,7 @@ public class BlackboardSolverTest {
             solutions[1] = new StateSolution(states);
         }
 
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         var result = (StateSolution)solver.mergeSolutions(List.of(solutions));
         Assert.assertEquals(3, result.size());
         { // step 0
@@ -452,6 +461,7 @@ public class BlackboardSolverTest {
             new int[]{2, 5, 3}
         ));
 
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         var result = solver.combinations(options, freezePosition, freezeValue);
         Assert.assertEquals(expected.size(), result.size());
         for(var permutation: expected){

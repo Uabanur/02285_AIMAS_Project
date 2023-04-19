@@ -16,7 +16,6 @@ import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import dtu.aimas.search.solvers.heuristics.ConflictPenalizedCost;
 import dtu.aimas.search.solvers.heuristics.Cost;
-import dtu.aimas.search.solvers.heuristics.GoalCount;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,11 +24,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class BlackboardSolver implements Solver {
-    private final Cost cost;
+    private final Cost baseCost;
     private final Function<Cost, SolverMinLength> subSolverGenerator;
-    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator){
+    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator, Cost baseCost){
         this.subSolverGenerator = subSolverGenerator;
-        cost = new GoalCount(); // change to precomputed dist cost
+        this.baseCost = baseCost;
     }
 
     public Result<Solution> solve(Problem problem) {
@@ -38,8 +37,8 @@ public class BlackboardSolver implements Solver {
 
     private Result<Solution> solve(StateSpace space) {
         IO.debug("Starting blackboard search");
-        var initialState = space.getInitialState();
-        var fullProblem = space.getProblem();
+        var initialState = space.initialState();
+        var fullProblem = space.problem();
 
         // Solve agent naively initially
         var planCount = Math.max(1, initialState.agents.size());
@@ -54,7 +53,7 @@ public class BlackboardSolver implements Solver {
             for(var i = 0; i < plans.length; i++){
                 var agent = initialState.agents.get(i);
                 var subProblem = subProblemFor(fullProblem, agent);
-                var solution = subSolverGenerator.apply(this.cost)
+                var solution = subSolverGenerator.apply(this.baseCost)
                         .solve(subProblem)
                         .map(s -> (StateSolution)s);
                 plans[i] = new Plan(agent, subProblem, solution);
@@ -104,7 +103,7 @@ public class BlackboardSolver implements Solver {
                 }
 
                 var solution = subSolverGenerator
-                        .apply(new ConflictPenalizedCost(cost, attempts.get(i)))
+                        .apply(new ConflictPenalizedCost(baseCost, attempts.get(i)))
                         .solve(plans[i].getProblem(), attemptSolutionLength)
                         .map(s -> (StateSolution)s);
                 plans[i].addAttempt(new Attempt(solution));
@@ -198,7 +197,7 @@ public class BlackboardSolver implements Solver {
     }
 
     private boolean validSolution(StateSolution solution, StateSpace space){
-        var expectedInitialState = space.getInitialState();
+        var expectedInitialState = space.initialState();
         var givenInitialState = solution.getState(0);
 
         // initial state cannot have a joint action

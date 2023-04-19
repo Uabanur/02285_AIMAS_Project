@@ -10,7 +10,7 @@ import dtu.aimas.search.solvers.heuristics.Cost;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
 
 public class AStarMinLength extends GraphSearchMinLength implements SolverMinLength {
-    private Heuristic heuristic;
+    private final Heuristic heuristic;
 
     public AStarMinLength(Cost cost){
         this.heuristic = new AStarHeuristic(cost);

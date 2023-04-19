@@ -49,18 +49,32 @@ public class LevelSolvingTest {
     static final LevelParser parser = CourseLevelParser.Instance;
 
     @Test
-    public void TestMAPF00_BFS() {
-        TestMap("MAPF00", new BFS(), 1, TimeUnit.SECONDS);
+    public void TestMAPF00_BFS_TimeLimit_500ms() {
+        TestMap("MAPF00", new BFS(), 500, TimeUnit.MILLISECONDS);
     }
 
     @Test
-    public void TestMAPF00_DFS() {
-        TestMap("MAPF00", new DFS(), 1, TimeUnit.SECONDS);
+    public void TestMAPF00_DFS_TimeLimit_500ms() {
+        TestMap("MAPF00", new DFS(), 500, TimeUnit.MILLISECONDS);
     }
 
+    @Test
+    public void TestMAPF01_BFS_TimeLimit_1Second() {
+        TestMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void TestMAPF01_DFS_TimeLimit_1Second() {
+        TestMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
+    }
     @Test
     public void TestMAPF00_AStar_GoalCount() {
         TestMap("MAPF00", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestMAPF00_AStar_DistanceCost() {
+        TestMap("MAPF00", new AStar(new MAAdmissibleCost()));
     }
 
     @Test
@@ -84,6 +98,11 @@ public class LevelSolvingTest {
     }
 
     @Test
+    public void TestMAPF01_AStar_MAAdmissibleCost() {
+        TestMap("MAPF01", new AStar(new MAAdmissibleCost()));
+    }
+
+    @Test
     public void TestMAPF01_Greedy_GoalCount() {
         TestMap("MAPF01", new Greedy(new GoalCount()));
     }
@@ -91,5 +110,49 @@ public class LevelSolvingTest {
     @Test
     public void TestSAD1_BFS() {
         TestMap("SAD1", new BFS());
+    }
+
+    @Test
+    public void TestMAPF02_AStar_GoalCount() {
+        TestMap("MAPF02", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestMAPF02_AStar_DistanceCost() {
+        TestMap("MAPF02", new AStar(new DistanceSumCost()));
+    }
+    @Test
+    public void TestMAPF02_AStar_MAAdmissibleCost() {
+        TestMap("MAPF02", new AStar(new MAAdmissibleCost()));
+    }
+
+    @Test
+    public void TestMAsimple4_AStar_DistanceCost() {
+        TestMap("MAsimple4", new AStar(new DistanceSumCost()));
+    }
+
+    @Test
+    public void TestMAsimple4_AStar_MAAdmissibleCost() {
+        TestMap("MAsimple4", new AStar(new MAAdmissibleCost()));
+    }
+
+    @Test
+    public void TestMAsimple4_AStar_GoalCount() {
+        TestMap("MAsimple4", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestMAsimple5_AStar_DistanceCost() {
+        TestMap("MAsimple5", new AStar(new DistanceSumCost()));
+    }
+
+    @Test
+    public void TestMAsimple5_AStar_MAAdmissibleCost() {
+        TestMap("MAsimple5", new AStar(new MAAdmissibleCost()));
+    }
+
+    @Test
+    public void TestMAsimple5_AStar_GoalCount() {
+        TestMap("MAsimple5", new AStar(new GoalCount()));
     }
 }
