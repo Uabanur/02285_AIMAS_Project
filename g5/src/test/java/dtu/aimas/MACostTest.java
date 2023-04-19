@@ -62,7 +62,7 @@ public class MACostTest {
             if(test[3].row >= 0) goals[test[3].row][test[3].col] = '0';
             Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
             StateSpace space = ProblemParser.parse(problem).get();
-            State state = space.getInitialState();
+            State state = space.initialState();
 
             //agent -> box -> boxGoal (-> agentGoal)
             int expected = problem.admissibleDist(test[0], test[1]) + problem.admissibleDist(test[1], test[2]);
@@ -90,7 +90,7 @@ public class MACostTest {
         Position goalB = new Position(4, 19); goals[goalB.row][goalB.col] = 'B';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int boxGoal0Cost = singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA, null);
         int boxGoal1Cost = singleAgentBoxGoalCost(problem, agents[1], boxes[1], goalB, null);
@@ -112,7 +112,7 @@ public class MACostTest {
         Position goalA = new Position(0, 6); goals[goalA.row][goalA.col] = 'A';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int agent0Goal = singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA, null);
         int agent1Goal = singleAgentBoxGoalCost(problem, agents[1], boxes[0], goalA, null);
@@ -135,7 +135,7 @@ public class MACostTest {
         Position goalA = new Position(8, 15); goals[goalA.row][goalA.col] = 'A';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int agent0GoalCost = Math.min(
             singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA, null),
@@ -167,7 +167,7 @@ public class MACostTest {
         Position goalA1 = new Position(4, 9); goals[goalA1.row][goalA1.col] = 'A';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int minGoalA0Cost = Collections.min(Arrays.asList(
             singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA0, null),
@@ -211,7 +211,7 @@ public class MACostTest {
         Position goalA1 = new Position(4, 9); goals[goalA1.row][goalA1.col] = 'A';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int minGoalA0Cost = Collections.min(Arrays.asList(
             singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA0, null),
@@ -249,7 +249,7 @@ public class MACostTest {
         Position goalB0 = new Position(4, 9); goals[goalB0.row][goalB0.col] = 'B';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int minGoalA0Cost = Collections.min(Arrays.asList(
             singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA0, null),
@@ -289,7 +289,7 @@ public class MACostTest {
         Position agentGoal0 = new Position(0,0); goals[agentGoal0.row][agentGoal0.col] = '0';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int minGoalA0Cost = Collections.min(Arrays.asList(
             singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA0, agentGoal0),
@@ -342,7 +342,7 @@ public class MACostTest {
         Position agentGoal2 = new Position(5,5); goals[agentGoal2.row][agentGoal2.col] = '2';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
         StateSpace space = ProblemParser.parse(problem).get();
-        State state = space.getInitialState();
+        State state = space.initialState();
 
         int minGoalA0Cost = Collections.min(Arrays.asList(
             singleAgentBoxGoalCost(problem, agents[0], boxes[0], goalA0, agentGoal0),

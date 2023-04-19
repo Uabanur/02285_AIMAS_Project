@@ -28,7 +28,7 @@ public class ConflictPenalizedCost implements Cost {
         var step = state.g();
         if(step == 0) return result;
 
-        var problem = space.getProblem();
+        var problem = space.problem();
         var conflictPenalty = problem.walls.length * problem.walls[0].length;
         for (var conflictingSolution : attempt.getConflicts()) {
             if(solutionStepConflicts(state, space, conflictingSolution, step)){
