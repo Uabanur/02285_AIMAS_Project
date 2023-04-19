@@ -3,14 +3,9 @@ package dtu.aimas.common;
 import java.util.Objects;
 
 public class Agent extends DomainObject {
-    public Position pos;
-    public Color color;
-    public char label;
 
     public Agent(Position pos, Color color, char label) {
-        this.pos = pos;
-        this.color = color;
-        this.label = label;
+        super(pos, color, label);
     }
 
     public static boolean isLabel(char symbol) {
