@@ -29,7 +29,7 @@ public class BlackboardSolverTest {
 
     @Before
     public void setup(){
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
     }
@@ -38,8 +38,8 @@ public class BlackboardSolverTest {
     public void after(){
         IO.debug("Test time: %d ms", System.currentTimeMillis() - startTimeMs);
         solution.ifOk(s -> {
-            IO.info("Solution of size %d found:\n", s.size());
-            s.serializeSteps().forEach(IO::info);
+            IO.debug("Solution of size %d found:\n", s.size());
+            s.serializeSteps().forEach(IO::debug);
         });
     }
     
@@ -174,19 +174,18 @@ public class BlackboardSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
-    @Ignore
     @Test
-    public void MoreAgentsCrossing(){
+    public void ThreeAgentsCrossing(){
         var level = """
                 #initial
                 +++++++
                 +01   +
                 +++ +++
-                + 32  +
+                +  2  +
                 +++++++
                 #goal
                 +++++++
-                +   32+
+                +    2+
                 +++ +++
                 +   01+
                 +++++++
