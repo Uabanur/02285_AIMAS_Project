@@ -251,7 +251,6 @@ public class BlackboardSolverTest {
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
-    @Ignore // TODO: for now it cannot manage agents of same color with boxes
     @Test
     public void SameColorAgentsWithBoxes(){
         var level = """
