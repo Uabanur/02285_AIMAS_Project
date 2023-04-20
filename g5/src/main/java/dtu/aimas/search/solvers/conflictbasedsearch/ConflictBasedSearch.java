@@ -30,14 +30,11 @@ public class ConflictBasedSearch implements Solver {
         var frontier = new PriorityQueue<CBSNode>();
         var root = new CBSNode();
 
-        // IO.info("Initial plans:");
         for(var agent : initialProblem.agents){
             var isolatedSolution = subSolver.solve(initialProblem.subProblemFor(agent));
             if (isolatedSolution.isError()) 
                 return Result.passError(isolatedSolution);
-                
-                // IO.info("Agent" + agent.label + ": " + isolatedSolution.get().serializeSteps().toString());
-                
+                                
             root.setSolutionFor(agent, isolatedSolution);
         }
         root.calculateCost();
@@ -50,14 +47,8 @@ public class ConflictBasedSearch implements Solver {
             var node = frontier.poll();
             var issues = node.findConflicts(stateSpace);
 
-            // for (var issue : issues) {
-            //     IO.info("Conflict found: " + issue.toString());
-            // }
-
             if (issues.isEmpty()){
-                // IO.info("No conflicts found!");
                 var sol = node.getSolution(stateSpace);
-                // IO.info(sol.get().serializeSteps());
                 return sol;
             }
                 
@@ -78,20 +69,21 @@ public class ConflictBasedSearch implements Solver {
                     frontier.add(constrainedNode);
                     break;
                 }
-                // NEGATE CONSTRAINT
-                var unconstrainedNode = node;
-                var unconstrainedProblem = initialProblem.subProblemFor(agent);
-                solution = subSolver.solve(unconstrainedProblem);
-                unconstrainedNode.setSolutionFor(agent, solution);
-                unconstrainedNode.calculateCost();
-                if(unconstrainedNode.isSolvable())
-                {
-                    frontier.add(unconstrainedNode);
-                    IO.info("Unconstrained solvable!");
-                    break;
-                }
-                IO.info("No subproblem is solvable!");
-                // TODO: backtrack to the conflict and try different resolution
+                // TODO: test with correct conflict detector whether needed or not, if not, remove
+                // // NEGATE CONSTRAINT
+                // var unconstrainedNode = node;
+                // var unconstrainedProblem = initialProblem.subProblemFor(agent);
+                // solution = subSolver.solve(unconstrainedProblem);
+                // unconstrainedNode.setSolutionFor(agent, solution);
+                // unconstrainedNode.calculateCost();
+                // if(unconstrainedNode.isSolvable())
+                // {
+                //     frontier.add(unconstrainedNode);
+                //     IO.info("Unconstrained solvable!");
+                //     break;
+                // }
+                // IO.info("No subproblem is solvable!");
+                // // BACKTRACK to the conflict and try different resolution
             }
         }
     }

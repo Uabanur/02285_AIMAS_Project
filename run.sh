@@ -5,4 +5,4 @@ clientName="dtu.aimas.SearchClient"
 arguments="-cbs"
 flags="-g"
 
-java -jar ./mavis.jar -l "$levelDir/TunnelWithBox.lvl" -c "java -cp $classesDir $clientName $arguments" $flags
+java -jar ./mavis.jar -l "$levelDir/TwoAgentsConflict.lvl" -c "java -cp $classesDir $clientName $arguments" $flags

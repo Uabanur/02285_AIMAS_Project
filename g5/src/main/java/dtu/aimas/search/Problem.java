@@ -178,40 +178,6 @@ public class Problem {
         return sb.toString();
     }
 
-    // public Problem subProblemFor(Agent agent) {
-    //     // Should only contain the agents given, and their boxes.
-    //     // Walls are the same, and goals only contain goals for the agent and its boxes.
-        
-    //     // in order to create a subproblem and stay within domain rules we have to reorder the agents naming
-    //     var subAgent = new Agent(agent.pos, agent.color, '0');
-    //     var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
-
-    //     // Deep copy of the goals array
-    //     char[][] goals = new char[this.goals.length][this.goals[0].length];
-    //     for (int i = 0; i < this.goals.length; i++) {
-    //         goals[i] = Arrays.copyOf(this.goals[i], this.goals[i].length);
-    //     }
-
-    //     for(var row = 0; row < goals.length; row++){
-    //         for(var col = 0; col < goals[row].length; col++){
-    //             var symbol = goals[row][col];
-    //             if(boxes.stream().anyMatch(b -> b.label == symbol)){
-    //                 // boxes can stay like this
-    //                 continue;
-    //             }
-    //             if(symbol == agent.label){
-    //                 // agent goal has to be renamed
-    //                 goals[row][col] = subAgent.label;
-    //             } 
-    //             else{
-    //                 goals[row][col] = '\0';
-    //             }
-    //         }
-    //     }
-        
-    //     return new Problem(List.of(subAgent), boxes, walls, goals);
-    // }
-
     public Problem subProblemFor(Agent agent)
     {
         var agents = List.of(agent);

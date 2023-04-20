@@ -3,6 +3,7 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,10 +18,12 @@ import dtu.aimas.common.DomainObject;
 import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
+import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import dtu.aimas.search.solutions.StateSolution;
@@ -360,12 +363,10 @@ public class StateSpace {
         return allConflicts;
     }
 
+    // TODO: deprecated - to be changed by external ConflictChecker
     private ArrayList<Conflict> checkStateForConflicts(State previousState, State state, Action[] previousActions, int timeStep) {
-        // TODO: WIP - just to pass between computers
         ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
 
-        // Construct a map of box and agent positions
-        // CONFLICT TYPE 1: Two objects on the same position
         var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
         for (var agent : state.agents) {
             if (agentAndBoxPositions.containsKey(agent.pos)) {
@@ -386,26 +387,6 @@ public class StateSpace {
                 agentAndBoxPositions.put(box.pos, boxesAtPos);
             }
         }
-        // // CONFLICT TYPE 2: Object stepping on the other object's previous position
-        // var previousAgentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>(); 
-        // for (var agent : previousState.agents){
-        //     if (previousAgentAndBoxPositions.containsKey(agent.pos)) {
-        //         previousAgentAndBoxPositions.get(agent.pos).add(agent);
-        //     } else {
-        //         var agentsAtPos = new ArrayList<DomainObject>();
-        //         agentsAtPos.add(agent);
-        //         previousAgentAndBoxPositions.put(agent.pos, agentsAtPos);
-        //     }
-        // }
-        // for (var box : previousState.boxes) {
-        //     if (previousAgentAndBoxPositions.containsKey(box.pos)) {
-        //         previousAgentAndBoxPositions.get(box.pos).add(box);
-        //     } else {
-        //         var boxesAtPos = new ArrayList<DomainObject>();
-        //         boxesAtPos.add(box);
-        //         previousAgentAndBoxPositions.put(box.pos, boxesAtPos);
-        //     }
-        // }
 
 
         // Report the conflicts
@@ -414,41 +395,8 @@ public class StateSpace {
             var objectsAtPos = entry.getValue();
             ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
 
-            // TODO: Delete this, previous version
             if (objectsAtPos.size() <= 1) {
                 continue;
-
-            // // No domain objects at the current position
-            // if (objectsAtPos.size() == 0) {
-            //     continue;
-            // }
-            // // Domain objects at the current position, but may be stepping on a different object
-            // else if(objectsAtPos.size() == 1){
-            //     var objectAtPos = objectsAtPos.get(0);
-            //     if(previousAgentAndBoxPositions.containsKey(position)){
-            //         var previousObjectsAtPos = previousAgentAndBoxPositions.get(position);
-            //         if(previousObjectsAtPos.size() > 1){
-            //             var previousObjectAtPos = previousObjectsAtPos.get(0);
-            //             if(previousObjectAtPos instanceof Agent){
-            //                 if(objectAtPos instanceof Agent){
-            //                     // CASE 1: The same agent (FINE)
-            //                     if(((Agent) objectAtPos).label == ((Agent) previousObjectAtPos).label){
-            //                         continue;
-            //                     }
-            //                     else{
-            //                         // CASE 2: Different agents (CONFLICT)
-            //                         involvedAgents.add((Agent) objectAtPos);
-            //                         Agent[] matchingInitialStateAgents = getInitialStateAgents(objectsAtPos).toArray(new Agent[objectsAtPos.size()]);
-            //                         Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
-            //                         foundConflicts.add(newConflict);
-            //                         continue;
-            //                     }
-
-            //                     }
-            //                 }
-            //             }
-                        
-            //     }
             }
 
             // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
