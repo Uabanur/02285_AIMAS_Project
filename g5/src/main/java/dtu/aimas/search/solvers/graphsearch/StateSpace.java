@@ -340,4 +340,14 @@ public record StateSpace(
         }
         return result;
     }
+
+    public State shallowMerge(State mainState, State otherState){
+        var agents = new ArrayList<>(mainState.agents);
+        var boxes = new ArrayList<>(mainState.boxes);
+
+        agents.addAll(otherState.agents);
+        boxes.addAll(otherState.boxes);
+
+        return new State(agents, boxes);
+    }
 }

@@ -42,18 +42,16 @@ public class ConflictPenalizedCost implements Cost {
     private boolean solutionStepConflicts(State state, StateSpace space, 
         StateSolution solution, int step) {
 
-        var solutionStep = Math.min(solution.size() - 1, step);
-        var otherState = solution.getState(solutionStep);
-
+        var otherState = solution.getState(step);
         var currentState = combineState(state, otherState);
         if(!space.isValid(currentState)) {
             return true;
         }
 
-        if(state.parent == null || otherState.parent == null) throw new UnreachableState();
+        if(state.parent == null || state.jointAction == null) throw new UnreachableState();
 
         var prevMainState = state.parent;
-        var prevOtherState = step < solution.size() ? otherState.parent : otherState;
+        var prevOtherState = solution.getState(step-1);
         var previousState = combineState(prevMainState, prevOtherState);
 
         // TODO : Refactor duplicated logic from blackboard solver
@@ -62,9 +60,9 @@ public class ConflictPenalizedCost implements Cost {
             return true;
         }
 
-        if(step < solution.size()){ // If other solution is finished its noop'ing
+        if(step < solution.size() && otherState.jointAction != null){ // If other solution is finished its noop'ing
             for(var i = 0; i < otherState.agents.size(); i++){
-                if(space.isApplicable(previousState, otherState.parent.agents.get(i), otherState.jointAction[i])) continue;
+                if(space.isApplicable(previousState, prevOtherState.agents.get(i), otherState.jointAction[i])) continue;
                 return true;
             }
         }

@@ -339,8 +339,7 @@ public class BlackboardSolverTest {
             solutions[1] = new StateSolution(states);
         }
 
-        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
-        var result = (StateSolution)solver.mergeSolutions(List.of(solutions));
+        var result = SolutionMerger.mergeSolutions(List.of(solutions));
         Assert.assertEquals(3, result.size());
         { // step 0
             var state = result.getState(0);
