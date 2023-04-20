@@ -14,7 +14,7 @@ public class AStarHeuristic extends Heuristic {
     }
 
     @Override
-    public float f(State s, StateSpace space) {
+    public int f(State s, StateSpace space) {
         return s.g() + cost.calculate(s, space);
     }
 }

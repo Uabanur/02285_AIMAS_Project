@@ -14,7 +14,7 @@ public class GreedyHeuristic extends Heuristic {
     }
 
     @Override
-    public float f(State s, StateSpace space) {
+    public int f(State s, StateSpace space) {
         return cost.calculate(s, space);
     }
 }
