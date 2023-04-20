@@ -114,6 +114,12 @@ public class StateSpace {
 
             for (var solutionEntry: solutions) {
                 Result<Solution> result = solutionEntry.getValue();
+
+                if (result.isError()) {
+                    // A problem occurred with the result -> Silently return an empty list
+                    return new Action[][] { };
+                }
+
                 Solution agentSolution = result.get();
 
                 var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
@@ -124,7 +130,7 @@ public class StateSpace {
                     longestSolutionReached = false;
                 } else {
                     // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
-                    agentActions.add(Action.fromName("NoOp"));
+                    agentActions.add(Action.NoOp);
                 }
             }
 
@@ -171,12 +177,8 @@ public class StateSpace {
         return agent.pos.equals(goal.destination);
     }
 
-    private boolean isWallAt(Position position){
-        return this.problem.walls[position.row][position.col];
-    }
-
     private boolean isCellFree(Position position, State state, Agent agent, int timeStep){
-        return !isWallAt(position) && !getAgentAt(state, position).isPresent() && 
+        return !getAgentAt(state, position).isPresent() && 
         !getBoxAt(state, position).isPresent() && this.problem.isFree(position, agent, timeStep);
     }
 
@@ -336,6 +338,12 @@ public class StateSpace {
 
             for (var solutionEntry: solutions) {
                 Result<Solution> result = solutionEntry.getValue();
+
+                if (result.isError()) {
+                    // A problem occurred with the result -> Silently return an empty list
+                    return new ArrayList<>();
+                }
+                
                 Solution agentSolution = result.get();
 
                 var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
@@ -346,7 +354,7 @@ public class StateSpace {
                     longestSolutionReached = false;
                 } else {
                     // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
-                    agentActions.add(Action.fromName("NoOp"));
+                    agentActions.add(Action.NoOp);
                 }
             }
 
