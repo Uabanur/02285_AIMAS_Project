@@ -10,6 +10,7 @@ import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
+import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
@@ -21,6 +22,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class BlackboardSolverTest {
     private final LevelParser levelParser = CourseLevelParser.Instance;
@@ -192,6 +194,37 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,1,2,3,4");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
+        solution = solver.solve(problem);
+        Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
+    }
+
+    @Test
+    public void RowsOfAgentsAndBoxes(){
+        var level = """
+                #initial
+                +++++++++++
+                +0A       +
+                +1B       +
+                +2C       +
+                +3D       +
+                +4E       +
+                +++++++++++
+                #goal
+                +++++++++++
+                +        E+
+                +        A+
+                +        B+
+                +        C+
+                +        D+
+                +++++++++++
+                #end
+                """;
+        var colors = IntStream.range(0, 4).mapToObj(i ->
+                (Color.values()[i]).name() + ": " + i + "," + (char)('A'+i)
+        ).toArray(String[]::new);
+
+        var problem = getProblem(level, colors);
         var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
