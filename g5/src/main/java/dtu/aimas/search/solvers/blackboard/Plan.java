@@ -11,20 +11,17 @@ import lombok.Getter;
 
 @Getter
 public class Plan {
-    private final Agent agent;
     private final Problem problem;
     private final List<Attempt> attempts;
 
-    public Plan(Agent agent, Problem problem, Attempt attempt) {
-        this.agent = agent;
+    public Plan(Problem problem, Attempt attempt) {
         this.problem = problem;
         attempts = new ArrayList<>(){{add(attempt);}};
     }
 
-    public Plan(Agent agent, Problem problem, Result<StateSolution> solution) {
-        this(agent, problem, new Attempt(solution));
+    public Plan(Problem problem, Result<StateSolution> solution) {
+        this(problem, new Attempt(solution));
     }
-
 
     public Attempt getAttempt(int i){
         return attempts.get(i);
