@@ -3,8 +3,12 @@ package dtu.aimas.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Queue;
+import java.util.Set;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,8 @@ public class Problem {
     public Collection<Goal> boxGoals;
     public int expectedStateSize;
     private int[][][][] distances;
+    private Goal[] agentAssignedGoal;
+    private Box[] agentAssignedBox;
 
     public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
     {
@@ -47,8 +53,7 @@ public class Problem {
                 }
             }
         }
-        
-      
+              
         this.distances = new int[walls.length][walls[0].length][walls.length][walls[0].length];
         for(int i = 0; i < distances.length; i++) {
             for(int j = 0; j < distances[i].length; j++) {
@@ -57,6 +62,9 @@ public class Problem {
                 }
             }
         }
+        precompute();
+        //since goal assignation depends on ordering (for now), sorting can affect priority
+        orderGoalsByPriority();
     }
 
     private void distanceFromPos(Position src) {
@@ -178,6 +186,25 @@ public class Problem {
         return sb.toString();
     }
 
+    public void orderGoalsByPriority() {
+        ArrayList<Goal> newBoxGoals = new ArrayList<Goal>();
+        //We want goals in dead-ends to be solved first and those in chokepoints last
+        for(Goal goal : boxGoals) {
+            if(isDeadEnd(goal.destination)) {
+                newBoxGoals.add(0, goal);
+            }
+            else if(isChokepoint(goal.destination)) {
+                newBoxGoals.add(newBoxGoals.size()-1, goal);
+            }
+            else {
+                int insertPosition = Math.ceilDiv((newBoxGoals.size()-1),2);
+                newBoxGoals.add(insertPosition, goal);
+            }
+        }
+
+        this.boxGoals = newBoxGoals;
+    }
+
     public Problem subProblemFor(Agent agent)
     {
         var agents = List.of(agent);
@@ -200,12 +227,122 @@ public class Problem {
         return new Problem(agents, subBoxes, walls, subGoals);
     }
 
+    public Problem subProblemFor2(Agent agent) {
+        var subAgent = new Agent(agent.pos, agent.color, '0');
+        var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
+
+        int agentNum = Character.getNumericValue(agent.label);
+        char[][] goals = new char[this.goals.length][this.goals[0].length];
+        //only leave the assigned goal
+        Goal boxGoal = agentAssignedGoal[agentNum];
+        if(boxGoal != null) {
+            goals[boxGoal.destination.row][boxGoal.destination.col] = boxGoal.label;
+        }
+        else {
+            //if no box goal assigned, try to see if a new one can be assigned
+            assignGoals();
+            boxGoal = agentAssignedGoal[agentNum];
+            if(boxGoal != null) {
+                goals[boxGoal.destination.row][boxGoal.destination.col] = boxGoal.label;
+            }
+            //otherwise assign agentGoal
+            else {
+                var agentGoalOption = agentGoals.stream().filter(agoal -> agoal.label == agent.label).findAny();
+                if(agentGoalOption.isPresent()) {
+                    Goal agentGoal = agentGoalOption.get();
+                    goals[agentGoal.destination.row][agentGoal.destination.col] = subAgent.label;
+                }
+            }
+        }
+
+        Box assignedBox = agentAssignedBox[agentNum];
+        if(assignedBox != null) {
+            //if agent has a box assigned, only leave that one in the subproblem
+            boxes = List.of(assignedBox);
+        }
+
+        return new Problem(List.of(subAgent), boxes, walls, goals);
+    }
+
+    public void assignGoals() {
+        //this can be used for the initial subproblem generation
+        agentAssignedBox = new Box[agents.size()];
+        agentAssignedGoal = new Goal[agents.size()];
+        Set<Box> assignedBoxes = Arrays.stream(agentAssignedBox).collect(Collectors.toSet());
+        Set<Goal> assignedGoals = Arrays.stream(agentAssignedGoal).collect(Collectors.toSet());
+        Collection<Agent> freeAgents = agents.stream().filter(a -> agentAssignedGoal[Character.getNumericValue(a.label)] == null).collect(Collectors.toList());
+        
+        //simple assignation to start off, it's dependent on boxGoal ordering
+        for(Goal goal : boxGoals) {
+            if(assignedGoals.contains(goal)) continue;
+            
+            List<Box> compatibleBoxes = this.boxes.stream().filter(
+                b -> b.label == goal.label && !assignedBoxes.contains(b) 
+                && freeAgents.stream().anyMatch(a -> a.color.equals(b.color))
+                ).collect(Collectors.toList());
+            if(compatibleBoxes.isEmpty()) continue;
+
+            Box closestBox = compatibleBoxes.get(0);
+            int closestBoxDist = Integer.MAX_VALUE;
+            for(Box box : compatibleBoxes) {
+                int dist = admissibleDist(box.pos, goal.destination);
+                if(dist < closestBoxDist) {
+                    closestBox = box;
+                    closestBoxDist = dist;
+                }
+            }
+
+            //idk why this needs to be done, but otherwise there is an error
+            Box theBox = closestBox;
+            List<Agent> compatibleAgents = this.agents.stream().filter(
+                a -> a.color == theBox.color && agentAssignedGoal[Character.getNumericValue(a.label)] == null
+            ).collect(Collectors.toList());
+            if(compatibleAgents.isEmpty()) continue;
+            Agent closestAgent = compatibleAgents.get(0);
+
+            int closestAgentDist = Integer.MAX_VALUE;
+            for(Agent agent : compatibleAgents) {
+                int dist = admissibleDist(agent.pos, closestBox.pos);
+                if(dist < closestAgentDist) {
+                    closestAgent = agent;
+                    closestAgentDist = dist;
+                }
+            }
+            int agentIndex = Character.getNumericValue(closestAgent.label);
+            agentAssignedBox[agentIndex] = closestBox;
+            agentAssignedGoal[agentIndex] = goal;
+            assignedBoxes.add(closestBox);
+        }
+    }
+
     public int admissibleDist(Position from, Position to) {
         return distances[from.row][from.col][to.row][to.col];
     }
     
     public boolean isFree(Position pos, Agent agent, int timeStep) {
         return !walls[pos.row][pos.col];
+    }
+
+    public boolean isChokepoint(Position pos) {
+        int row = pos.row; int col = pos.col;
+        boolean firstRow = row == 0;
+        boolean lastRow = row == walls.length-1;
+        boolean firstCol = col == 0;
+        boolean lastCol = col == walls[0].length-1;
+        if(isDeadEnd(pos)) return false;
+        return (firstRow || walls[row-1][col]) && (lastRow || walls[row+1][col])
+            || (firstCol || walls[row][col-1]) && (lastCol || walls[row][col+1]) 
+            || (   (firstRow || ((firstCol || walls[row-1][col-1]) && (lastCol || walls[row-1][col+1])))
+                && (lastRow  || ((firstCol || walls[row+1][col-1]) && (lastCol || walls[row+1][col+1]))));
+    }
+
+    public boolean isDeadEnd(Position pos) {
+        int freeNeighbors = 0;
+        if(pos.row > 0 && !walls[pos.row-1][pos.col]) freeNeighbors++;
+        if(pos.row < walls.length-1 && !walls[pos.row+1][pos.col]) freeNeighbors++;
+        if(pos.col > 0 && !walls[pos.row][pos.col-1]) freeNeighbors++;
+        if(pos.col < walls[0].length-1 && !walls[pos.row][pos.col+1]) freeNeighbors++;
+        return freeNeighbors < 2;
     }
 
 }
