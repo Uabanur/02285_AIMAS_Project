@@ -1,7 +1,6 @@
 package dtu.aimas.search.solvers.conflictbasedsearch;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.PriorityQueue;
 
 import dtu.aimas.common.Agent;
@@ -23,7 +22,6 @@ public class ConflictBasedSearch implements Solver {
     }
 
     public Result<Solution> solve(Problem initialProblem) {
-
         ArrayList<Agent> agents = new ArrayList<Agent>(initialProblem.agents);
         ArrayList<Box> boxes = new ArrayList<Box>(initialProblem.boxes);
         State initialState = new State(agents, boxes);
@@ -36,7 +34,7 @@ public class ConflictBasedSearch implements Solver {
             var isolatedSolution = subSolver.solve(initialProblem.subProblemFor(agent));
             if (isolatedSolution.isError()) 
                 return Result.passError(isolatedSolution);
-
+                                
             root.setSolutionFor(agent, isolatedSolution);
         }
         root.calculateCost();
@@ -46,32 +44,46 @@ public class ConflictBasedSearch implements Solver {
         while(true){
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("CBS found no solutions."));
-
             var node = frontier.poll();
             var issues = node.findConflicts(stateSpace);
 
-            if (issues.isEmpty())
-                return node.getSolution(stateSpace);
+            if (issues.isEmpty()){
+                var sol = node.getSolution(stateSpace);
+                return sol;
+            }
+                
 
             var firstConflict = issues.get(0);
+            IO.info("First conflict: " + firstConflict.toString());
             for(var agent: firstConflict.getInvolvedAgents()) {
-                var childNode = node.constrain(agent, firstConflict.getPosition(), firstConflict.getTimeStep());
-
-
-                var constrainedProblem = ConstrainedProblem.from(
-                    initialProblem.subProblemFor(agent), childNode.getConstraint());
-
-                var problemToSolve = initialProblem;
-                if (agent.label == '0') {
-                    problemToSolve = constrainedProblem;
+                IO.info("agent" + agent.label + " is involved");
+                // CONSTRAINT
+                var constrainedNode = node.constrain(agent, firstConflict.getPosition(), firstConflict.getTimeStep());
+                var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.getConstraint());
+                var solution = subSolver.solve(constrainedProblem);
+                constrainedNode.setSolutionFor(agent, solution);
+                constrainedNode.calculateCost();
+                if(constrainedNode.isSolvable())
+                {
+                    IO.info("Constrained solvable!");
+                    frontier.add(constrainedNode);
+                    break;
                 }
-
-                var solution = subSolver.solve(problemToSolve);
-                childNode.setSolutionFor(agent, solution);
-                childNode.calculateCost();
-
-                if(childNode.isSolvable())
-                    frontier.add(childNode);
+                // TODO: test with correct conflict detector whether needed or not, if not, remove
+                // // NEGATE CONSTRAINT
+                // var unconstrainedNode = node;
+                // var unconstrainedProblem = initialProblem.subProblemFor(agent);
+                // solution = subSolver.solve(unconstrainedProblem);
+                // unconstrainedNode.setSolutionFor(agent, solution);
+                // unconstrainedNode.calculateCost();
+                // if(unconstrainedNode.isSolvable())
+                // {
+                //     frontier.add(unconstrainedNode);
+                //     IO.info("Unconstrained solvable!");
+                //     break;
+                // }
+                // IO.info("No subproblem is solvable!");
+                // // BACKTRACK to the conflict and try different resolution
             }
         }
     }

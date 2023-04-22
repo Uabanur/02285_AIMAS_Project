@@ -2,23 +2,10 @@ package dtu.aimas.common;
 
 import java.util.Objects;
 
-public class Box {
-    public final Position pos;
-    public final Color color;
-    public final char label;
+public class Box extends DomainObject {
 
     public Box(Position pos, Color color, char type) {
-        this.pos = pos;
-        this.color = color;
-        this.label = type;
-    }
-
-    public static boolean isLabel(char symbol) {
-        return 'A' <= symbol && symbol <= 'Z';
-    }
-
-    public String toSimpleString(){
-        return String.format("(%s:%c|%s)", pos.toSimpleString(), label, color.name());
+        super(pos, color, type);
     }
 
     @Override
@@ -34,5 +21,9 @@ public class Box {
     @Override
     public int hashCode() {
         return Objects.hash(pos, color, label);
+    }
+
+    public Box clone() {
+        return new Box(new Position(pos.row, pos.col), color, label);
     }
 }

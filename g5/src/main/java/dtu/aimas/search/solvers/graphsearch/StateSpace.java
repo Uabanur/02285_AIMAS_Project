@@ -3,6 +3,7 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,15 +14,19 @@ import java.util.Set;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Box;
+import dtu.aimas.common.DomainObject;
 import dtu.aimas.common.Goal;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.errors.InvalidOperation;
+import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
+import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
 
 public class StateSpace {
@@ -42,12 +47,14 @@ public class StateSpace {
         if (!isGoalState(state)) 
             return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
 
-        return Result.ok(new ActionSolution(extractPlanFromState(state)));
+        // return Result.ok(new ActionSolution(extractPlanFromState(state)));
+        return Result.ok(new StateSolution(extractStates(state)));
     }
 
     public boolean isGoalState(State state) {
         for(Goal goal : this.problem.agentGoals){
-            var agent = getAgentByNumber(state, goal.label - '0');
+            // var agent = getAgentByNumber(state, goal.label - '0');
+            var agent = getAgentByLabel(state, goal.label);
             if(!satisfies(goal, agent)){
                 return false;
             }
@@ -66,6 +73,19 @@ public class StateSpace {
             }
         }
         return true;
+    }
+
+    private State[] extractStates(State state){
+        var length = state.g()+1;
+        var states = new State[length];
+        var current = state;
+
+        for(var i = length-1; i >= 0; i--){
+            states[i] = current;
+            current = current.parent;
+        }
+    
+        return states;
     }
 
     public Action[][] extractPlanFromState(State state)
@@ -94,6 +114,12 @@ public class StateSpace {
 
             for (var solutionEntry: solutions) {
                 Result<Solution> result = solutionEntry.getValue();
+
+                if (result.isError()) {
+                    // A problem occurred with the result -> Silently return an empty list
+                    return new Action[][] { };
+                }
+
                 Solution agentSolution = result.get();
 
                 var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
@@ -104,7 +130,7 @@ public class StateSpace {
                     longestSolutionReached = false;
                 } else {
                     // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
-                    agentActions.add(Action.fromName("NoOp"));
+                    agentActions.add(Action.NoOp);
                 }
             }
 
@@ -121,6 +147,13 @@ public class StateSpace {
 
     public Agent getAgentByNumber(State state, int i) {
         return state.agents.get(i);
+    }
+
+    public Agent getAgentByLabel(State state, char label){ 
+        for(var agent: state.agents){
+            if(agent.label == label) return agent;
+        }
+        throw new UnreachableState();
     }
 
     public Optional<Box> getBoxAt(State state, Position position) {
@@ -144,12 +177,8 @@ public class StateSpace {
         return agent.pos.equals(goal.destination);
     }
 
-    private boolean isWallAt(Position position){
-        return this.problem.walls[position.row][position.col];
-    }
-
     private boolean isCellFree(Position position, State state, Agent agent, int timeStep){
-        return !isWallAt(position) && !getAgentAt(state, position).isPresent() && 
+        return !getAgentAt(state, position).isPresent() && 
         !getBoxAt(state, position).isPresent() && this.problem.isFree(position, agent, timeStep);
     }
 
@@ -173,7 +202,14 @@ public class StateSpace {
         return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
-    private boolean isApplicable(State state, Agent agent, Action action, int timeStep){
+    public boolean isApplicable(State state, Agent agent, Action action) {
+        // Users of this method that don't care about timestamp redirect to the method with extended signature -- 
+        // The argument of -1 ensures that time constraints do not restrict applicability: 
+        // Reserving a cell at timestep of -1 should never happen
+        return isApplicable(state, agent, action, -1);
+    }
+
+    public boolean isApplicable(State state, Agent agent, Action action, int timeStep){
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
@@ -222,7 +258,8 @@ public class StateSpace {
         for(int agentId = 0; agentId < agentsCount; agentId++)
         {
             ArrayList<Action> agentActions = new ArrayList<>(Action.values().length);
-            var agent = getAgentByNumber(state, agentId);
+            // var agent = getAgentByNumber(state, agentId);
+            var agent = state.agents.get(agentId);
             for(Action action : Action.values()){
                 if(isApplicable(state, agent, action, timeStep)){
                     agentActions.add(action);
@@ -269,7 +306,7 @@ public class StateSpace {
         return expandedStates;
     }
 
-    private boolean isValid(State state){
+    public boolean isValid(State state){
         Set<Position> occupiedPositions = new HashSet<>();
         for (Agent agent : state.agents){
             if(!occupiedPositions.add(agent.pos)) return false;
@@ -280,7 +317,7 @@ public class StateSpace {
         return true;
     }
 
-    private Optional<State> tryCreateState(State state, Action[] jointAction){
+    public Optional<State> tryCreateState(State state, Action[] jointAction){
         var jointActionsToApply = Arrays.copyOf(jointAction, jointAction.length);
         State destinationState = applyJointActions(state, jointActionsToApply);
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
@@ -301,6 +338,12 @@ public class StateSpace {
 
             for (var solutionEntry: solutions) {
                 Result<Solution> result = solutionEntry.getValue();
+
+                if (result.isError()) {
+                    // A problem occurred with the result -> Silently return an empty list
+                    return new ArrayList<>();
+                }
+                
                 Solution agentSolution = result.get();
 
                 var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
@@ -311,15 +354,16 @@ public class StateSpace {
                     longestSolutionReached = false;
                 } else {
                     // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
-                    agentActions.add(Action.fromName("NoOp"));
+                    agentActions.add(Action.NoOp);
                 }
             }
 
             Action[] actionArray = new Action[agentActions.size()];
             agentActions.toArray(actionArray);
+            
 
-            currentState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, actionArray, stepIndex++);
+            var nextState = this.applyJointActions(currentState, actionArray);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, nextState, actionArray, stepIndex++);
 
             allConflicts.addAll(currentStepConflicts);
         }
@@ -327,33 +371,58 @@ public class StateSpace {
         return allConflicts;
     }
 
-    private ArrayList<Conflict> checkStateForConflicts(State state, Action[] previousActions, int timeStep) {
-
+    // TODO: deprecated - to be changed by external ConflictChecker
+    private ArrayList<Conflict> checkStateForConflicts(State previousState, State state, Action[] previousActions, int timeStep) {
         ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
 
-        // Check for basic conflicts: agents moving to the same destination
-        var agentPositions = new HashMap<Position, ArrayList<Agent>>();
+        var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
         for (var agent : state.agents) {
-            if (agentPositions.containsKey(agent.pos)) {
-                agentPositions.get(agent.pos).add(agent);
+            if (agentAndBoxPositions.containsKey(agent.pos)) {
+                agentAndBoxPositions.get(agent.pos).add(agent);
             } else {
-                var agentsAtPos = new ArrayList<Agent>();
+                var agentsAtPos = new ArrayList<DomainObject>();
                 agentsAtPos.add(agent);
-                agentPositions.put(agent.pos, agentsAtPos);
+                agentAndBoxPositions.put(agent.pos, agentsAtPos);
             }
         }
 
-        for (var entry : agentPositions.entrySet()) {
+        for (var box : state.boxes) {
+            if (agentAndBoxPositions.containsKey(box.pos)) {
+                agentAndBoxPositions.get(box.pos).add(box);
+            } else {
+                var boxesAtPos = new ArrayList<DomainObject>();
+                boxesAtPos.add(box);
+                agentAndBoxPositions.put(box.pos, boxesAtPos);
+            }
+        }
+
+
+        // Report the conflicts
+        for (var entry : agentAndBoxPositions.entrySet()) {
             var position = entry.getKey();
-            var agentsAtPos = entry.getValue();
-            if (agentsAtPos.size() > 1) {
-                Agent[] matchingInitialStateAgents = getInitialStateAgents(agentsAtPos).toArray(new Agent[agentsAtPos.size()]);
-                Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
-                foundConflicts.add(newConflict);
-            }
-        }
+            var objectsAtPos = entry.getValue();
+            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
 
-        // TODO: Check other kinds of conflicts, including boxes, once agent-box ownership is implemented
+            if (objectsAtPos.size() <= 1) {
+                continue;
+            }
+
+            // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
+            for (var domainObject: objectsAtPos) {
+                if (domainObject instanceof Agent) {
+                    involvedAgents.add((Agent) domainObject);
+                } else if (domainObject instanceof Box) {
+                    // TODO: We currently don't have enough information to determine with certainty which agent moved the box.
+                    // Additionally we don't have a strategy of generally dealing with box conflicts. 
+                    // For example, what if no agent moved the box, which objects should be involved in the conflict?
+                    continue;
+                }
+            } 
+
+            Agent[] matchingInitialStateAgents = getInitialStateAgents(involvedAgents).toArray(new Agent[involvedAgents.size()]);
+            Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
+            foundConflicts.add(newConflict);
+        }
 
         return foundConflicts;
     }
@@ -382,7 +451,8 @@ public class StateSpace {
         }
 
         for(int action = 0; action < actionsToApply.length; action++){
-            Agent agent = getAgentByNumber(state, action);
+            // Agent agent = getAgentByNumber(state, action);
+            Agent agent = state.agents.get(action);
             Agent updatedAgent = null;
             Position agentDestination;
 
@@ -465,7 +535,7 @@ public class StateSpace {
     public int getSatisfiedAgentGoalsCount(State state){
         var result = 0;
         for(Goal goal : this.problem.agentGoals){
-            var agent = getAgentByNumber(state, goal.label - '0');
+            var agent = getAgentByLabel(state, goal.label);
             if(satisfies(goal, agent)){
                 result++;
             }

@@ -100,4 +100,6 @@ public interface Result<T> {
     T getOrElse(final Supplier<T> supplier);
 
     Throwable getError();
+
+    String getErrorMessageOrEmpty();
 }

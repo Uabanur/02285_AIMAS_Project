@@ -9,13 +9,7 @@ import dtu.aimas.errors.InvalidArgument;
 import dtu.aimas.errors.UnknownArguments;
 
 public abstract class ConfigOption {
-    private static final Map<String, Supplier<ConfigOption>> options = Map.of(
-        BFSConfigOption.OptionName, BFSConfigOption::new,
-        DFSConfigOption.OptionName, DFSConfigOption::new,
-        CBSConfigOption.OptionName, CBSConfigOption::new,
-        LoggingConfigOption.OptionName, LoggingConfigOption::new
-    );
-
+    private static final Map<String, Supplier<ConfigOption>> options = ConfigOptionLoader.getOptions();
     public abstract String getOptionName();
     public abstract void apply(Configuration conf);
     protected abstract Result<ConfigOption> bindInner(List<String> tokens);

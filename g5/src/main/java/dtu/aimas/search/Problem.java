@@ -68,33 +68,35 @@ public class Problem {
     }
 
     private void distanceFromPos(Position src) {
+        if(walls[src.row][src.col]) return;
         Queue<Position> neighbors = new LinkedList<Position>();
         distances[src.row][src.col][src.row][src.col] = 0;
         neighbors.add(src);
         while(!neighbors.isEmpty()) {
             Position curr = neighbors.remove();
             int distToCurr = distances[src.row][src.col][curr.row][curr.col];
-            
+            if(distToCurr == Integer.MAX_VALUE) continue;
+
             Position top = new Position(curr.row-1,curr.col);
-            if(top.row >= 0 && !walls[top.row][top.col] 
+            if(top.row >= 0 && !walls[top.row][top.col]
                     && distances[src.row][src.col][top.row][top.col] > distToCurr+1) {
                 distances[src.row][src.col][top.row][top.col] = distToCurr+1;
                 neighbors.add(top);             
             }
             Position left = new Position(curr.row,curr.col-1);
-            if (left.col >= 0 && !walls[left.row][left.col] 
+            if (left.col >= 0 && !walls[left.row][left.col]
                     && distances[src.row][src.col][left.row][left.col] > distToCurr+1 ) {
                 distances[src.row][src.col][left.row][left.col] = distToCurr+1;
                 neighbors.add(left);
             }
             Position bot = new Position(curr.row+1,curr.col);
-            if (bot.row < walls.length && !walls[bot.row][bot.col] 
+            if (bot.row < walls.length && !walls[bot.row][bot.col]
                     && distances[src.row][src.col][bot.row][bot.col] > distToCurr+1) {
                 distances[src.row][src.col][bot.row][bot.col] = distToCurr+1;
                 neighbors.add(bot);
             }
             Position right = new Position(curr.row,curr.col+1);
-            if (right.col < walls[right.row].length && !walls[right.row][right.col] 
+            if (right.col < walls[right.row].length && !walls[right.row][right.col]
                     && distances[src.row][src.col][right.row][right.col] > distToCurr+1) {
                 distances[src.row][src.col][right.row][right.col] = distToCurr+1;
                 neighbors.add(right);
@@ -203,38 +205,26 @@ public class Problem {
         this.boxGoals = newBoxGoals;
     }
 
-    public Problem subProblemFor(Agent agent) {
-        // Should only contain the agents given, and their boxes.
-        // Walls are the same, and goals only contain goals for the agent and its boxes.
-        
-        // in order to create a subproblem and stay within domain rules we have to reorder the agents naming
-        var subAgent = new Agent(agent.pos, agent.color, '0');
-        var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
-
-        // Deep copy of the goals array
-        char[][] goals = new char[this.goals.length][this.goals[0].length];
-        for (int i = 0; i < this.goals.length; i++) {
-            goals[i] = Arrays.copyOf(this.goals[i], this.goals[i].length);
-        }
+    public Problem subProblemFor(Agent agent)
+    {
+        var agents = List.of(agent);
+        var subBoxes = boxes.stream().filter(b -> 
+            b.color == agent.color).collect(Collectors.toList());
+        var subGoals = new char[goals.length][goals[0].length];
 
         for(var row = 0; row < goals.length; row++){
             for(var col = 0; col < goals[row].length; col++){
                 var symbol = goals[row][col];
-                if(boxes.stream().anyMatch(b -> b.label == symbol)){
-                    // boxes can stay like this
-                    continue;
-                }
-                if(symbol == agent.label){
-                    // agent goal has to be renamed
-                    goals[row][col] = subAgent.label;
-                } 
-                else{
-                    goals[row][col] = '\0';
+                if (symbol == 0) continue;
+                if (symbol == agent.label){
+                    subGoals[row][col] = symbol;
+                }  else
+                if (subBoxes.stream().anyMatch(b -> b.label == symbol)) {
+                    subGoals[row][col] = symbol;
                 }
             }
         }
-        
-        return new Problem(List.of(subAgent), boxes, walls, goals);
+        return new Problem(agents, subBoxes, walls, subGoals);
     }
 
     public Problem subProblemFor2(Agent agent) {

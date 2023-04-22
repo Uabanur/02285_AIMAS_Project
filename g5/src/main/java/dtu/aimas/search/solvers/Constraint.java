@@ -42,4 +42,9 @@ public class Constraint {
     public List<Position> getReserved(Agent agent, int timeStep){
         return constraints.getOrDefault(createKey(agent, timeStep), new ArrayList<>());
     }
+
+    @Override
+    public String toString() {
+        return "Constraint [constraints=" + constraints + "]";
+    }
 }

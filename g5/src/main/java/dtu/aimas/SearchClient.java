@@ -31,6 +31,7 @@ public class SearchClient
     }
 
     private static void handleConfigs(String[] args) {
+        IO.debug(args);
         var configuration = ArgumentParser.parse(args);
         
         IO.debug(configuration);

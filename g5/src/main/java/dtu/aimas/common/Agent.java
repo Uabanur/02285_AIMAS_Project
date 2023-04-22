@@ -2,23 +2,18 @@ package dtu.aimas.common;
 
 import java.util.Objects;
 
-public class Agent {
-    public Position pos;
-    public Color color;
-    public char label;
+public class Agent extends DomainObject {
 
     public Agent(Position pos, Color color, char label) {
-        this.pos = pos;
-        this.color = color;
-        this.label = label;
+        super(pos, color, label);
     }
 
     public static boolean isLabel(char symbol) {
         return '0' <= symbol && symbol <= '9';
     }
 
-    public String toSimpleString(){
-        return String.format("(%s|%s)", pos.toSimpleString(), color.name());
+    public String toString(){
+        return String.format("(%s:%c|%s)", pos.toSimpleString(), label, color.name());
     }
 
     @Override
@@ -33,5 +28,10 @@ public class Agent {
     @Override
     public int hashCode() {
         return Objects.hash(pos, color);
+    }
+
+    @Override
+    public Agent clone() {
+        return new Agent(new Position(pos.row, pos.col), color, label);
     }
 }
