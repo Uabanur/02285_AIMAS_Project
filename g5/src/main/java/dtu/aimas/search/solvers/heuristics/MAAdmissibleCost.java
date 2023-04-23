@@ -13,7 +13,7 @@ import dtu.aimas.search.solvers.graphsearch.StateSpace;
 public class MAAdmissibleCost implements Cost {
     //Not accurate if there are more boxgoals than agents
     public int calculate(State state, StateSpace space) {
-        Problem problem = space.getProblem();
+        Problem problem = space.problem();
         var allBoxes = state.boxes;
         var allAgents = state.agents;
         // We want the cost of completing the longest goal in the shortest way possible

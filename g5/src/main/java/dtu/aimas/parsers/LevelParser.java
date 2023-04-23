@@ -8,6 +8,6 @@ import dtu.aimas.search.Problem;
 public abstract class LevelParser {
     protected abstract Result<Problem> parseInput(Reader level);
     public Result<Problem> parse(Reader level){
-        return parseInput(level).map(p -> p.precompute());
+        return parseInput(level).map(Problem::precompute);
     }
 }

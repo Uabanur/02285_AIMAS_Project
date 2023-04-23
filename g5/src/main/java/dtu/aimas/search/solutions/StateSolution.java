@@ -23,7 +23,9 @@ public class StateSolution implements Solution {
     }
 
     public State getState(int step){
-        return states[step];
+        // clamp to [0, n]
+        var index = Math.max(0, Math.min(states.length-1, step));
+        return states[index];
     }
 
     public Collection<String> serializeSteps() {
