@@ -45,6 +45,9 @@ public class Problem {
         this.agentGoals = extractGoals(Agent::isLabel);
         this.boxGoals = extractGoals(Box::isLabel);
         this.distances = initializeDistances();
+
+        this.agentAssignedBox = new Box[agents.size()];
+        this.agentAssignedGoal = new Goal[agents.size()];
         
         orderGoalsByPriority();
     }
@@ -59,6 +62,9 @@ public class Problem {
         this.walls = parent.walls;
         this.expectedStateSize = parent.expectedStateSize;
         this.distances = parent.distances;
+
+        this.agentAssignedBox = new Box[agents.size()];
+        this.agentAssignedGoal = new Goal[agents.size()];
         
         orderGoalsByPriority();
     }
@@ -247,7 +253,7 @@ public class Problem {
 
     public Problem subProblemFor2(Agent agent) {
         var subAgent = new Agent(agent.pos, agent.color, '0');
-        var boxes = this.boxes.stream().filter(b -> b.color == agent.color).collect(Collectors.toList());
+        List<Box> boxes = new ArrayList<Box>();
 
         int agentNum = Character.getNumericValue(agent.label);
         char[][] goals = new char[this.goals.length][this.goals[0].length];
@@ -276,7 +282,7 @@ public class Problem {
         Box assignedBox = agentAssignedBox[agentNum];
         if(assignedBox != null) {
             //if agent has a box assigned, only leave that one in the subproblem
-            boxes = List.of(assignedBox);
+            boxes.add(assignedBox);
         }
 
         return new Problem(List.of(subAgent), boxes, walls, goals);
@@ -284,8 +290,6 @@ public class Problem {
 
     public void assignGoals() {
         //this can be used for the initial subproblem generation
-        agentAssignedBox = new Box[agents.size()];
-        agentAssignedGoal = new Goal[agents.size()];
         Set<Box> assignedBoxes = Arrays.stream(agentAssignedBox).collect(Collectors.toSet());
         Set<Goal> assignedGoals = Arrays.stream(agentAssignedGoal).collect(Collectors.toSet());
         Collection<Agent> freeAgents = agents.stream().filter(a -> agentAssignedGoal[Character.getNumericValue(a.label)] == null).collect(Collectors.toList());

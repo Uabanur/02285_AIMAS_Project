@@ -37,7 +37,7 @@ public class SubProblem2Test {
         for(var agent: agents) goals[agent.pos.row][agent.pos.col] = agent.label;
         for(var box: boxes) goals[box.pos.row][box.pos.col] = box.label;
 
-        var problem = new Problem(agents, boxes, walls, goals);
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
         problem.assignGoals();
 
         var subProblem0 = problem.subProblemFor2(agents.get(0));
@@ -73,7 +73,7 @@ public class SubProblem2Test {
 
         var boxes = List.of(
             new Box(new Position(1, 2), Color.Red, 'A'),
-            new Box(new Position(2, 2), Color.Red, 'B')
+            new Box(new Position(2, 2), Color.Red, 'A')
         );
 
         var walls = new boolean[width][height];
@@ -82,7 +82,7 @@ public class SubProblem2Test {
         for(var agent: agents) goals[agent.pos.row][agent.pos.col] = agent.label;
         for(var box: boxes) goals[box.pos.row][box.pos.col] = box.label;
 
-        var problem = new Problem(agents, boxes, walls, goals);
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
         problem.assignGoals();
 
         var subProblem0 = problem.subProblemFor2(agents.get(0));
@@ -132,7 +132,7 @@ public class SubProblem2Test {
         goals[0][9] = boxes.get(0).label;
         goals[9][9] = boxes.get(1).label;
 
-        var problem = new Problem(agents, boxes, walls, goals);
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
         problem.assignGoals();
 
         var subProblem0 = problem.subProblemFor2(agents.get(0));
@@ -174,7 +174,7 @@ public class SubProblem2Test {
         goals[5][5] = agents.get(0).label;
         goals[0][9] = boxes.get(0).label;
 
-        var problem = new Problem(agents, boxes, walls, goals);
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
         problem.assignGoals();
 
         var subProblem0 = problem.subProblemFor2(agents.get(0));
@@ -211,7 +211,7 @@ public class SubProblem2Test {
         goals[5][5] = agents.get(0).label;
         goals[0][9] = 'A';
 
-        var problem = new Problem(agents, boxes, walls, goals);
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
         problem.assignGoals();
 
         var subProblem0 = problem.subProblemFor2(agents.get(0));
@@ -248,7 +248,7 @@ public class SubProblem2Test {
         goals[9][9] = agents.get(1).label;
         goals[0][9] = 'A';
 
-        var problem = new Problem(agents, boxes, walls, goals);
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
         problem.assignGoals();
 
         var subProblem0 = problem.subProblemFor2(agents.get(0));
@@ -265,11 +265,11 @@ public class SubProblem2Test {
         var expectedAgents1 = new Agent[]{agents.get(1)};
         var expectedBoxes1 = new Box[]{};
         var expectedBoxGoals1 = new Goal[]{};
-        var expectedAgentGoals1 = new Goal[]{new Goal(agents.get(1).label, new Position(9,9))};
-        Assert.assertArrayEquals(expectedAgents0, subProblem0.agents.toArray(Agent[]::new));
-        Assert.assertArrayEquals(expectedBoxes0, subProblem0.boxes.toArray(Box[]::new));
-        Assert.assertArrayEquals(expectedBoxGoals0, subProblem0.boxGoals.toArray(Goal[]::new));
-        Assert.assertArrayEquals(expectedAgentGoals0, subProblem0.agentGoals.toArray(Goal[]::new));
+        var expectedAgentGoals1 = new Goal[]{new Goal('0', new Position(9,9))};
+        Assert.assertArrayEquals(expectedAgents1, subProblem1.agents.toArray(Agent[]::new));
+        Assert.assertArrayEquals(expectedBoxes1, subProblem1.boxes.toArray(Box[]::new));
+        Assert.assertArrayEquals(expectedBoxGoals1, subProblem1.boxGoals.toArray(Goal[]::new));
+        Assert.assertArrayEquals(expectedAgentGoals1, subProblem1.agentGoals.toArray(Goal[]::new));
     }
     
 }
