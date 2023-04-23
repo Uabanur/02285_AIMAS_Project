@@ -106,6 +106,7 @@ public class BlackboardSolver implements SolverMinLength {
                         .apply(new ConflictPenalizedCost(baseCost, attempts.get(i)))
                         .solve(plans[i].getProblem(), attemptSolutionLength)
                         .map(s -> (StateSolution)s);
+
                 plans[i].addAttempt(new Attempt(solution));
 
                 var next = attemptPermutation.transfer(i, plans[i].lastAttemptIndex(), plans, space);

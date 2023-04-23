@@ -44,9 +44,11 @@ public class AssignedBoxGoalCost implements Cost {
         // guide agent towards closest box
         result += distanceFromAgentToClosestBox;
 
-        // buffer distance to unfinished boxes
-        // to avoid sudden increase in cost when new box is selected
-        result += unfinishedBoxes * problem.mapSize();
+        if(unfinishedBoxes > 0){
+            // buffer distance to unfinished boxes
+            // to avoid sudden increase in cost when new box is selected
+            result += (unfinishedBoxes-1) * problem.mapSize();
+        }
 
         return result;
     }
