@@ -1,5 +1,6 @@
 package dtu.aimas.search.solutions;
 
+import dtu.aimas.search.Action;
 import dtu.aimas.search.solvers.graphsearch.State;
 
 import java.util.ArrayList;
@@ -9,17 +10,35 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StateSolution implements Solution {
-    private State[] states;
+    private final int productiveActions;
+    private final State[] states;
     private final int hash;
     public StateSolution(State[] states) {
         this.states = states;
+
+        var state = states[states.length-1];
+        while(state.parent != null && Arrays.stream(state.jointAction).allMatch(a -> a == Action.NoOp)) {
+            state = state.parent;
+        }
+        productiveActions = state.g();
+
 
         var jointActions = Arrays.stream(states).map(s -> s.jointAction).toArray();
         hash = Arrays.deepHashCode(jointActions);
     }
 
+    /**
+     * @return Amount of states in solutions
+     */
     public int size() {
         return states.length;
+    }
+
+    /**
+     * @return Amount of states ignoring trailing states with NoOp's
+     */
+    public int productiveSize(){
+        return productiveActions + 1;
     }
 
     public State getState(int step){

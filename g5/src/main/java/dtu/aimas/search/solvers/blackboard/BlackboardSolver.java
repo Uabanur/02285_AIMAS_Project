@@ -1,66 +1,71 @@
 package dtu.aimas.search.solvers.blackboard;
 
-import dtu.aimas.common.Color;
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
+import dtu.aimas.search.problems.ProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
-import dtu.aimas.search.solvers.*;
+import dtu.aimas.search.solvers.SolutionChecker;
+import dtu.aimas.search.solvers.SolutionMerger;
+import dtu.aimas.search.solvers.SolverMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import dtu.aimas.search.solvers.heuristics.ConflictPenalizedCost;
 import dtu.aimas.search.solvers.heuristics.Cost;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-public class BlackboardSolver implements Solver {
+public class BlackboardSolver implements SolverMinLength {
     private final Cost baseCost;
+    private final ProblemSplitter problemSplitter;
     private final Function<Cost, SolverMinLength> subSolverGenerator;
-    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator, Cost baseCost){
+    public BlackboardSolver(
+            ProblemSplitter problemSplitter,
+            Function<Cost, SolverMinLength> subSolverGenerator,
+            Cost baseCost){
+        this.problemSplitter = problemSplitter;
         this.subSolverGenerator = subSolverGenerator;
         this.baseCost = baseCost;
     }
 
-    public Result<Solution> solve(Problem problem) {
-        return ProblemParser.parse(problem).flatMap(this::solve);
+    @Override
+    public Result<Solution> solve(Problem initial) {
+        return solve(initial, 0);
+    }
+    public Result<Solution> solve(Problem problem, int minSolutionLength) {
+        return ProblemParser.parse(problem).flatMap(space -> solve(space, minSolutionLength));
     }
 
-    private Result<Solution> solve(StateSpace space) {
+    private Result<Solution> solve(StateSpace space, int minSolutionLength) {
         IO.debug("Starting blackboard search");
         var initialState = space.initialState();
-        var fullProblem = space.problem();
+        var problem = space.problem();
 
-        // Solve sub problems naively initially
-        var colors = initialState.agents.stream().map(a -> a.color)
-                .collect(Collectors.toSet())
-                .toArray(Color[]::new);
-
-        var planCount = Math.max(1, colors.length);
+        var subProblems = problemSplitter.split(problem);
+        var planCount = Math.max(1, subProblems.size());
         var plans = new Plan[planCount];
-        if(colors.length == 0){
-            IO.debug("No colors found. Initial state solution attempt with no actions.");
-            var solution = new StateSolution(new State[]{initialState});
-            plans[0] = new Plan(fullProblem, Result.ok(solution));
-        } else {
-            IO.debug("Found %d colors. Solving sub problems independently.", colors.length);
-            var startTime = System.currentTimeMillis();
-            for(var i = 0; i < plans.length; i++){
-                var color = colors[i];
-                var subProblem = ProblemSplitter.singleColor(fullProblem, color);
-                var solution = subSolverGenerator.apply(this.baseCost)
-                        .solve(subProblem)
-                        .map(s -> (StateSolution)s);
 
-                plans[i] = new Plan(subProblem, solution);
-            }
-            var endTime = System.currentTimeMillis();
-            IO.debug("Average time per naive solution: %,.2f ms", (endTime-startTime)/(float)planCount);
+        IO.debug("Received %d sub problems. Solving independently.", subProblems.size());
+        var startTime = System.currentTimeMillis();
+        for(var i = 0; i < subProblems.size(); i++){
+            var subProblem = subProblems.get(i);
+            var solution = subSolverGenerator.apply(this.baseCost)
+                    .solve(subProblem, minSolutionLength)
+                    .map(s -> (StateSolution) s);
+
+            plans[i] = new Plan(subProblem, solution);
+        }
+        var endTime = System.currentTimeMillis();
+        IO.debug("Average time per naive solution: %,.2f ms", (endTime - startTime) / (float) planCount);
+
+        if(subProblems.isEmpty()) { // empty problem must already be solved
+            var solution = new StateSolution(new State[]{initialState});
+            plans[0] = new Plan(problem, Result.ok(solution));
         }
 
         IO.debug("Searching for conflict free solution permutations");
@@ -90,10 +95,10 @@ public class BlackboardSolver implements Solver {
             for(var i = 0; i < planCount; i++) {
                 if(attempts.get(i).getConflicts().isEmpty()) continue;
 
-                var attemptSolutionLength = 0;
+                var attemptSolutionLength = minSolutionLength;
                 for(var j = 0; j < planCount; j++){
                     if(i == j) continue;
-                    var solutionSize = attempts.get(j).getSolution().map(StateSolution::size).getOrElse(() -> 0);
+                    var solutionSize = attempts.get(j).getSolution().map(StateSolution::productiveSize).getOrElse(() -> 0);
                     if(solutionSize > attemptSolutionLength) attemptSolutionLength = solutionSize;
                 }
 
@@ -107,32 +112,6 @@ public class BlackboardSolver implements Solver {
                 if (set.contains(next)) continue;
                 queue.add(next);
                 set.add(next);
-            }
-        }
-    }
-
-
-    public List<int[]> combinations(int[] options, int freezePosition, int freezeValue){
-        var result = new ArrayList<int[]>();
-
-        var permutation = new int[options.length];
-        permutation[freezePosition] = freezeValue;
-        var mutableOptions = IntStream.range(0, options.length)
-                .filter(i -> i != freezePosition).toArray();
-
-        while(true){
-            result.add(permutation.clone());
-            for(var i: mutableOptions){
-                if(permutation[i] < options[i] - 1){
-                    ++permutation[i];
-                    break;
-                }
-                else{
-                    permutation[i] = 0;
-                    if(i == mutableOptions[mutableOptions.length-1]){
-                        return result;
-                    }
-                }
             }
         }
     }

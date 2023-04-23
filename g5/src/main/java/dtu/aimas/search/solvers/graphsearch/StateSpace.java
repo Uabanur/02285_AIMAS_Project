@@ -502,11 +502,11 @@ public record StateSpace(
     }
 
     private Box copyBox(Box box) {
-        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.label);
+        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.label, box.id);
     }
 
     private Box copyBox(Box box, Position newPosition) {
-        return new Box(newPosition, box.color, box.label);
+        return new Box(newPosition, box.color, box.label, box.id);
     }
 
     public int getSatisfiedAgentGoalsCount(State state) {

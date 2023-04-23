@@ -27,8 +27,8 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A'),
-            new Box(new Position(2, 2), Color.Blue, 'B')
+            new Box(new Position(1, 2), Color.Red, 'A', 0),
+            new Box(new Position(2, 2), Color.Blue, 'B', 1)
         );
 
         var walls = new boolean[width][height];
@@ -72,8 +72,8 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A'),
-            new Box(new Position(2, 2), Color.Red, 'A')
+            new Box(new Position(1, 2), Color.Red, 'A', 0),
+            new Box(new Position(2, 2), Color.Red, 'A', 1)
         );
 
         var walls = new boolean[width][height];
@@ -120,8 +120,8 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A'),
-            new Box(new Position(2, 2), Color.Red, 'B')
+            new Box(new Position(1, 2), Color.Red, 'A', 0),
+            new Box(new Position(2, 2), Color.Red, 'B', 1)
         );
 
         var walls = new boolean[width][height];
@@ -165,7 +165,7 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Blue, 'A')
+            new Box(new Position(1, 2), Color.Blue, 'A', 0)
         );
 
         var walls = new boolean[width][height];
@@ -200,9 +200,9 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 9), Color.Blue, 'A'),
-            new Box(new Position(2, 0), Color.Red, 'A'),
-            new Box(new Position(0, 7), Color.Red, 'A')
+            new Box(new Position(1, 9), Color.Blue, 'A', 0),
+            new Box(new Position(2, 0), Color.Red, 'A', 1),
+            new Box(new Position(0, 7), Color.Red, 'A', 2)
         );
 
         var walls = new boolean[width][height];
@@ -236,9 +236,9 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(0, 5), Color.Blue, 'A'),
-            new Box(new Position(2, 0), Color.Red, 'A'),
-            new Box(new Position(1, 9), Color.Green, 'A')
+            new Box(new Position(0, 5), Color.Blue, 'A', 0),
+            new Box(new Position(2, 0), Color.Red, 'A', 1),
+            new Box(new Position(1, 9), Color.Green, 'A', 2)
         );
 
         var walls = new boolean[width][height];

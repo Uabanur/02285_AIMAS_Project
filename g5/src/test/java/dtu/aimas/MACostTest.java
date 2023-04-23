@@ -45,7 +45,7 @@ public class MACostTest {
             new Agent(new Position(0,0), Color.Blue, '0')
         };
         var boxes = new Box[]{
-            new Box(new Position(0,5), Color.Blue, 'A')
+            new Box(new Position(0,5), Color.Blue, 'A', 0)
         };
         
         var tests = new Position[][] {
@@ -57,7 +57,7 @@ public class MACostTest {
 
         for(var test : tests) {
             agents[0].pos = test[0];
-            boxes[0] = new Box(test[1], Color.Blue, 'A'); //Box.pos is final, so this is necessary
+            boxes[0] = new Box(test[1], Color.Blue, 'A', 0); //Box.pos is final, so this is necessary
             goals[test[2].row][test[2].col] = 'A';  //Box goal
             if(test[3].row >= 0) goals[test[3].row][test[3].col] = '0';
             Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
@@ -83,8 +83,8 @@ public class MACostTest {
             new Agent(new Position(9, 19), Color.Red, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(0,5), Color.Blue, 'A'),
-            new Box(new Position(1, 1), Color.Red, 'B')
+            new Box(new Position(0,5), Color.Blue, 'A', 0),
+            new Box(new Position(1, 1), Color.Red, 'B', 1)
         };
         Position goalA = new Position(0, 6); goals[goalA.row][goalA.col] = 'A';
         Position goalB = new Position(4, 19); goals[goalB.row][goalB.col] = 'B';
@@ -107,7 +107,7 @@ public class MACostTest {
             new Agent(new Position(9, 19), Color.Blue, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(0,5), Color.Blue, 'A')
+            new Box(new Position(0,5), Color.Blue, 'A', 0)
         };
         Position goalA = new Position(0, 6); goals[goalA.row][goalA.col] = 'A';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
@@ -129,8 +129,8 @@ public class MACostTest {
             new Agent(new Position(9, 19), Color.Blue, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(0,5), Color.Blue, 'A'),
-            new Box(new Position(9, 5), Color.Blue, 'A')
+            new Box(new Position(0,5), Color.Blue, 'A', 0),
+            new Box(new Position(9, 5), Color.Blue, 'A', 1)
         };
         Position goalA = new Position(8, 15); goals[goalA.row][goalA.col] = 'A';
         Problem problem = new Problem(Arrays.asList(agents), Arrays.asList(boxes), walls, goals).precompute();
@@ -158,10 +158,10 @@ public class MACostTest {
             new Agent(new Position(9, 19), Color.Blue, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(0, 5), Color.Blue, 'A'),
-            new Box(new Position(9, 5), Color.Blue, 'A'),
-            new Box(new Position(3, 12), Color.Blue, 'A'),
-            new Box(new Position(4, 0), Color.Blue, 'A')
+            new Box(new Position(0, 5), Color.Blue, 'A', 0),
+            new Box(new Position(9, 5), Color.Blue, 'A', 1),
+            new Box(new Position(3, 12), Color.Blue, 'A', 2),
+            new Box(new Position(4, 0), Color.Blue, 'A', 3)
         };
         Position goalA0 = new Position(8, 15); goals[goalA0.row][goalA0.col] = 'A';
         Position goalA1 = new Position(4, 9); goals[goalA1.row][goalA1.col] = 'A';
@@ -202,10 +202,10 @@ public class MACostTest {
             new Agent(new Position(9, 19), Color.Red, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(0, 5), Color.Blue, 'A'),
-            new Box(new Position(9, 5), Color.Blue, 'A'),
-            new Box(new Position(3, 12), Color.Red, 'A'),
-            new Box(new Position(4, 0), Color.Red, 'A')
+            new Box(new Position(0, 5), Color.Blue, 'A', 0),
+            new Box(new Position(9, 5), Color.Blue, 'A', 1),
+            new Box(new Position(3, 12), Color.Red, 'A', 2),
+            new Box(new Position(4, 0), Color.Red, 'A', 3)
         };
         Position goalA0 = new Position(8, 15); goals[goalA0.row][goalA0.col] = 'A';
         Position goalA1 = new Position(4, 9); goals[goalA1.row][goalA1.col] = 'A';
@@ -238,12 +238,12 @@ public class MACostTest {
             new Agent(new Position(3, 3), Color.Red, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(8, 7), Color.Blue, 'A'),
-            new Box(new Position(8, 19), Color.Blue, 'A'),
-            new Box(new Position(9, 18), Color.Blue, 'B'),
-            new Box(new Position(2, 3), Color.Red, 'A'),
-            new Box(new Position(0, 0), Color.Red, 'B'),
-            new Box(new Position(4, 9), Color.Red, 'B')
+            new Box(new Position(8, 7), Color.Blue, 'A', 0),
+            new Box(new Position(8, 19), Color.Blue, 'A', 1),
+            new Box(new Position(9, 18), Color.Blue, 'B', 2),
+            new Box(new Position(2, 3), Color.Red, 'A', 3),
+            new Box(new Position(0, 0), Color.Red, 'B', 4),
+            new Box(new Position(4, 9), Color.Red, 'B', 5)
         };
         Position goalA0 = new Position(8, 15); goals[goalA0.row][goalA0.col] = 'A';
         Position goalB0 = new Position(4, 9); goals[goalB0.row][goalB0.col] = 'B';
@@ -274,13 +274,13 @@ public class MACostTest {
             new Agent(new Position(3, 3), Color.Red, '1')
         };
         var boxes = new Box[]{
-            new Box(new Position(8, 7), Color.Blue, 'A'),
-            new Box(new Position(8, 19), Color.Blue, 'A'),
-            new Box(new Position(9, 18), Color.Blue, 'B'),
-            new Box(new Position(2, 3), Color.Red, 'A'),
-            new Box(new Position(0, 0), Color.Red, 'B'),
-            new Box(new Position(4, 9), Color.Red, 'B'),
-            new Box(new Position(4, 9), Color.Red, 'C')
+            new Box(new Position(8, 7), Color.Blue, 'A', 0),
+            new Box(new Position(8, 19), Color.Blue, 'A', 1),
+            new Box(new Position(9, 18), Color.Blue, 'B', 2),
+            new Box(new Position(2, 3), Color.Red, 'A', 3),
+            new Box(new Position(0, 0), Color.Red, 'B', 4),
+            new Box(new Position(4, 9), Color.Red, 'B', 5),
+            new Box(new Position(4, 9), Color.Red, 'C', 6)
         };
         Position goalA0 = new Position(8, 15); goals[goalA0.row][goalA0.col] = 'A';
         Position goalA1 = new Position(2, 8); goals[goalA1.row][goalA1.col] = 'A';
@@ -325,14 +325,14 @@ public class MACostTest {
             new Agent(new Position(9, 18), Color.Red, '2')
         };
         var boxes = new Box[]{
-            new Box(new Position(8, 7), Color.Blue, 'A'),
-            new Box(new Position(8, 19), Color.Blue, 'A'),
-            new Box(new Position(9, 18), Color.Blue, 'B'),
-            new Box(new Position(2, 3), Color.Red, 'A'),
-            new Box(new Position(0, 0), Color.Red, 'B'),
-            new Box(new Position(4, 9), Color.Red, 'B'),
-            new Box(new Position(4, 9), Color.Red, 'C'),
-            new Box(new Position(6, 8), Color.Red, 'C')
+            new Box(new Position(8, 7), Color.Blue, 'A', 0),
+            new Box(new Position(8, 19), Color.Blue, 'A', 1),
+            new Box(new Position(9, 18), Color.Blue, 'B', 2),
+            new Box(new Position(2, 3), Color.Red, 'A', 3),
+            new Box(new Position(0, 0), Color.Red, 'B', 4),
+            new Box(new Position(4, 9), Color.Red, 'B', 5),
+            new Box(new Position(4, 9), Color.Red, 'C', 6),
+            new Box(new Position(6, 8), Color.Red, 'C', 7)
         };
         Position goalA0 = new Position(8, 15); goals[goalA0.row][goalA0.col] = 'A';
         Position goalA1 = new Position(2, 8); goals[goalA1.row][goalA1.col] = 'A';

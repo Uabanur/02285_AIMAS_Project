@@ -10,6 +10,7 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
+import dtu.aimas.search.solvers.subsolvers.AgentSolver;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -154,5 +155,10 @@ public class LevelSolvingTest {
     @Test
     public void TestMAsimple5_AStar_GoalCount() {
         TestMap("MAsimple5", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestSAD3_AgentSolver(){
+        TestMap("SAD3", new AgentSolver(AStarMinLength::new));
     }
 }

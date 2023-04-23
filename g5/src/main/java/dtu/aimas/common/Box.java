@@ -3,9 +3,15 @@ package dtu.aimas.common;
 import java.util.Objects;
 
 public class Box extends DomainObject {
+    public final int id;
 
-    public Box(Position pos, Color color, char type) {
+    public Box(Position pos, Color color, char type, int id) {
         super(pos, color, type);
+        this.id = id;
+    }
+
+    public static boolean isLabel(char symbol) {
+        return 'A' <= symbol && symbol <= 'Z';
     }
 
     @Override
@@ -24,6 +30,6 @@ public class Box extends DomainObject {
     }
 
     public Box clone() {
-        return new Box(new Position(pos.row, pos.col), color, label);
+        return new Box(new Position(pos.row, pos.col), color, label, id);
     }
 }

@@ -4,6 +4,7 @@ import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 
 public class DistanceSumCost implements Cost {
+    public static DistanceSumCost instance = new DistanceSumCost();
     @Override
     public int calculate(State state, StateSpace space) {
         var problem = space.problem();

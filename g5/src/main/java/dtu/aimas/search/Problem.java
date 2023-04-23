@@ -137,6 +137,10 @@ public class Problem {
         return this;
     }
 
+    public int mapSize(){
+        return walls.length * walls[0].length;
+    }
+
     @Override
     public String toString() {
         var height = walls.length;
@@ -204,7 +208,7 @@ public class Problem {
             for(var col = 0; col < width; col++ ){
                 sb.append(goal[row][col]);
             }
-            if(row < width-1) sb.append(newline);
+            sb.append(newline);
         }
 
         return sb.toString();

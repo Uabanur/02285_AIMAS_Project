@@ -155,11 +155,12 @@ public class CourseLevelParser extends LevelParser
             .collect(Collectors.toList());
 
         var boxList = new ArrayList<Box>();
+        var boxId = 0;
         for(var row = 0; row < boxes.length; row++){
             for(var col = 0; col < boxes[row].length; col++){
                 var c = boxes[row][col];
                 if(!Box.isLabel(c)) continue;
-                boxList.add(new Box(new Position(row, col), boxColors[c-'A'], c));
+                boxList.add(new Box(new Position(row, col), boxColors[c-'A'], c, boxId++));
             }
         }
 

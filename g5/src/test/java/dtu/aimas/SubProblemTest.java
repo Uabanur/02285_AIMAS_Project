@@ -25,8 +25,8 @@ public class SubProblemTest {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A'),
-            new Box(new Position(2, 2), Color.Blue, 'B')
+            new Box(new Position(1, 2), Color.Red, 'A', 0),
+            new Box(new Position(2, 2), Color.Blue, 'B', 1)
         );
 
         var walls = new boolean[width][height];
@@ -67,8 +67,8 @@ public class SubProblemTest {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A'),
-            new Box(new Position(2, 2), Color.Red, 'B')
+            new Box(new Position(1, 2), Color.Red, 'A', 0),
+            new Box(new Position(2, 2), Color.Red, 'B', 1)
         );
 
         var walls = new boolean[width][height];

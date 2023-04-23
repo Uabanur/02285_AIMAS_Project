@@ -27,7 +27,7 @@ public abstract class GraphSearchMinLength {
 
     public Result<Solution> solve(Problem problem, BasicFrontier frontier, int minSolutionLength)
     {
-        this.cost = DefaultCost.instance();
+        this.cost = DefaultCost.instance;
         this.noopAction = IntStream.range(0, problem.agents.size()).mapToObj(a -> Action.NoOp).toArray(Action[]::new);
         return ProblemParser.parse(problem)
                 .flatMap(space -> solve(space, frontier, minSolutionLength));
