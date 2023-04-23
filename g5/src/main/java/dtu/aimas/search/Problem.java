@@ -3,6 +3,7 @@ package dtu.aimas.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.Queue;
 import java.util.LinkedList;
@@ -17,13 +18,13 @@ import dtu.aimas.common.Goal;
 
 public class Problem {
 
-    public Collection<Agent> agents;
-    public Collection<Box> boxes;
-    public boolean[][] walls;
-    public char[][] goals;
-    public Collection<Goal> agentGoals;
-    public Collection<Goal> boxGoals;
-    public int expectedStateSize;
+    public final Collection<Agent> agents;
+    public final Collection<Box> boxes;
+    public final boolean[][] walls;
+    public final char[][] goals;
+    public final Collection<Goal> agentGoals;
+    public final Collection<Goal> boxGoals;
+    public final int expectedStateSize;
     private int[][][][] distances;
 
     public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
@@ -33,30 +34,44 @@ public class Problem {
         this.walls = walls;
         this.goals = goals;
         expectedStateSize = 2<<15;
-      
-        this.agentGoals = new ArrayList<Goal>();
-        this.boxGoals = new ArrayList<Goal>();
+
+        this.agentGoals = extractGoals(Agent::isLabel);
+        this.boxGoals = extractGoals(Box::isLabel);
+        this.distances = initializeDistances();
+    }
+
+    public Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, Problem parent) {
+        this.agents = agents;
+        this.boxes = boxes;
+        this.goals = goals;
+        this.agentGoals = extractGoals(Agent::isLabel);
+        this.boxGoals = extractGoals(Box::isLabel);
+
+        this.walls = parent.walls;
+        this.expectedStateSize = parent.expectedStateSize;
+        this.distances = parent.distances;
+    }
+
+    private Collection<Goal> extractGoals(Function<Character, Boolean> predicate){
+        var result = new ArrayList<Goal>();
         for(var row = 0; row < goals.length; row++){
             for(var col = 0; col < goals[row].length; col++){
                 var c = goals[row][col];
-                if(Agent.isLabel(c)){
-                    this.agentGoals.add(new Goal(c, new Position(row, col)));
-                }
-                else if(Box.isLabel(c)){
-                    this.boxGoals.add(new Goal(c, new Position(row, col)));
-                }
+                if (!predicate.apply(c)) continue;
+
+                result.add(new Goal(c, new Position(row, col)));
             }
         }
-        
-      
-        this.distances = new int[walls.length][walls[0].length][walls.length][walls[0].length];
-        for(int i = 0; i < distances.length; i++) {
-            for(int j = 0; j < distances[i].length; j++) {
-                for(int l = 0; l < distances[i][j].length; l++) {
-                    Arrays.fill(distances[i][j][l], Integer.MAX_VALUE);
-                }
-            }
-        }
+        return result;
+    }
+
+    private int[][][][] initializeDistances(){
+        var distances = new int[walls.length][walls[0].length][walls.length][walls[0].length];
+        Arrays.stream(distances)
+                .flatMap(Arrays::stream)
+                .flatMap(Arrays::stream)
+                .forEach(a -> Arrays.fill(a, Integer.MAX_VALUE));
+        return distances;
     }
 
     private void distanceFromPos(Position src) {

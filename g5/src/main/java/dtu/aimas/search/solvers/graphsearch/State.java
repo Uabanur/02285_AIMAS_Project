@@ -2,36 +2,46 @@ package dtu.aimas.search.solvers.graphsearch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import dtu.aimas.common.*;
 import dtu.aimas.search.Action;
 import lombok.Getter;
+import lombok.NonNull;
 
 public class State {
     public final State parent;
-    public ArrayList<Agent> agents;
-    public ArrayList<Box> boxes;
-    public Action[] jointAction;
+    public final ArrayList<Agent> agents;
+    public final ArrayList<Box> boxes;
+    public final Action[] jointAction;
+    private final StateConfig stateConfig;
+    private final int hash;
     
     @Getter
     private final int g;
 
-    public State(State parent, ArrayList<Agent> agents, ArrayList<Box> boxes, Action[] jointActions){
+    public State(@NonNull State parent, ArrayList<Agent> agents, ArrayList<Box> boxes, @NonNull Action[] jointActions){
         this.parent = parent;
         this.agents = agents;
         this.boxes = boxes;
         this.jointAction = jointActions;
         this.g = parent.g + 1;
+        this.stateConfig = parent.stateConfig;
+        this.hash = stateConfig.getHash().apply(this);
     }
 
-    public State(ArrayList<Agent> agents, ArrayList<Box> boxes){
+    public State(ArrayList<Agent> agents, ArrayList<Box> boxes, @NonNull StateConfig stateConfig){
         this.parent = null;
         this.agents = agents;
         this.boxes = boxes;
         this.jointAction = null;
         this.g = 0;
+        this.stateConfig = stateConfig;
+        this.hash = stateConfig.getHash().apply(this);
+    }
+
+    public State(ArrayList<Agent> agents, ArrayList<Box> boxes){
+        this(agents, boxes, new StateConfig());
     }
 
     public int g()
@@ -46,20 +56,13 @@ public class State {
         var newline = System.lineSeparator();
 
         sb.append("Agents: ");
-        sb.append(agents.stream().map(x -> x.toString()).collect(commaSeparate));
+        sb.append(agents.stream().map(Agent::toString).collect(commaSeparate));
         sb.append(newline);
 
         sb.append("Boxes: ");
-        sb.append(boxes.stream().map(x -> x.toString()).collect(commaSeparate));
+        sb.append(boxes.stream().map(Box::toString).collect(commaSeparate));
         sb.append(newline);
 
-        return sb.toString();
-    }
-
-    public String printActions(){
-        StringBuilder sb = new StringBuilder("Actions: ");
-        for (Action action : jointAction)
-            sb.append(action.name + " ");
         return sb.toString();
     }
 
@@ -83,15 +86,11 @@ public class State {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof State)) return false;
-        State state = (State) o;
-        return Objects.equals(agents, state.agents) &&
-               Objects.equals(boxes, state.boxes) && 
-               g == state.g();
+        return hashCode() == o.hashCode();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agents, boxes, g);
+        return hash;
     }
-    
 }

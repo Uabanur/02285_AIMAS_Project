@@ -1,0 +1,27 @@
+#domain
+hospital
+#levelname
+RowsOfAgentsAndBoxes
+#colors
+red:        0, A
+blue:       1, B
+lightblue:  2, C
+green:      3, D
+grey:       4, E
+#initial
++++++++++++
++0A       +
++1B       +
++2C       +
++3D       +
++4E       +
++++++++++++
+#goal
++++++++++++
++        E+
++        A+
++        B+
++        C+
++        D+
++++++++++++
+#end

@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,8 +23,7 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 
 public class IO {
-    private final static String CurrentClassPathString = System.getProperty("java.class.path")
-            .split(OsClassPathSeparator.get())[0];
+    private final static String CurrentClassPathString = getClassPath();
     private final static Path TargetsPath = Paths.get(CurrentClassPathString).getParent();
     private final static Path TargetClassesPath = Paths.get(TargetsPath.toString(), "classes");
 
@@ -39,6 +39,13 @@ public class IO {
     private static BufferedReader serverMessages = new BufferedReader(
         new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 
+
+    private static String getClassPath(){
+        var classPaths = System.getProperty("java.class.path").split(OsClassPathSeparator.get());
+        var path = Arrays.stream(classPaths).filter(p -> p.contains("g5")).findAny();
+        if(path.isEmpty()) throw new IllegalStateException("Class path not found");
+        return path.get();
+    }
 
     private static void sendToServerRaw(String msg){
         if (useServerCommunication){

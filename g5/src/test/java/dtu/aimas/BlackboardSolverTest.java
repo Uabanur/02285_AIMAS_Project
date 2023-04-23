@@ -10,26 +10,28 @@ import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
+import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
-import dtu.aimas.search.solvers.graphsearch.AStar;
+import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.GoalCount;
 import org.junit.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class BlackboardSolverTest {
     private final LevelParser levelParser = CourseLevelParser.Instance;
     private Result<Solution> solution;
     private long startTimeMs = 0;
-    private BlackboardSolver solver;
 
     @Before
     public void setup(){
         IO.logLevel = LogLevel.Information;
-        solver = new BlackboardSolver(AStar::new);
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
     }
@@ -38,8 +40,8 @@ public class BlackboardSolverTest {
     public void after(){
         IO.debug("Test time: %d ms", System.currentTimeMillis() - startTimeMs);
         solution.ifOk(s -> {
-            IO.info("Solution of size %d found:\n", s.size());
-            s.serializeSteps().forEach(IO::info);
+            IO.debug("Solution of size %d found:\n", s.size());
+            s.serializeSteps().forEach(IO::debug);
         });
     }
     
@@ -79,6 +81,7 @@ public class BlackboardSolverTest {
                     """;
 
         var problem = getProblem(level);
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -97,6 +100,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -119,6 +123,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -141,6 +146,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -165,33 +171,65 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
     @Test
-    public void MoreAgentsCrossing(){
+    public void ThreeAgentsCrossing(){
         var level = """
                 #initial
                 +++++++
                 +01   +
                 +++ +++
-                + 32  +
+                +  2  +
                 +++++++
                 #goal
                 +++++++
-                +   32+
+                +    2+
                 +++ +++
                 +   01+
                 +++++++
                 #end
                 """;
         var problem = getProblem(level, "red: 0,1,2,3,4");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
-    @Ignore
+    @Test
+    public void RowsOfAgentsAndBoxes(){
+        var level = """
+                #initial
+                +++++++++++
+                +0A       +
+                +1B       +
+                +2C       +
+                +3D       +
+                +4E       +
+                +++++++++++
+                #goal
+                +++++++++++
+                +        E+
+                +        A+
+                +        B+
+                +        C+
+                +        D+
+                +++++++++++
+                #end
+                """;
+        var colors = IntStream.range(0, 4).mapToObj(i ->
+                (Color.values()[i]).name() + ": " + i + "," + (char)('A'+i)
+        ).toArray(String[]::new);
+
+        var problem = getProblem(level, colors);
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
+        solution = solver.solve(problem);
+        Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
+    }
+
     @Test
     public void BlockingFinish(){
         var level = """
@@ -208,11 +246,11 @@ public class BlackboardSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0, 1");
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
-    @Ignore // TODO: for now it cannot manage agents of same color with boxes
     @Test
     public void SameColorAgentsWithBoxes(){
         var level = """
@@ -232,6 +270,7 @@ public class BlackboardSolverTest {
                 """;
 
         var problem = getProblem(level, "red: 0,1,A,B");
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -332,7 +371,7 @@ public class BlackboardSolverTest {
             solutions[1] = new StateSolution(states);
         }
 
-        var result = (StateSolution)solver.mergeSolutions(List.of(solutions));
+        var result = SolutionMerger.mergeSolutions(List.of(solutions));
         Assert.assertEquals(3, result.size());
         { // step 0
             var state = result.getState(0);
@@ -452,6 +491,7 @@ public class BlackboardSolverTest {
             new int[]{2, 5, 3}
         ));
 
+        var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         var result = solver.combinations(options, freezePosition, freezeValue);
         Assert.assertEquals(expected.size(), result.size());
         for(var permutation: expected){

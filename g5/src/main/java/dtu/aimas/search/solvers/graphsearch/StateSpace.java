@@ -1,43 +1,25 @@
 package dtu.aimas.search.solvers.graphsearch;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-
-import dtu.aimas.common.Agent;
-import dtu.aimas.common.Box;
-import dtu.aimas.common.Goal;
-import dtu.aimas.common.Position;
-import dtu.aimas.common.Result;
+import dtu.aimas.common.*;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
-import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
+import lombok.NonNull;
 
-public class StateSpace {
+import java.util.*;
+
+public record StateSpace(
+        @Getter @NonNull Problem problem,
+        @Getter @NonNull State initialState
+) {
     private static final Random RNG = new Random(1);
 
-    @Getter
-    private Problem problem;
-
-    @Getter
-    private State initialState;
-
-    public StateSpace(Problem problem, State initialState) {
-        this.problem = problem;
-        this.initialState = initialState;
-    }
-
-    public Result<Solution> createSolution(State state){
-        if (!isGoalState(state)) 
+    public Result<Solution> createSolution(State state) {
+        if (!isGoalState(state))
             return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
 
         // return Result.ok(new ActionSolution(extractPlan(state)));
@@ -45,48 +27,46 @@ public class StateSpace {
     }
 
     public boolean isGoalState(State state) {
-        for(Goal goal : this.problem.agentGoals){
+        for (Goal goal : this.problem.agentGoals) {
             // var agent = getAgentByNumber(state, goal.label - '0');
             var agent = getAgentByLabel(state, goal.label);
-            if(!satisfies(goal, agent)){
+            if (!satisfies(goal, agent)) {
                 return false;
             }
         }
-        for(Goal goal : this.problem.boxGoals) {
+        for (Goal goal : this.problem.boxGoals) {
             boolean goalSatisfied = false;
-            for(Box box : state.boxes){
-                if(satisfies(goal, box)){
+            for (Box box : state.boxes) {
+                if (satisfies(goal, box)) {
                     goalSatisfied = true;
                     break;
                 }
             }
-            if(!goalSatisfied) 
-            {
+            if (!goalSatisfied) {
                 return false;
             }
         }
         return true;
     }
 
-    private State[] extractStates(State state){
-        var length = state.g()+1;
+    private State[] extractStates(State state) {
+        var length = state.g() + 1;
         var states = new State[length];
         var current = state;
 
-        for(var i = length-1; i >= 0; i--){
+        for (var i = length - 1; i >= 0; i--) {
             states[i] = current;
             current = current.parent;
         }
-    
+
         return states;
     }
 
-    public Action[][] extractPlan(State state)
-    { 
-        ArrayList<Action[]> plan = new ArrayList<Action[]>();
+    @SuppressWarnings("unused")
+    public Action[][] extractPlan(State state) {
+        ArrayList<Action[]> plan = new ArrayList<>();
         State iterator = state;
-        while (iterator.jointAction != null)
-        {
+        while (iterator.jointAction != null) {
             plan.add(iterator.jointAction);
             iterator = iterator.parent;
         }
@@ -98,107 +78,106 @@ public class StateSpace {
         return state.agents.get(i);
     }
 
-    public Agent getAgentByLabel(State state, char label){ 
-        for(var agent: state.agents){
-            if(agent.label == label) return agent;
+    public Agent getAgentByLabel(State state, char label) {
+        for (var agent : state.agents) {
+            if (agent.label == label) return agent;
         }
         throw new UnreachableState();
     }
 
     public Optional<Box> getBoxAt(State state, Position position) {
-        for(Box box : state.boxes){
-            if (position.equals(box.pos)){
+        for (Box box : state.boxes) {
+            if (position.equals(box.pos)) {
                 return Optional.of(box);
             }
         }
         return Optional.empty();
     }
 
-    public Optional<Agent> getAgentAt(State state, Position position){
-        for(Agent agent : state.agents){
+    public Optional<Agent> getAgentAt(State state, Position position) {
+        for (Agent agent : state.agents) {
             if (position.equals(agent.pos))
                 return Optional.of(agent);
         }
         return Optional.empty();
     }
 
-    private boolean satisfies(Goal goal, Agent agent){
+    private boolean satisfies(Goal goal, Agent agent) {
         return agent.pos.equals(goal.destination);
     }
 
-    private boolean isWallAt(Position position){
+    private boolean isWallAt(Position position) {
         return this.problem.walls[position.row][position.col];
     }
 
-    private boolean isCellFree(Position position, State state){
-        return !isWallAt(position) && !getAgentAt(state, position).isPresent() && !getBoxAt(state, position).isPresent();
+    private boolean isCellFree(Position position, State state) {
+        return !isWallAt(position) && getAgentAt(state, position).isEmpty() && getBoxAt(state, position).isEmpty();
     }
 
-    private boolean canMoveBox(Agent agent, Box box){
-        return agent.color == box.color;
+    private boolean notOwner(Agent agent, Box box) {
+        return agent.color != box.color;
     }
 
-    private boolean satisfies(Goal goal, Box box){
+    private boolean satisfies(Goal goal, Box box) {
         return box.label == goal.label && box.pos.equals(goal.destination);
     }
 
-    private Position moveAgent(Agent agent, Action action){
+    private Position moveAgent(Agent agent, Action action) {
         return new Position(agent.pos.row + action.agentRowDelta, agent.pos.col + action.agentColDelta);
     }
 
-    private Position moveBox(Box box, Action action){
+    private Position moveBox(Box box, Action action) {
         return new Position(box.pos.row + action.boxRowDelta, box.pos.col + action.boxColDelta);
     }
 
-    private Position getPullSource(Agent agent, Action action){
+    private Position getPullSource(Agent agent, Action action) {
         return new Position(agent.pos.row - action.boxRowDelta, agent.pos.col - action.boxColDelta);
     }
 
-    public boolean isApplicable(State state, Agent agent, Action action){
+    public boolean isApplicable(State state, Agent agent, Action action) {
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
-        switch(action.type){
-            case NoOp:
+        switch (action.type) {
+            case NoOp -> {
                 return true;
-
-            case Move:
+            }
+            case Move -> {
                 agentDestination = moveAgent(agent, action);
                 return isCellFree(agentDestination, state);
-
-            case Push:
+            }
+            case Push -> {
                 agentDestination = moveAgent(agent, action);
                 boxResult = getBoxAt(state, agentDestination);
-                if(!boxResult.isPresent()) return false;
+                if (boxResult.isEmpty()) return false;
                 box = boxResult.get();
-                if(!canMoveBox(agent, box)) return false;
+                if (notOwner(agent, box)) return false;
                 Position boxDestination = moveBox(box, action);
                 return isCellFree(boxDestination, state);
-
-            case Pull:
+            }
+            case Pull -> {
                 Position boxSource = getPullSource(agent, action);
                 boxResult = getBoxAt(state, boxSource);
-                if(!boxResult.isPresent()) return false;
+                if (boxResult.isEmpty()) return false;
                 box = boxResult.get();
-                if(!canMoveBox(agent, box)) return false; 
+                if (notOwner(agent, box)) return false;
                 agentDestination = moveAgent(agent, action);
                 return isCellFree(agentDestination, state);
-
+            }
         }
-        // unreachable
-        return false;
+
+        throw new UnreachableState();
     }
 
     public ArrayList<State> expand(State state) {
         int agentsCount = state.agents.size();
         Action[][] applicableActions = new Action[agentsCount][];
-        for(int agentId = 0; agentId < agentsCount; agentId++)
-        {
+        for (int agentId = 0; agentId < agentsCount; agentId++) {
             ArrayList<Action> agentActions = new ArrayList<>(Action.values().length);
             // var agent = getAgentByNumber(state, agentId);
             var agent = state.agents.get(agentId);
-            for(Action action : Action.values()){
-                if(isApplicable(state, agent, action)){
+            for (Action action : Action.values()) {
+                if (isApplicable(state, agent, action)) {
                     agentActions.add(action);
                 }
             }
@@ -210,32 +189,29 @@ public class StateSpace {
         int[] actionsPermutation = new int[agentsCount];
         ArrayList<State> expandedStates = new ArrayList<>(16);
 
-        while(true){
-            for(int i=0; i<agentsCount; i++){
+        while (true) {
+            for (int i = 0; i < agentsCount; i++) {
                 jointAction[i] = applicableActions[i][actionsPermutation[i]];
             }
 
             var stateResult = tryCreateState(state, jointAction);
-            if(stateResult.isPresent()){
-                expandedStates.add(stateResult.get());
-            }
+            stateResult.ifPresent(expandedStates::add);
 
             boolean done = false;
 
-            for(int i = 0; i<agentsCount; i++){
-                if(actionsPermutation[i] < applicableActions[i].length - 1){
+            for (int i = 0; i < agentsCount; i++) {
+                if (actionsPermutation[i] < applicableActions[i].length - 1) {
                     ++actionsPermutation[i];
                     break;
-                }
-                else{
+                } else {
                     actionsPermutation[i] = 0;
-                    if(i == agentsCount - 1){
+                    if (i == agentsCount - 1) {
                         done = true;
                     }
                 }
             }
 
-            if(done) break;
+            if (done) break;
         }
 
         Collections.shuffle(expandedStates, StateSpace.RNG);
@@ -243,32 +219,32 @@ public class StateSpace {
         return expandedStates;
     }
 
-    public boolean isValid(State state){
+    public boolean isValid(State state) {
         Set<Position> occupiedPositions = new HashSet<>();
-        for (Agent agent : state.agents){
-            if(!occupiedPositions.add(agent.pos)) return false;
+        for (Agent agent : state.agents) {
+            if (!occupiedPositions.add(agent.pos)) return false;
         }
-        for (Box box : state.boxes){
-            if(!occupiedPositions.add(box.pos)) return false;
+        for (Box box : state.boxes) {
+            if (!occupiedPositions.add(box.pos)) return false;
         }
         return true;
     }
 
-    public Optional<State> tryCreateState(State state, Action[] jointAction){
+    public Optional<State> tryCreateState(State state, Action[] jointAction) {
         var jointActionsToApply = Arrays.copyOf(jointAction, jointAction.length);
         State destinationState = applyJointActions(state, jointActionsToApply);
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
 
-    private State applyJointActions(State state, Action[] actionsToApply){
+    private State applyJointActions(State state, Action[] actionsToApply) {
         ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());
         ArrayList<Box> updatedBoxes = new ArrayList<>(state.boxes.size());
 
-        for(Box box : state.boxes){
+        for (Box box : state.boxes) {
             updatedBoxes.add(copyBox(box));
         }
 
-        for(int action = 0; action < actionsToApply.length; action++){
+        for (int action = 0; action < actionsToApply.length; action++) {
             // Agent agent = getAgentByNumber(state, action);
             Agent agent = state.agents.get(action);
             Agent updatedAgent = null;
@@ -279,93 +255,84 @@ public class StateSpace {
             Box updatedBox;
             Position boxDestination;
             Position boxSource;
-            
-            switch (actionsToApply[action].type)
-            {
-                case NoOp:
-                    updatedAgent = copyAgent(agent);
-                    break;
-                
-                case Move:
+
+            switch (actionsToApply[action].type) {
+                case NoOp -> updatedAgent = copyAgent(agent);
+                case Move -> {
                     agentDestination = moveAgent(agent, actionsToApply[action]);
-
                     updatedAgent = copyAgent(agent, agentDestination);
-                    break;
-
-                case Push:
+                }
+                case Push -> {
                     agentDestination = moveAgent(agent, actionsToApply[action]);
                     boxResult = getBoxAt(state, agentDestination);
+                    if(boxResult.isEmpty()) throw new IllegalStateException("Invalid action");
                     box = boxResult.get();
                     boxDestination = moveBox(box, actionsToApply[action]);
-
                     updatedAgent = copyAgent(agent, agentDestination);
                     updatedBox = copyBox(box, boxDestination);
-                    for(int i = 0; i < updatedBoxes.size(); i++){
-                        if(agentDestination.equals(updatedBoxes.get(i).pos)){
+                    for (int i = 0; i < updatedBoxes.size(); i++) {
+                        if (agentDestination.equals(updatedBoxes.get(i).pos)) {
                             updatedBoxes.remove(i);
                             updatedBoxes.add(i, updatedBox);
                             break;
                         }
                     }
-
-                    break;
-
-                case Pull:
+                }
+                case Pull -> {
                     boxSource = getPullSource(agent, actionsToApply[action]);
                     agentDestination = moveAgent(agent, actionsToApply[action]);
                     boxResult = getBoxAt(state, boxSource);
+                    if(boxResult.isEmpty()) throw new IllegalStateException("Invalid action");
                     box = boxResult.get();
                     boxDestination = moveBox(box, actionsToApply[action]);
-
                     updatedAgent = copyAgent(agent, agentDestination);
                     updatedBox = copyBox(box, boxDestination);
-                    for(int i = 0; i < updatedBoxes.size(); i++){
-                        if(boxSource.equals(updatedBoxes.get(i).pos)){
+                    for (int i = 0; i < updatedBoxes.size(); i++) {
+                        if (boxSource.equals(updatedBoxes.get(i).pos)) {
                             updatedBoxes.remove(i);
                             updatedBoxes.add(i, updatedBox);
                             break;
                         }
                     }
-
-                    break;
+                }
             }
             updatedAgents.add(updatedAgent);
         }
         return new State(state, updatedAgents, updatedBoxes, actionsToApply);
     }
 
-    private Agent copyAgent(Agent agent){
+    private Agent copyAgent(Agent agent) {
         return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color, agent.label);
     }
 
-    private Agent copyAgent(Agent agent, Position newPosition){
+    private Agent copyAgent(Agent agent, Position newPosition) {
         return new Agent(newPosition, agent.color, agent.label);
     }
 
-    private Box copyBox(Box box){
+    private Box copyBox(Box box) {
         return new Box(new Position(box.pos.row, box.pos.col), box.color, box.label);
     }
 
-    private Box copyBox(Box box, Position newPosition){
+    private Box copyBox(Box box, Position newPosition) {
         return new Box(newPosition, box.color, box.label);
     }
 
-    public int getSatisfiedAgentGoalsCount(State state){
+    public int getSatisfiedAgentGoalsCount(State state) {
         var result = 0;
-        for(Goal goal : this.problem.agentGoals){
+        for (Goal goal : this.problem.agentGoals) {
             var agent = getAgentByLabel(state, goal.label);
-            if(satisfies(goal, agent)){
+            if (satisfies(goal, agent)) {
                 result++;
             }
         }
         return result;
     }
 
-    public int getSatisfiedBoxGoalsCount(State state){
+    public int getSatisfiedBoxGoalsCount(State state) {
         var result = 0;
-        for(Goal goal : this.problem.boxGoals) {
-            for(Box box : state.boxes){
-                if(satisfies(goal, box)){
+        for (Goal goal : this.problem.boxGoals) {
+            for (Box box : state.boxes) {
+                if (satisfies(goal, box)) {
                     result++;
                     break;
                 }
@@ -374,4 +341,13 @@ public class StateSpace {
         return result;
     }
 
+    public State shallowMerge(State mainState, State otherState){
+        var agents = new ArrayList<>(mainState.agents);
+        var boxes = new ArrayList<>(mainState.boxes);
+
+        agents.addAll(otherState.agents);
+        boxes.addAll(otherState.boxes);
+
+        return new State(agents, boxes);
+    }
 }

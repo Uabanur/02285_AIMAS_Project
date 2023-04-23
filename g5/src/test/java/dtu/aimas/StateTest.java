@@ -41,7 +41,7 @@ public class StateTest {
         Assert.assertTrue(stateSpaceResult.isOk());
         
         var stateSpace = stateSpaceResult.get();
-        var initialState = stateSpace.getInitialState();
+        var initialState = stateSpace.initialState();
         Assert.assertNotNull(initialState);
     
         var agentQuery = stateSpace.getAgentByNumber(initialState, 0);
@@ -55,7 +55,7 @@ public class StateTest {
         var agent = new Agent(new Position(2, 2), Color.Red, '0');
         var problem = makeProblem(List.of(agent), List.of());
         var stateSpace = ProblemParser.parse(problem).get();
-        var initialState = stateSpace.getInitialState();
+        var initialState = stateSpace.initialState();
         var expanded = stateSpace.expand(initialState);
     
         var expectedPositions = List.of(
@@ -94,7 +94,7 @@ public class StateTest {
         var agent = new Agent(new Position(1, 5), Color.Red, '0');
         var problem = makeProblem(List.of(agent), List.of());
         var stateSpace = ProblemParser.parse(problem).get();
-        var initialState = stateSpace.getInitialState();
+        var initialState = stateSpace.initialState();
         var expanded = stateSpace.expand(initialState);
     
         var expectedPositions = List.of(
@@ -120,7 +120,7 @@ public class StateTest {
         var agent1 = new Agent(new Position(2,5), Color.Red, '1');
 
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent0, agent1), List.of())).get();
-        var initialState = stateSpace.getInitialState();
+        var initialState = stateSpace.initialState();
 
         Assert.assertEquals(agent0.pos, stateSpace.getAgentByNumber(initialState, 0).pos);
         Assert.assertEquals(agent1.pos, stateSpace.getAgentByNumber(initialState, 1).pos);
@@ -153,7 +153,7 @@ public class StateTest {
         var agent = new Agent(new Position(1, 1), Color.Red, '0');
         var box = new Box(new Position(1, 2), Color.Red, 'A');
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent), List.of(box))).get();
-        var initialState = stateSpace.getInitialState();
+        var initialState = stateSpace.initialState();
         var expanded = stateSpace.expand(initialState);
         
         var expectedAgentPositions = List.of(
