@@ -151,8 +151,7 @@ public class CourseLevelParser extends LevelParser
         char[][] goals, boolean[][] walls)
     {
         var agentList = IntStream.range(0, agentRows.length)
-            .mapToObj(i -> 
-                new Agent(new Position(agentRows[i], agentCols[i]), agentColors[i], (char) ('0'+i)))
+            .mapToObj(i -> new Agent(new Position(agentRows[i], agentCols[i]), agentColors[i], (char)('0'+i)))
             .collect(Collectors.toList());
 
         var boxList = new ArrayList<Box>();

@@ -8,6 +8,7 @@ public class ConfigOptionLoader {
         return Map.of(
                 BFSConfigOption.OptionName, BFSConfigOption::new,
                 DFSConfigOption.OptionName, DFSConfigOption::new,
+                CBSConfigOption.OptionName, CBSConfigOption::new,
                 BlackboardConfigOption.OptionName, BlackboardConfigOption::new,
                 LoggingConfigOption.OptionName, LoggingConfigOption::new
         );

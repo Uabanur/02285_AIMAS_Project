@@ -48,4 +48,13 @@ public class StateSolution implements Solution {
     public boolean equals(Object obj) {
         return hashCode() == obj.hashCode();
     }
+
+    public int getFlowtime() {
+        // StateSolution does not support getFlowtime and getMakespan costs currently: only ActionSolution
+        return 0;
+    }
+
+    public int getMakespan() {
+        return 0;
+    }
 }

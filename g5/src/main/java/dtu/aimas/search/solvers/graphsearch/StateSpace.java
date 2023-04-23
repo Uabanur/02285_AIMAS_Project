@@ -1,11 +1,27 @@
 package dtu.aimas.search.solvers.graphsearch;
 
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+
+import dtu.aimas.communication.IO;
 import dtu.aimas.common.*;
+
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
 import lombok.NonNull;
@@ -22,7 +38,7 @@ public record StateSpace(
         if (!isGoalState(state))
             return Result.error(new InvalidOperation("Can only create a solution from a goal state"));
 
-        // return Result.ok(new ActionSolution(extractPlan(state)));
+        // return Result.ok(new ActionSolution(extractPlanFromState(state)));
         return Result.ok(new StateSolution(extractStates(state)));
     }
 
@@ -62,15 +78,59 @@ public record StateSpace(
         return states;
     }
 
-    @SuppressWarnings("unused")
-    public Action[][] extractPlan(State state) {
-        ArrayList<Action[]> plan = new ArrayList<>();
+    public Action[][] extractPlanFromState(State state)
+    { 
+        ArrayList<Action[]> plan = new ArrayList<Action[]>();
         State iterator = state;
         while (iterator.jointAction != null) {
             plan.add(iterator.jointAction);
             iterator = iterator.parent;
         }
         Collections.reverse(plan);
+        return plan.toArray(new Action[plan.size()][]);
+    }
+
+    public Action[][] extractPlanFromSubsolutions(List<Map.Entry<Agent, Result<Solution>>> solutions) {
+
+        ArrayList<Action[]> plan = new ArrayList<Action[]>();
+
+        var stepIndex = 0;
+        boolean longestSolutionReached = false;
+
+        while (!longestSolutionReached) {
+            longestSolutionReached = true;
+            ArrayList<Action> agentActions = new ArrayList<Action>();
+
+            for (var solutionEntry: solutions) {
+                Result<Solution> result = solutionEntry.getValue();
+
+                if (result.isError()) {
+                    // A problem occurred with the result -> Silently return an empty list
+                    return new Action[][] { };
+                }
+
+                Solution agentSolution = result.get();
+
+                var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
+
+                if (stepIndex < agentSteps.size()) {
+                    String agentStep = (String) agentSteps.get(stepIndex);
+                    agentActions.add(Action.fromName(agentStep));
+                    longestSolutionReached = false;
+                } else {
+                    // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
+                    agentActions.add(Action.NoOp);
+                }
+            }
+
+            Action[] actionArray = new Action[agentActions.size()];
+            agentActions.toArray(actionArray);
+
+            plan.add(actionArray);
+
+            stepIndex++;
+        }
+
         return plan.toArray(new Action[plan.size()][]);
     }
 
@@ -106,12 +166,9 @@ public record StateSpace(
         return agent.pos.equals(goal.destination);
     }
 
-    private boolean isWallAt(Position position) {
-        return this.problem.walls[position.row][position.col];
-    }
-
-    private boolean isCellFree(Position position, State state) {
-        return !isWallAt(position) && getAgentAt(state, position).isEmpty() && getBoxAt(state, position).isEmpty();
+    private boolean isCellFree(Position position, State state, Agent agent, int timeStep){
+        return !getAgentAt(state, position).isPresent() && 
+        !getBoxAt(state, position).isPresent() && this.problem.isFree(position, agent, timeStep);
     }
 
     private boolean notOwner(Agent agent, Box box) {
@@ -135,6 +192,13 @@ public record StateSpace(
     }
 
     public boolean isApplicable(State state, Agent agent, Action action) {
+        // Users of this method that don't care about timestamp redirect to the method with extended signature -- 
+        // The argument of -1 ensures that time constraints do not restrict applicability: 
+        // Reserving a cell at timestep of -1 should never happen
+        return isApplicable(state, agent, action, -1);
+    }
+
+    public boolean isApplicable(State state, Agent agent, Action action, int timeStep){
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
@@ -144,7 +208,7 @@ public record StateSpace(
             }
             case Move -> {
                 agentDestination = moveAgent(agent, action);
-                return isCellFree(agentDestination, state);
+                return isCellFree(agentDestination, state, agent, timeStep);
             }
             case Push -> {
                 agentDestination = moveAgent(agent, action);
@@ -153,7 +217,7 @@ public record StateSpace(
                 box = boxResult.get();
                 if (notOwner(agent, box)) return false;
                 Position boxDestination = moveBox(box, action);
-                return isCellFree(boxDestination, state);
+                return isCellFree(boxDestination, state, agent, timeStep);
             }
             case Pull -> {
                 Position boxSource = getPullSource(agent, action);
@@ -162,7 +226,7 @@ public record StateSpace(
                 box = boxResult.get();
                 if (notOwner(agent, box)) return false;
                 agentDestination = moveAgent(agent, action);
-                return isCellFree(agentDestination, state);
+                return isCellFree(agentDestination, state, agent, timeStep);
             }
         }
 
@@ -170,14 +234,22 @@ public record StateSpace(
     }
 
     public ArrayList<State> expand(State state) {
+
+        int timeStep = 0;
+        State iterator = state;
+        while (iterator.parent != null) {
+            iterator = iterator.parent;
+            timeStep++;
+        }
+
         int agentsCount = state.agents.size();
         Action[][] applicableActions = new Action[agentsCount][];
         for (int agentId = 0; agentId < agentsCount; agentId++) {
             ArrayList<Action> agentActions = new ArrayList<>(Action.values().length);
             // var agent = getAgentByNumber(state, agentId);
             var agent = state.agents.get(agentId);
-            for (Action action : Action.values()) {
-                if (isApplicable(state, agent, action)) {
+            for(Action action : Action.values()){
+                if(isApplicable(state, agent, action, timeStep)){
                     agentActions.add(action);
                 }
             }
@@ -235,6 +307,126 @@ public record StateSpace(
         State destinationState = applyJointActions(state, jointActionsToApply);
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
+
+    public ArrayList<Conflict> replaySolutionsForConflicts(List<Map.Entry<Agent, Result<Solution>>> solutions) {
+
+        ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
+        
+        var stepIndex = 0;
+
+        State currentState = this.initialState;
+        boolean longestSolutionReached = false;
+
+        while (!longestSolutionReached) {            
+            longestSolutionReached = true;
+            ArrayList<Action> agentActions = new ArrayList<Action>();
+
+            for (var solutionEntry: solutions) {
+                Result<Solution> result = solutionEntry.getValue();
+
+                if (result.isError()) {
+                    // A problem occurred with the result -> Silently return an empty list
+                    return new ArrayList<>();
+                }
+                
+                Solution agentSolution = result.get();
+
+                var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
+
+                if (stepIndex < agentSteps.size()) {
+                    String agentStep = (String) agentSteps.get(stepIndex);
+                    agentActions.add(Action.fromName(agentStep));
+                    longestSolutionReached = false;
+                } else {
+                    // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
+                    agentActions.add(Action.NoOp);
+                }
+            }
+
+            Action[] actionArray = new Action[agentActions.size()];
+            agentActions.toArray(actionArray);
+            
+
+            var nextState = this.applyJointActions(currentState, actionArray);
+            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, nextState, actionArray, stepIndex++);
+
+            allConflicts.addAll(currentStepConflicts);
+        }
+
+        return allConflicts;
+    }
+
+    // TODO: deprecated - to be changed by external ConflictChecker
+    private ArrayList<Conflict> checkStateForConflicts(State previousState, State state, Action[] previousActions, int timeStep) {
+        ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
+
+        var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
+        for (var agent : state.agents) {
+            if (agentAndBoxPositions.containsKey(agent.pos)) {
+                agentAndBoxPositions.get(agent.pos).add(agent);
+            } else {
+                var agentsAtPos = new ArrayList<DomainObject>();
+                agentsAtPos.add(agent);
+                agentAndBoxPositions.put(agent.pos, agentsAtPos);
+            }
+        }
+
+        for (var box : state.boxes) {
+            if (agentAndBoxPositions.containsKey(box.pos)) {
+                agentAndBoxPositions.get(box.pos).add(box);
+            } else {
+                var boxesAtPos = new ArrayList<DomainObject>();
+                boxesAtPos.add(box);
+                agentAndBoxPositions.put(box.pos, boxesAtPos);
+            }
+        }
+
+
+        // Report the conflicts
+        for (var entry : agentAndBoxPositions.entrySet()) {
+            var position = entry.getKey();
+            var objectsAtPos = entry.getValue();
+            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
+
+            if (objectsAtPos.size() <= 1) {
+                continue;
+            }
+
+            // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
+            for (var domainObject: objectsAtPos) {
+                if (domainObject instanceof Agent) {
+                    involvedAgents.add((Agent) domainObject);
+                } else if (domainObject instanceof Box) {
+                    // TODO: We currently don't have enough information to determine with certainty which agent moved the box.
+                    // Additionally we don't have a strategy of generally dealing with box conflicts. 
+                    // For example, what if no agent moved the box, which objects should be involved in the conflict?
+                    continue;
+                }
+            } 
+
+            Agent[] matchingInitialStateAgents = getInitialStateAgents(involvedAgents).toArray(new Agent[involvedAgents.size()]);
+            Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
+            foundConflicts.add(newConflict);
+        }
+
+        return foundConflicts;
+    }
+
+    private ArrayList<Agent> getInitialStateAgents(ArrayList<Agent> agentCopies) {
+
+        ArrayList<Agent> matchingInitialAgents = new ArrayList<>();
+
+        for (var initialAgent: initialState.agents) {
+            for (var agentCopy: agentCopies) {
+                if (agentCopy.label == initialAgent.label) {
+                    matchingInitialAgents.add(initialAgent);
+                }
+            }  
+        }
+
+        return matchingInitialAgents;
+    }
+
 
     private State applyJointActions(State state, Action[] actionsToApply) {
         ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());

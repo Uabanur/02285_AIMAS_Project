@@ -65,5 +65,14 @@ public enum Action
         this.boxRowDelta = brd; 
         this.boxColDelta = bcd;  
     }
+
+    public static Action fromName(String name) {
+        for (Action action : Action.values()) {
+            if (action.name.equals(name)) {
+                return action;
+            }
+        }
+        throw new IllegalArgumentException("No action with name " + name);
+    }
 }
 

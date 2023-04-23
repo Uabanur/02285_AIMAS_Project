@@ -10,6 +10,7 @@ import dtu.aimas.config.Configuration;
 import dtu.aimas.errors.AggregateError;
 import dtu.aimas.errors.UnknownArguments;
 import dtu.aimas.parsers.ArgumentParser;
+import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 import dtu.aimas.search.solvers.graphsearch.*;
 
 public class ArgumentParserTest {
@@ -42,6 +43,12 @@ public class ArgumentParserTest {
     public void EmptyDFSOption_Should_Pass(){
         var conf = assertParseOk("-dfs");
         assertTypeIs(conf.getSolver().getClass(), DFS.class);
+    }
+
+    @Test 
+    public void EmptyCBSOption_Should_Pass(){
+        var conf = assertParseOk("-cbs");
+        assertTypeIs(conf.getSolver().getClass(), ConflictBasedSearch.class);
     }
 
     @Test 
