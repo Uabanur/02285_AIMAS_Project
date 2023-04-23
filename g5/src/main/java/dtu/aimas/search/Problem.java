@@ -59,7 +59,7 @@ public class Problem {
         this.expectedStateSize = parent.expectedStateSize;
         this.distances = parent.distances;
         
-        orderGoalsByPriority()
+        orderGoalsByPriority();
     }
 
     private Collection<Goal> extractGoals(Function<Character, Boolean> predicate){
