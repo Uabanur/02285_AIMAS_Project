@@ -5,6 +5,7 @@ import org.junit.Test;
 import dtu.aimas.common.Position;
 import dtu.aimas.search.Problem;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -28,7 +29,7 @@ public class ProblemPositionCheckTests {
         //small hole in one of the corners
         walls[2][2] = false; walls[2][3] = false;
         walls[3][2] = false; walls[3][3] = false;
-        Problem problem = new Problem(null, null, walls, goals);
+        Problem problem = new Problem(Arrays.asList(), Arrays.asList(), walls, goals);
         Assert.assertEquals(true, problem.isChokepoint(new Position(5,3)));
         Assert.assertEquals(true, problem.isChokepoint(new Position(2,5)));
         Assert.assertEquals(true, problem.isChokepoint(new Position(5,5)));
@@ -50,7 +51,7 @@ public class ProblemPositionCheckTests {
             new boolean[] {x, x, x, x, x, x, x},
         };
         char goals[][] = new char[walls.length][walls[0].length];
-        var problem = new Problem(null, null, walls, goals);
+        var problem = new Problem(Arrays.asList(), Arrays.asList(), walls, goals);
 
         Assert.assertEquals(true, problem.isDeadEnd(new Position(1,1)));
         Assert.assertEquals(true, problem.isDeadEnd(new Position(1,3)));
