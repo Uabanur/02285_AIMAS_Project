@@ -14,13 +14,7 @@ public class DomainObject {
         this.label = label;
     }
 
-    public static boolean isLabel(char symbol) {
-        return 'A' <= symbol && symbol <= 'Z';
-    }
-
     public String toString(){
         return String.format("(%s:%c|%s)", pos.toSimpleString(), label, color.name());
     }
-
-
 }
