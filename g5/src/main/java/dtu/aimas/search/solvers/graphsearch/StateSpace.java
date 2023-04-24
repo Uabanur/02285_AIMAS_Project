@@ -308,10 +308,7 @@ public record StateSpace(
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
 
-    public ArrayList<Conflict> replaySolutionsForConflicts(List<Map.Entry<Agent, Result<Solution>>> solutions) {
-
-        ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
-        
+    public Optional<Conflict> replaySolutionsForConflicts(List<Map.Entry<Agent, Result<Solution>>> solutions) {
         var stepIndex = 0;
 
         State currentState = this.initialState;
@@ -326,7 +323,8 @@ public record StateSpace(
 
                 if (result.isError()) {
                     // A problem occurred with the result -> Silently return an empty list
-                    return new ArrayList<>();
+                    // TODO: look whether it still works
+                    return Optional.empty();
                 }
                 
                 Solution agentSolution = result.get();
@@ -347,71 +345,85 @@ public record StateSpace(
             agentActions.toArray(actionArray);
             
 
-            var nextState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, nextState, actionArray, stepIndex++);
-
-            allConflicts.addAll(currentStepConflicts);
+            // var nextState = this.applyJointActions(currentState, actionArray);
+            var conflict = this.tryGetConflict(currentState, actionArray, stepIndex);
+            if(conflict.isPresent())
+                return conflict;
         }
 
-        return allConflicts;
+        // No conflict found
+        return Optional.empty();
     }
 
-    // TODO: deprecated - to be changed by external ConflictChecker
-    private ArrayList<Conflict> checkStateForConflicts(State previousState, State state, Action[] previousActions, int timeStep) {
-        ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
+    public Optional<Conflict> tryGetConflict(State state, Action[] actions, int timeStep){
+        Optional<Conflict> conflict = Optional.empty();
 
-        var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
-        for (var agent : state.agents) {
-            if (agentAndBoxPositions.containsKey(agent.pos)) {
-                agentAndBoxPositions.get(agent.pos).add(agent);
-            } else {
-                var agentsAtPos = new ArrayList<DomainObject>();
-                agentsAtPos.add(agent);
-                agentAndBoxPositions.put(agent.pos, agentsAtPos);
-            }
+        for(int label = 0; label < actions.length; label++){
+            var performingAgent = getAgentByLabel(state, (char)label);
+            var action = actions[label];
+
+            var possibleConflictPosition = getPossibleConflictPosition(state, performingAgent, action);
+            
+            // CASE: NOOP action
+            if(!possibleConflictPosition.isPresent()) continue;
+
+            // CASE: already investigating conflict on different position
+            if(conflict.isPresent() && conflict.get().getPosition() != possibleConflictPosition.get()) continue;
+
+            var agentResponsibleForOccupation = tryGetAgentResponsibleForOccupation(state, possibleConflictPosition.get());
+
+            // CASE: cell not occupied
+            if(!agentResponsibleForOccupation.isPresent()) continue;
+
+            // CASE: conflict found
+            if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), timeStep));
+            conflict.get().involveAgent(agentResponsibleForOccupation.get());
+            conflict.get().involveAgent(performingAgent);
         }
-
-        for (var box : state.boxes) {
-            if (agentAndBoxPositions.containsKey(box.pos)) {
-                agentAndBoxPositions.get(box.pos).add(box);
-            } else {
-                var boxesAtPos = new ArrayList<DomainObject>();
-                boxesAtPos.add(box);
-                agentAndBoxPositions.put(box.pos, boxesAtPos);
-            }
-        }
-
-
-        // Report the conflicts
-        for (var entry : agentAndBoxPositions.entrySet()) {
-            var position = entry.getKey();
-            var objectsAtPos = entry.getValue();
-            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
-
-            if (objectsAtPos.size() <= 1) {
-                continue;
-            }
-
-            // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
-            for (var domainObject: objectsAtPos) {
-                if (domainObject instanceof Agent) {
-                    involvedAgents.add((Agent) domainObject);
-                } else if (domainObject instanceof Box) {
-                    // TODO: We currently don't have enough information to determine with certainty which agent moved the box.
-                    // Additionally we don't have a strategy of generally dealing with box conflicts. 
-                    // For example, what if no agent moved the box, which objects should be involved in the conflict?
-                    continue;
-                }
-            } 
-
-            Agent[] matchingInitialStateAgents = getInitialStateAgents(involvedAgents).toArray(new Agent[involvedAgents.size()]);
-            Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
-            foundConflicts.add(newConflict);
-        }
-
-        return foundConflicts;
+        return conflict;
     }
 
+    private Optional<Position> getPossibleConflictPosition(State state, Agent agent, Action action){
+        switch (action.type) {
+            case NoOp -> {
+                return Optional.empty();
+            }
+            case Move -> {
+                return Optional.of(moveAgent(agent, action));
+            }
+            case Push -> {
+                var agentDestination = moveAgent(agent, action);
+                var agentsBox = getBoxAt(state, agentDestination).get();
+                return Optional.of(moveBox(agentsBox, action));
+            }
+            case Pull -> {
+                return Optional.of(moveAgent(agent, action));
+            }
+            default -> throw new UnreachableState();
+        }
+    }
+
+    private Optional<Agent> tryGetAgentResponsibleForOccupation(State state, Position pos)
+    {
+        // CASE 1: occupied by Agent
+        var occupyingAgent = getAgentAt(state, pos);
+        if(occupyingAgent.isPresent()){
+            return occupyingAgent;
+        }
+        // CASE 2: occupied by Box
+        var occupyingBox = getBoxAt(state, pos);
+        if(occupyingBox.isPresent()){
+            // TODO: plug in the responsible agent (who should it be? all the agents with box's color? the one assigned to the box?)
+            // var resposibleAgent = getResponsibleAgent(state, occupyingBox.get(), timeStep);
+            // return Optional.of(new Pair<>(agent, responsibleAgent));
+            return null;
+        }
+        // CASE 3: not occupied
+        return null;
+    }
+
+
+    // TODO: it may be useful while returning conflict
     private ArrayList<Agent> getInitialStateAgents(ArrayList<Agent> agentCopies) {
 
         ArrayList<Agent> matchingInitialAgents = new ArrayList<>();
@@ -542,4 +554,5 @@ public record StateSpace(
 
         return new State(agents, boxes);
     }
+
 }

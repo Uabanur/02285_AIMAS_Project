@@ -45,27 +45,24 @@ public class ConflictBasedSearch implements Solver {
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("CBS found no solutions."));
             var node = frontier.poll();
-            var issues = node.findConflicts(stateSpace);
+            var conflict = node.findFirstConflict(stateSpace);
 
-            if (issues.isEmpty()){
+            if (conflict.isEmpty()){
                 var sol = node.getSolution(stateSpace);
                 return sol;
             }
                 
-
-            var firstConflict = issues.get(0);
-            IO.info("First conflict: " + firstConflict.toString());
-            for(var agent: firstConflict.getInvolvedAgents()) {
-                IO.info("agent" + agent.label + " is involved");
+            for(var agent: conflict.get().getInvolvedAgents()) {
+                // IO.info("agent" + agent.label + " is involved");
                 // CONSTRAINT
-                var constrainedNode = node.constrain(agent, firstConflict.getPosition(), firstConflict.getTimeStep());
+                var constrainedNode = node.constrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
                 var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.getConstraint());
                 var solution = subSolver.solve(constrainedProblem);
                 constrainedNode.setSolutionFor(agent, solution);
                 constrainedNode.calculateCost();
                 if(constrainedNode.isSolvable())
                 {
-                    IO.info("Constrained solvable!");
+                    // IO.info("Constrained solvable!");
                     frontier.add(constrainedNode);
                     break;
                 }

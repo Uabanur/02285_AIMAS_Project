@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Position;
@@ -70,7 +71,7 @@ public class CBSNode implements Comparable<CBSNode> {
         return Result.ok(new ActionSolution(mergedPlan));
     }
 
-    public ArrayList<Conflict> findConflicts(StateSpace stateSpace) {
+    public Optional<Conflict> findFirstConflict(StateSpace stateSpace) {
         var subSolutionsResult = Result.collapse(solutions.values());
         assert subSolutionsResult.isOk() : subSolutionsResult.getError().getMessage();
 
