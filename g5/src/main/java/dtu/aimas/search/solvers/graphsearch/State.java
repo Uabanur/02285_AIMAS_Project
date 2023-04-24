@@ -16,6 +16,7 @@ public class State {
     public final Action[] jointAction;
     private final StateConfig stateConfig;
     private final int hash;
+//    public int lastCost = -1; // TODO for debug
     
     @Getter
     private final int g;

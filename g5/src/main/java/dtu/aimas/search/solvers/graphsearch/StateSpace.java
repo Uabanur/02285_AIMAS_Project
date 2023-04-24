@@ -1,31 +1,18 @@
 package dtu.aimas.search.solvers.graphsearch;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-
-import dtu.aimas.communication.IO;
 import dtu.aimas.common.*;
-
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
-import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import dtu.aimas.search.solutions.StateSolution;
+import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.util.Map;
 import java.util.*;
 
 public record StateSpace(
@@ -494,19 +481,23 @@ public record StateSpace(
     }
 
     private Agent copyAgent(Agent agent) {
-        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color, agent.label);
+        return agent.clone();
+//        return new Agent(new Position(agent.pos.row, agent.pos.col), agent.color, agent.label, agent.uid);
     }
 
     private Agent copyAgent(Agent agent, Position newPosition) {
-        return new Agent(newPosition, agent.color, agent.label);
+        return agent.clone(newPosition);
+//        return new Agent(newPosition, agent.color, agent.label, agent.uid);
     }
 
     private Box copyBox(Box box) {
-        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.label, box.id);
+        return box.clone();
+//        return new Box(new Position(box.pos.row, box.pos.col), box.color, box.label, box.uid);
     }
 
     private Box copyBox(Box box, Position newPosition) {
-        return new Box(newPosition, box.color, box.label, box.id);
+//        return new Box(newPosition, box.color, box.label, box.uid);
+        return box.clone(newPosition);
     }
 
     public int getSatisfiedAgentGoalsCount(State state) {

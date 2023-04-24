@@ -1,18 +1,11 @@
 package dtu.aimas;
 
-import java.util.List;
-import java.util.stream.Stream;
-
+import dtu.aimas.common.*;
+import dtu.aimas.search.Problem;
 import org.junit.Assert;
 import org.junit.Test;
 
-import dtu.aimas.common.Agent;
-import dtu.aimas.common.Box;
-import dtu.aimas.common.Color;
-import dtu.aimas.common.Position;
-import dtu.aimas.communication.IO;
-import dtu.aimas.common.Goal;
-import dtu.aimas.search.Problem;
+import java.util.List;
 
 public class SubProblem2Test {
     
@@ -27,8 +20,8 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A', 0),
-            new Box(new Position(2, 2), Color.Blue, 'B', 1)
+            new Box(new Position(1, 2), Color.Red, 'A'),
+            new Box(new Position(2, 2), Color.Blue, 'B')
         );
 
         var walls = new boolean[width][height];
@@ -72,8 +65,8 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A', 0),
-            new Box(new Position(2, 2), Color.Red, 'A', 1)
+            new Box(new Position(1, 2), Color.Red, 'A'),
+            new Box(new Position(2, 2), Color.Red, 'A')
         );
 
         var walls = new boolean[width][height];
@@ -120,8 +113,8 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Red, 'A', 0),
-            new Box(new Position(2, 2), Color.Red, 'B', 1)
+            new Box(new Position(1, 2), Color.Red, 'A'),
+            new Box(new Position(2, 2), Color.Red, 'B')
         );
 
         var walls = new boolean[width][height];
@@ -165,7 +158,7 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 2), Color.Blue, 'A', 0)
+            new Box(new Position(1, 2), Color.Blue, 'A')
         );
 
         var walls = new boolean[width][height];
@@ -200,9 +193,9 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(1, 9), Color.Blue, 'A', 0),
-            new Box(new Position(2, 0), Color.Red, 'A', 1),
-            new Box(new Position(0, 7), Color.Red, 'A', 2)
+            new Box(new Position(1, 9), Color.Blue, 'A'),
+            new Box(new Position(2, 0), Color.Red, 'A'),
+            new Box(new Position(0, 7), Color.Red, 'A')
         );
 
         var walls = new boolean[width][height];
@@ -236,9 +229,9 @@ public class SubProblem2Test {
         );
 
         var boxes = List.of(
-            new Box(new Position(0, 5), Color.Blue, 'A', 0),
-            new Box(new Position(2, 0), Color.Red, 'A', 1),
-            new Box(new Position(1, 9), Color.Green, 'A', 2)
+            new Box(new Position(0, 5), Color.Blue, 'A'),
+            new Box(new Position(2, 0), Color.Red, 'A'),
+            new Box(new Position(1, 9), Color.Green, 'A')
         );
 
         var walls = new boolean[width][height];

@@ -33,4 +33,7 @@ public class Position {
         return String.format("(%d,%d)", row, col);
     }
 
+    public Position clone(){
+        return new Position(row, col);
+    }
 }

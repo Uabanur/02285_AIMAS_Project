@@ -1,13 +1,15 @@
 package dtu.aimas.common;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class Box extends DomainObject {
-    public final int id;
+    private Box(Position pos, Color color, char type, UUID uid){
+        super(pos, color, type, uid);
+    }
 
-    public Box(Position pos, Color color, char type, int id) {
-        super(pos, color, type);
-        this.id = id;
+    public Box(Position pos, Color color, char type) {
+        this(pos, color, type, UUID.randomUUID());
     }
 
     public static boolean isLabel(char symbol) {
@@ -26,10 +28,19 @@ public class Box extends DomainObject {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pos, color, label);
+        return Objects.hash(pos, color, label, uid);
     }
 
     public Box clone() {
-        return new Box(new Position(pos.row, pos.col), color, label, id);
+        return new Box(pos.clone(), color, label, uid);
+    }
+    public Box clone(int row, int col){
+        return clone(new Position(row, col));
+    }
+    public Box clone(Position newPosition){
+        return new Box(newPosition, color, label, uid);
+    }
+    public Box clone(Color newColor){
+        return new Box(pos.clone(), newColor, label, uid);
     }
 }

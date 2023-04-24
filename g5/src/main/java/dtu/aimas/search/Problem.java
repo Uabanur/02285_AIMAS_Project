@@ -1,24 +1,11 @@
 package dtu.aimas.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.stream.Collector;
+import dtu.aimas.common.*;
+
+import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.Queue;
-import java.util.Set;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import dtu.aimas.common.Position;
-import dtu.aimas.common.Agent;
-import dtu.aimas.common.Box;
-import dtu.aimas.common.Color;
-import dtu.aimas.common.Goal;
 
 public class Problem {
 
@@ -305,7 +292,7 @@ public class Problem {
             List<Box> compatibleBoxes = this.boxes.stream().filter(
                 b -> b.label == goal.label && !assignedBoxes.contains(b) 
                 && freeAgents.stream().anyMatch(a -> a.color.equals(b.color))
-                ).collect(Collectors.toList());
+                ).toList();
             if(compatibleBoxes.isEmpty()) continue;
 
             Box closestBox = compatibleBoxes.get(0);
@@ -322,7 +309,7 @@ public class Problem {
             Box theBox = closestBox;
             List<Agent> compatibleAgents = this.agents.stream().filter(
                 a -> a.color == theBox.color && agentAssignedGoal[Character.getNumericValue(a.label)] == null
-            ).collect(Collectors.toList());
+            ).toList();
             if(compatibleAgents.isEmpty()) continue;
             Agent closestAgent = compatibleAgents.get(0);
 

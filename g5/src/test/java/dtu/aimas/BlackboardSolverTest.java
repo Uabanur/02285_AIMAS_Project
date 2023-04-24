@@ -13,7 +13,10 @@ import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.GoalCount;
 import dtu.aimas.search.solvers.subsolvers.AgentSolver;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.stream.IntStream;
 
@@ -271,28 +274,27 @@ public class BlackboardSolverTest {
 
         var solver = new BlackboardSolver(
                 new AgentProblemSplitter(),
-                c -> new AgentSolver(AStarMinLength::new, c),
+                AgentSolver::new,
                 new DistanceSumCost()
         );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
-    @Ignore
     @Test
-    public void AgentSolver_With_More_Conflicts(){
+    public void AgentSplitting_With_Conflicts(){
         var level = """
                 #initial
                 +++++++
-                +01   +
-                +AB   +
+                +01234+
+                +ABCDE+
                 +     +
                 +++++++
                 #goal
                 +++++++
+                +01234+
                 +     +
-                +     +
-                +BA   +
+                +BADCE+
                 +++++++
                 #end
                 """;
@@ -305,9 +307,7 @@ public class BlackboardSolverTest {
 
         var solver = new BlackboardSolver(
                 new AgentProblemSplitter(),
-//                AgentSolver::new,
                 AStarMinLength::new,
-//                DefaultCost.instance
                 DistanceSumCost.instance
         );
 

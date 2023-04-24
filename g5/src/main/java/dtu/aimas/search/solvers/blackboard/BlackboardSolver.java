@@ -88,7 +88,8 @@ public class BlackboardSolver implements SolverMinLength {
             IO.debug("Next solution permutation: %s", attemptPermutation);
 
             if(SolutionChecker.validAttempts(attempts, space)){
-                return Result.ok(SolutionMerger.mergeAttempts(attempts));
+                return Result.ok(SolutionMerger.mergeAttempts(attempts))
+                        .map(SolutionMerger::pruneInactiveStates);
             }
 
             // Calculate all neighbor attempts

@@ -179,7 +179,7 @@ public class ColorSolverTest {
                     +    +
                     +    +
                     +    +
-                    +ABCD+
+                    +BADC+
                     ++++++
                     #end
                     """;
@@ -188,7 +188,8 @@ public class ColorSolverTest {
 
         Function<Cost, SolverMinLength> blackboard = baseCost -> new BlackboardSolver(
                 new AgentProblemSplitter(),
-                AgentSolver::new,
+//                AgentSolver::new,
+                AStarMinLength::new,
                 baseCost
         );
 

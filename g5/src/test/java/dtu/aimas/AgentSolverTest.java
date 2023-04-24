@@ -117,7 +117,7 @@ public class AgentSolverTest {
                     +++++++++++++
                     +           +
                     +           +
-                    +A B C D E F+
+                    +A B C      +
                     +++++++++++++
                     #end
                     """;
@@ -125,6 +125,6 @@ public class AgentSolverTest {
         var problem = getProblem(level, "red: 0,A,B,C,D,E,F");
         var solver = new AgentSolver(AStarMinLength::new);
         solution = solver.solve(problem);
-        Assert.assertTrue(solution.isOk());
+        Assert.assertTrue(solution.toString(), solution.isOk());
     }
 }

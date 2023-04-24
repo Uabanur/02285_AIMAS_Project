@@ -23,9 +23,9 @@ public class AssignedBoxGoalCost implements Cost {
         var result = baseCost.calculate(state, space);
 
         int distanceFromAgentToClosestBox = Integer.MAX_VALUE;
-        var unfinishedBoxes = 0;
+//        var unfinishedBoxes = 0;
         for(var box: state.boxes){
-            var assignment = rankings.stream().filter(r -> r.box().id == box.id).findAny();
+            var assignment = rankings.stream().filter(r -> r.box().uid == box.uid).findAny();
             if(assignment.isEmpty()) continue; // box has no goal
 
             var goal = assignment.get().goal();
@@ -36,20 +36,18 @@ public class AssignedBoxGoalCost implements Cost {
             if(distanceFromAgentToBox < distanceFromAgentToClosestBox){
                 distanceFromAgentToClosestBox = distanceFromAgentToBox;
             }
-
-            unfinishedBoxes++;
-            result += distanceToGoal;
+//            result += distanceToGoal;
         }
-
-        // guide agent towards closest box
-        result += distanceFromAgentToClosestBox;
-
-        if(unfinishedBoxes > 0){
-            // buffer distance to unfinished boxes
-            // to avoid sudden increase in cost when new box is selected
-            result += (unfinishedBoxes-1) * problem.mapSize();
-        }
-
+//
+//        // guide agent towards closest box
+//        result += distanceFromAgentToClosestBox;
+//
+//        if(unfinishedBoxes > 0){
+//            // buffer distance to unfinished boxes
+//            // to avoid sudden increase in cost when new box is selected
+//            result += (unfinishedBoxes-1) * problem.mapSize();
+//        }
+//
         return result;
     }
 }

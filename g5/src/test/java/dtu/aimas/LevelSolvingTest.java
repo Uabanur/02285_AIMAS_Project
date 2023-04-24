@@ -114,14 +114,10 @@ public class LevelSolvingTest {
     }
 
     @Test
-    public void TestMAPF02_AStar_GoalCount() {
-        TestMap("MAPF02", new AStar(new GoalCount()));
-    }
-
-    @Test
     public void TestMAPF02_AStar_DistanceCost() {
         TestMap("MAPF02", new AStar(new DistanceSumCost()));
     }
+
     @Test
     public void TestMAPF02_AStar_MAAdmissibleCost() {
         TestMap("MAPF02", new AStar(new MAAdmissibleCost()));

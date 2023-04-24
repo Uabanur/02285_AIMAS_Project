@@ -21,9 +21,9 @@ public class SolutionMergeTest {
         { // solution 1
             var states = new State[2];
             var agent0 = new Agent(new Position(0, 0), Color.Blue, '0');
-            var box0 = new Box(new Position(agent0.pos.row, agent0.pos.col+1), Color.Blue, 'A', 0);
+            var box0 = new Box(new Position(agent0.pos.row, agent0.pos.col+1), Color.Blue, 'A');
             var agent1 = new Agent(new Position(2, 0), Color.Red, '2');
-            var box1 = new Box(new Position(agent1.pos.row, agent1.pos.col+1), Color.Red, 'C', 2);
+            var box1 = new Box(new Position(agent1.pos.row, agent1.pos.col+1), Color.Red, 'C');
 
             { // step 0
                 states[0] = new State(
@@ -57,9 +57,9 @@ public class SolutionMergeTest {
         { // solution 2, longer than solution 1
             var states = new State[3];
             var agent0 = new Agent(new Position(4, 3), Color.Green, '1');
-            var box0 = new Box(new Position(agent0.pos.row, agent0.pos.col+1), Color.Green, 'B', 1);
+            var box0 = new Box(new Position(agent0.pos.row, agent0.pos.col+1), Color.Green, 'B');
             var agent1 = new Agent(new Position(5, 3), Color.Grey, '3');
-            var box1 = new Box(new Position(agent1.pos.row, agent1.pos.col+1), Color.Grey, 'D', 3);
+            var box1 = new Box(new Position(agent1.pos.row, agent1.pos.col+1), Color.Grey, 'D');
 
             { // step 0
                 states[0] = new State(
@@ -115,16 +115,16 @@ public class SolutionMergeTest {
         { // step 0
             var state = result.getState(0);
             var agent0 = new Agent(new Position(0, 0), Color.Blue, '0');
-            var box0 = new Box(new Position(0, 1), Color.Blue, 'A', 0);
+            var box0 = new Box(new Position(0, 1), Color.Blue, 'A');
 
             var agent1 = new Agent(new Position(4, 3), Color.Green, '1');
-            var box1 = new Box(new Position(4, 4), Color.Green, 'B', 1);
+            var box1 = new Box(new Position(4, 4), Color.Green, 'B');
 
             var agent2 = new Agent(new Position(2, 0), Color.Red, '2');
-            var box2 = new Box(new Position(2, 1), Color.Red, 'C', 2);
+            var box2 = new Box(new Position(2, 1), Color.Red, 'C');
 
             var agent3 = new Agent(new Position(5, 3), Color.Grey, '3');
-            var box3 = new Box(new Position(5, 4), Color.Grey, 'D', 3);
+            var box3 = new Box(new Position(5, 4), Color.Grey, 'D');
 
             // require order of agents
             var expectedAgents = new ArrayList<>(List.of(agent0, agent1, agent2, agent3));
@@ -145,19 +145,19 @@ public class SolutionMergeTest {
 
             // PushEE
             var agent0 = new Agent(new Position(0, 1), Color.Blue, '0');
-            var box0 = new Box(new Position(0, 2), Color.Blue, 'A', 0);
+            var box0 = new Box(new Position(0, 2), Color.Blue, 'A');
 
             // NoOp
             var agent1 = new Agent(new Position(4, 3), Color.Green, '1');
-            var box1 = new Box(new Position(4, 4), Color.Green, 'B', 1);
+            var box1 = new Box(new Position(4, 4), Color.Green, 'B');
 
             // PushEE
             var agent2 = new Agent(new Position(2, 1), Color.Red, '2');
-            var box2 = new Box(new Position(2, 2), Color.Red, 'C', 2);
+            var box2 = new Box(new Position(2, 2), Color.Red, 'C');
 
             // PushEE
             var agent3 = new Agent(new Position(5, 3+1), Color.Grey, '3');
-            var box3 = new Box(new Position(5, 4+1), Color.Grey, 'D', 3);
+            var box3 = new Box(new Position(5, 4+1), Color.Grey, 'D');
 
             // require order of agents
             var expectedAgents = new ArrayList<>(List.of(agent0, agent1, agent2, agent3));
@@ -180,19 +180,19 @@ public class SolutionMergeTest {
 
             // NoOp
             var agent0 = new Agent(new Position(0, 1), Color.Blue, '0');
-            var box0 = new Box(new Position(0, 1 + 1), Color.Blue, 'A', 0);
+            var box0 = new Box(new Position(0, 1 + 1), Color.Blue, 'A');
 
             // PushEE
             var agent1 = new Agent(new Position(4, 3 + 1), Color.Green, '1');
-            var box1 = new Box(new Position(4, 4 + 1), Color.Green, 'B', 1);
+            var box1 = new Box(new Position(4, 4 + 1), Color.Green, 'B');
 
             // NoOp
             var agent2 = new Agent(new Position(2, 1), Color.Red, '2');
-            var box2 = new Box(new Position(2, 1 + 1), Color.Red, 'C', 2);
+            var box2 = new Box(new Position(2, 1 + 1), Color.Red, 'C');
 
             // MoveW
             var agent3 = new Agent(new Position(5, 3+1-1), Color.Grey, '3');
-            var box3 = new Box(new Position(5, 4 + 1), Color.Grey, 'D', 3);
+            var box3 = new Box(new Position(5, 4 + 1), Color.Grey, 'D');
 
             // require order of agents
             var expectedAgents = new ArrayList<>(List.of(agent0, agent1, agent2, agent3));

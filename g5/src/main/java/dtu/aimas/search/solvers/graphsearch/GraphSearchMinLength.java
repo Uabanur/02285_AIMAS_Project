@@ -6,19 +6,17 @@ import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
-import dtu.aimas.search.solvers.heuristics.Cost;
-import dtu.aimas.search.solvers.heuristics.DefaultCost;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
 
 import java.util.HashSet;
 import java.util.stream.IntStream;
 
 public abstract class GraphSearchMinLength {
-    private Cost cost;
+    private Heuristic heuristic = null;
     private Action[] noopAction;
 
     public Result<Solution> solve(Problem problem, Heuristic heuristic, int minSolutionLength) {
-        this.cost = heuristic.getCost();
+        this.heuristic = heuristic;
         this.noopAction = IntStream.range(0, problem.agents.size()).mapToObj(a -> Action.NoOp).toArray(Action[]::new);
         return ProblemParser.parse(problem)
                 .map(heuristic::attachStateSpace)
@@ -27,7 +25,6 @@ public abstract class GraphSearchMinLength {
 
     public Result<Solution> solve(Problem problem, BasicFrontier frontier, int minSolutionLength)
     {
-        this.cost = DefaultCost.instance;
         this.noopAction = IntStream.range(0, problem.agents.size()).mapToObj(a -> Action.NoOp).toArray(Action[]::new);
         return ProblemParser.parse(problem)
                 .flatMap(space -> solve(space, frontier, minSolutionLength));
@@ -35,8 +32,11 @@ public abstract class GraphSearchMinLength {
 
     private Result<Solution> solve(StateSpace space, Frontier frontier, int minSolutionLength)
     {
-        frontier.add(space.initialState());
-        HashSet<State> expanded = new HashSet<>();
+        var init = space.initialState();
+        frontier.add(init);
+        var evaluated = new HashSet<State>();
+        evaluated.add(init);
+
 
         while (true)
         {
@@ -57,10 +57,21 @@ public abstract class GraphSearchMinLength {
                 return space.createSolution(state);
             }
 
-            expanded.add(state);
             for (State child : space.expand(state)) {
-                if (!frontier.contains(child) && !expanded.contains(child)){
+//                if(evaluated.containsKey(child)){
+//                    var prev = evaluated.get(child);
+//                    if(heuristic.compare(child, prev) > 0){
+//
+////                    }
+////                    if(cost.calculate(child, space) < cost.calculate(prev, space)){
+//                        evaluated.remove(prev);
+//                        frontier.clear(prev);
+//                    }
+//                }
+
+                if (!evaluated.contains(child)){
                     frontier.add(child);
+                    evaluated.add(child);
                 }
             }
         }
@@ -68,6 +79,7 @@ public abstract class GraphSearchMinLength {
 
     private boolean hasFutureConflicts(State state, StateSpace space, int minSolutionLength){
         var current = state;
+        var cost = heuristic.getCost();
         for(var step = state.g(); step <= minSolutionLength; step++){
             if(cost.calculate(current, space) > 0) return true;
             current = staticChild(current);

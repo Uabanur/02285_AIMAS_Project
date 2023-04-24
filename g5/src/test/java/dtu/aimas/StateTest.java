@@ -151,7 +151,7 @@ public class StateTest {
     @Test
     public void ExpandingAgentWithBox() {
         var agent = new Agent(new Position(1, 1), Color.Red, '0');
-        var box = new Box(new Position(1, 2), Color.Red, 'A', 0);
+        var box = new Box(new Position(1, 2), Color.Red, 'A');
         var stateSpace = ProblemParser.parse(makeProblem(List.of(agent), List.of(box))).get();
         var initialState = stateSpace.initialState();
         var expanded = stateSpace.expand(initialState);

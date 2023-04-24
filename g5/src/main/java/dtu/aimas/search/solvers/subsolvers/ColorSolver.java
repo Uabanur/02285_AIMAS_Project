@@ -39,10 +39,10 @@ public class ColorSolver implements SolverMinLength {
         for(var agent: initial.agents){
             var newColor = Color.values()[colorIndex++];
 
-            agents.add(new Agent(new Position(agent.pos.row, agent.pos.col), newColor, agent.label));
+            agents.add(agent.clone(newColor));
 
             for(var box: assigned.getOrDefault(agent, List.of())){
-                boxes.add(new Box(new Position(box.pos.row, box.pos.col), newColor, box.label, box.id));
+                boxes.add(box.clone(newColor));
             }
         }
 

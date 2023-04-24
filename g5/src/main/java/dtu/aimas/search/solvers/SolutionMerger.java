@@ -76,6 +76,22 @@ public class SolutionMerger {
         return new State(parent, sortedAgentsList, boxes, sortedJointAction);
     }
 
+    public static StateSolution pruneInactiveStates(StateSolution stateSolution) {
+        var states = new ArrayList<State>();
+        states.add(stateSolution.getState(0));
+
+        for(var step = 1; step < stateSolution.size(); step++){
+            var state = stateSolution.getState(step);
+            assert state.jointAction != null;
+            if(Arrays.stream(state.jointAction).anyMatch(a -> a != Action.NoOp)) {
+                var parent = states.get(states.size()-1);
+                states.add(new State(parent, state.agents, state.boxes, state.jointAction));
+            }
+        }
+
+        return new StateSolution(states.toArray(State[]::new));
+    }
+
     static class AgentIndexComparator implements Comparator<Integer>
     {
         private final Agent[] agents;
