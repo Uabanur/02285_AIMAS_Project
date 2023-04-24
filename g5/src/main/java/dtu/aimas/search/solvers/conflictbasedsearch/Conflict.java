@@ -38,6 +38,6 @@ public class Conflict {
             sb.append(agent.label);
             sb.append(", ");
         }
-        return String.format("Position: %d,%d. TimeStep: %d. Num of agents: %d. Involved agents: %s", this.position.row, this.position.col, timeStep, involvedAgents.length, sb.toString());
+        return String.format("Position: %d,%d. TimeStep: %d. Num of agents: %d. Involved agents: %s", this.position.row, this.position.col, timeStep, involvedAgents.size(), sb.toString());
     }
 }
