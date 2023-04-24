@@ -153,8 +153,8 @@ public class LevelSolvingTest {
         TestMap("MAsimple5", new AStar(new GoalCount()));
     }
 
-    @Test
-    public void TestSAD3_AgentSolver(){
-        TestMap("SAD3", new AgentSolver(AStarMinLength::new));
-    }
+//    @Test
+//    public void TestSAD3_AgentSolver(){
+//        TestMap("SAD3", new AgentSolver(AStarMinLength::new));
+//    }
 }

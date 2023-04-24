@@ -243,6 +243,8 @@ public class Problem {
     }
 
     public Problem subProblemFor2(Agent agent) {
+        // TODO : Dont relabel the agents!! Otherwise we cannot merge a solution in correct order.
+        //        Use agent.clone(). A problem does not have to have agents labelled 0, 1, ...
         var subAgent = new Agent(agent.pos, agent.color, '0');
         List<Box> boxes = new ArrayList<Box>();
 
