@@ -49,7 +49,8 @@ public class Problem {
         this.agentAssignedBox = new Box[agents.size()];
         this.agentAssignedGoal = new Goal[agents.size()];
         
-        orderGoalsByPriority();
+        // TODO: some odd behaviour, had to comment out
+        // orderGoalsByPriority();
     }
 
     public Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, Problem parent) {
@@ -66,7 +67,8 @@ public class Problem {
         this.agentAssignedBox = new Box[agents.size()];
         this.agentAssignedGoal = new Goal[agents.size()];
         
-        orderGoalsByPriority();
+        // TODO: some odd behaviour, had to comment out
+        // orderGoalsByPriority();
     }
 
     private Collection<Goal> extractGoals(Function<Character, Boolean> predicate){

@@ -27,11 +27,24 @@ public class Constraint {
         var key = createKey(agent, timeStep);
         var extendedConstraints = constraints.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey(), e -> List.copyOf(e.getValue())));
-
-        var positions = extendedConstraints.computeIfAbsent(key, s -> new ArrayList<>());
-        positions.add(position);
-
+        
+        // TODO: super untidy, but works. to cleanup
+        if(extendedConstraints.containsKey(key)){
+            var positions = extendedConstraints.get(key);
+            var newPositions = new ArrayList<>(positions);
+            newPositions.add(position);
+            extendedConstraints.remove(position);
+            extendedConstraints.put(key, newPositions);
+        }
+        else{
+            extendedConstraints.put(key, List.of(position));
+        }
         return new Constraint(extendedConstraints);
+
+        // did not work due to immutability of List
+        // var positions = extendedConstraints.computeIfAbsent(key, s -> new ArrayList<>());
+        // positions.add(position);
+        // return new Constraint(extendedConstraints);
     }
 
     public boolean isReserved(Agent agent, Position position, int timeStep) {

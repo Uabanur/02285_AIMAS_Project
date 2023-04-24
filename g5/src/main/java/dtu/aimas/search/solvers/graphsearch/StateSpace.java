@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import dtu.aimas.communication.IO;
 import dtu.aimas.common.*;
@@ -21,6 +22,7 @@ import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
@@ -308,59 +310,14 @@ public record StateSpace(
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
 
-    public Optional<Conflict> replaySolutionsForConflicts(List<Map.Entry<Agent, Result<Solution>>> solutions) {
-        var stepIndex = 0;
-
-        State currentState = this.initialState;
-        boolean longestSolutionReached = false;
-
-        while (!longestSolutionReached) {            
-            longestSolutionReached = true;
-            ArrayList<Action> agentActions = new ArrayList<Action>();
-
-            for (var solutionEntry: solutions) {
-                Result<Solution> result = solutionEntry.getValue();
-
-                if (result.isError()) {
-                    // A problem occurred with the result -> Silently return an empty list
-                    // TODO: look whether it still works
-                    return Optional.empty();
-                }
-                
-                Solution agentSolution = result.get();
-
-                var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
-
-                if (stepIndex < agentSteps.size()) {
-                    String agentStep = (String) agentSteps.get(stepIndex);
-                    agentActions.add(Action.fromName(agentStep));
-                    longestSolutionReached = false;
-                } else {
-                    // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
-                    agentActions.add(Action.NoOp);
-                }
-            }
-
-            Action[] actionArray = new Action[agentActions.size()];
-            agentActions.toArray(actionArray);
-            
-
-            // var nextState = this.applyJointActions(currentState, actionArray);
-            var conflict = this.tryGetConflict(currentState, actionArray, stepIndex);
-            if(conflict.isPresent())
-                return conflict;
-        }
-
-        // No conflict found
-        return Optional.empty();
-    }
-
-    public Optional<Conflict> tryGetConflict(State state, Action[] actions, int timeStep){
+    public Optional<Conflict> tryGetConflict(State nextState, int timeStep){
         Optional<Conflict> conflict = Optional.empty();
-
-        for(int label = 0; label < actions.length; label++){
-            var performingAgent = getAgentByLabel(state, (char)label);
-            var action = actions[label];
+        var state = nextState.parent;
+        var actions = nextState.jointAction;
+        
+        for(int agentNumber = 0; agentNumber < actions.length; agentNumber++){
+            var performingAgent = getAgentByNumber(state, agentNumber);
+            var action = actions[agentNumber];
 
             var possibleConflictPosition = getPossibleConflictPosition(state, performingAgent, action);
             
@@ -376,14 +333,15 @@ public record StateSpace(
             if(!agentResponsibleForOccupation.isPresent()) continue;
 
             // CASE: conflict found
-            if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), timeStep));
+            // TODO: very untidy this timestep with minus, should be handled nicer
+            if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), timeStep - 1));
             conflict.get().involveAgent(agentResponsibleForOccupation.get());
             conflict.get().involveAgent(performingAgent);
         }
         return conflict;
     }
 
-    private Optional<Position> getPossibleConflictPosition(State state, Agent agent, Action action){
+    public Optional<Position> getPossibleConflictPosition(State state, Agent agent, Action action){
         switch (action.type) {
             case NoOp -> {
                 return Optional.empty();
@@ -416,10 +374,11 @@ public record StateSpace(
             // TODO: plug in the responsible agent (who should it be? all the agents with box's color? the one assigned to the box?)
             // var resposibleAgent = getResponsibleAgent(state, occupyingBox.get(), timeStep);
             // return Optional.of(new Pair<>(agent, responsibleAgent));
-            return null;
+            IO.info("UNRESOLVABLE Conflict with box at " + pos);
+            return Optional.empty();
         }
         // CASE 3: not occupied
-        return null;
+        return Optional.empty();
     }
 
 

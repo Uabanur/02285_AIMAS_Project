@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Position;
@@ -14,7 +15,9 @@ import dtu.aimas.common.Result;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.Constraint;
+import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import lombok.Getter;
 
@@ -72,12 +75,23 @@ public class CBSNode implements Comparable<CBSNode> {
     }
 
     public Optional<Conflict> findFirstConflict(StateSpace stateSpace) {
+        // TODO: check if error checking works well
         var subSolutionsResult = Result.collapse(solutions.values());
         assert subSolutionsResult.isOk() : subSolutionsResult.getError().getMessage();
 
-        // Delegate the conflict detection to the state space
-        List<Map.Entry<Agent, Result<Solution>>> sortedSolutions = getSortedSolutions();
-        return stateSpace.replaySolutionsForConflicts(sortedSolutions);
+        List<StateSolution> listOfSolutions = solutions.values().stream().map(s -> (StateSolution)s.get()).collect(Collectors.toList());
+        var mergedSolution = SolutionMerger.mergeSolutions(listOfSolutions);
+
+        // assuming initial state is all right
+        
+        for(int step = 1; step < mergedSolution.size(); step++){
+            var state = mergedSolution.getState(step);
+            var conflict = stateSpace.tryGetConflict(state, step);
+            if(conflict.isPresent()){
+                return conflict;
+            }
+        }
+        return Optional.empty();
     }
 
     private List<Map.Entry<Agent, Result<Solution>>> getSortedSolutions() {

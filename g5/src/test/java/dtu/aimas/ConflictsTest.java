@@ -15,6 +15,7 @@ import dtu.aimas.common.Box;
 import dtu.aimas.common.Color;
 import dtu.aimas.common.Position;
 import dtu.aimas.communication.IO;
+import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;

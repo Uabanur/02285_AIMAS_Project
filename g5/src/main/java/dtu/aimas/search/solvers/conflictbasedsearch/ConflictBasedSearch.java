@@ -34,7 +34,6 @@ public class ConflictBasedSearch implements Solver {
             var isolatedSolution = subSolver.solve(initialProblem.subProblemFor(agent));
             if (isolatedSolution.isError()) 
                 return Result.passError(isolatedSolution);
-                                
             root.setSolutionFor(agent, isolatedSolution);
         }
         root.calculateCost();
@@ -53,19 +52,20 @@ public class ConflictBasedSearch implements Solver {
             }
                 
             for(var agent: conflict.get().getInvolvedAgents()) {
-                // IO.info("agent" + agent.label + " is involved");
                 // CONSTRAINT
                 var constrainedNode = node.constrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
                 var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.getConstraint());
                 var solution = subSolver.solve(constrainedProblem);
+
                 constrainedNode.setSolutionFor(agent, solution);
                 constrainedNode.calculateCost();
                 if(constrainedNode.isSolvable())
                 {
-                    // IO.info("Constrained solvable!");
                     frontier.add(constrainedNode);
-                    break;
+                    // TODO: works without break, otherwise infite loop
+                    //break;
                 }
+
                 // TODO: test with correct conflict detector whether needed or not, if not, remove
                 // // NEGATE CONSTRAINT
                 // var unconstrainedNode = node;

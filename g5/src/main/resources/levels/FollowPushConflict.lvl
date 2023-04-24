@@ -1,0 +1,16 @@
+#domain
+hospital
+#levelname
+FollowPushConflict
+#colors
+blue: 0, A
+green: 1
+#initial
+++++++
++0A1 +
+++++++
+#goal
+++++++
++ 0A1+
+++++++
+#end
