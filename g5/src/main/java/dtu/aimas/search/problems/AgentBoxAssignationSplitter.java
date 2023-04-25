@@ -87,6 +87,11 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         var boxes = agentAssignedBoxes.get(agent);
         var goals = new char[problem.goals.length][problem.goals[0].length];
         agentAssignedGoals.get(agent).stream().forEach(g -> goals[g.destination.row][g.destination.col] = g.label);
+        var agentGoal = problem.agentGoals.stream().filter(ag -> ag.label == agent.label).findAny();
+        if(agentGoal.isPresent()) {
+            var goal = agentGoal.get();
+            goals[goal.destination.row][goal.destination.col] = goal.label;
+        }
         return new Problem(agents, boxes, goals, problem);
     }
 }
