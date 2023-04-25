@@ -17,12 +17,14 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
     private HashMap<Agent, List<Goal>> agentAssignedGoals;
     private HashMap<Agent, List<Box>> agentAssignedBoxes;
     private Problem problem; 
+    private ArrayList<Goal> orderedBoxGoals;
     
     @Override
     public List<Problem> split(Problem problem) {
         this.problem = problem;
         agentAssignedGoals = new HashMap<>();
         agentAssignedBoxes = new HashMap<>();
+        orderGoalsByPriority();
         assignGoals();
         return problem.agents.stream().map(a -> subProblemForAgent(a)).toList();
     }
@@ -84,14 +86,35 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
 
     private Problem subProblemForAgent(Agent agent) {
         var agents = List.of(agent);
-        var boxes = agentAssignedBoxes.get(agent);
         var goals = new char[problem.goals.length][problem.goals[0].length];
-        agentAssignedGoals.get(agent).stream().forEach(g -> goals[g.destination.row][g.destination.col] = g.label);
+        List<Box> boxes;
+        if(agentAssignedGoals.containsKey(agent)) {
+            agentAssignedGoals.get(agent).stream().forEach(g -> goals[g.destination.row][g.destination.col] = g.label);
+            boxes = agentAssignedBoxes.get(agent);
+        }
+        else boxes = List.of();
         var agentGoal = problem.agentGoals.stream().filter(ag -> ag.label == agent.label).findAny();
         if(agentGoal.isPresent()) {
             var goal = agentGoal.get();
             goals[goal.destination.row][goal.destination.col] = goal.label;
         }
         return new Problem(agents, boxes, goals, problem);
+    }
+
+    public void orderGoalsByPriority() {
+        orderedBoxGoals = new ArrayList<>();
+        //We want goals in dead-ends to be solved first and those in chokepoints last
+        for(Goal goal : problem.boxGoals) {
+            if(problem.isDeadEnd(goal.destination)) {
+                orderedBoxGoals.add(0, goal);
+            }
+            else if(problem.isChokepoint(goal.destination)) {
+                orderedBoxGoals.add(orderedBoxGoals.size()-1, goal);
+            }
+            else {
+                int insertPosition = Math.ceilDiv((orderedBoxGoals.size()-1),2);
+                orderedBoxGoals.add(insertPosition, goal);
+            }
+        }
     }
 }
