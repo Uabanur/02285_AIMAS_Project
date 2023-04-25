@@ -30,9 +30,6 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
     }
 
     private void assignGoals() {
-        //Set<Goal> assignedGoals = agentAssignedGoals.values().stream().flatMap(l -> l.stream()).collect(Collectors.toSet());
-        //Set<Box> assignedBoxes = agentAssignedBoxes.values().stream().flatMap(l -> l.stream()).collect(Collectors.toSet());
-        //Set<Goal> assignedGoals;
         Set<Box> assignedBoxes = new HashSet<>();
         int[] agentCost = new int[problem.agents.size()];
         Arrays.fill(agentCost, 0);
@@ -84,7 +81,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
 
     }
 
-    private Problem subProblemForAgent(Agent agent) {
+    public Problem subProblemForAgent(Agent agent) {
         var agents = List.of(agent);
         var goals = new char[problem.goals.length][problem.goals[0].length];
         List<Box> boxes;
@@ -101,7 +98,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         return new Problem(agents, boxes, goals, problem);
     }
 
-    public void orderGoalsByPriority() {
+    private void orderGoalsByPriority() {
         orderedBoxGoals = new ArrayList<>();
         //We want goals in dead-ends to be solved first and those in chokepoints last
         for(Goal goal : problem.boxGoals) {
