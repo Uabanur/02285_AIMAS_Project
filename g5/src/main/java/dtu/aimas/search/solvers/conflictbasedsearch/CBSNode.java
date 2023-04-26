@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import dtu.aimas.common.Agent;
 import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.solutions.ActionSolution;
 import dtu.aimas.search.solutions.Solution;
@@ -81,15 +82,21 @@ public class CBSNode implements Comparable<CBSNode> {
 
         List<StateSolution> listOfSolutions = solutions.values().stream().map(s -> (StateSolution)s.get()).collect(Collectors.toList());
         var mergedSolution = SolutionMerger.mergeSolutions(listOfSolutions);
-
+        IO.info("Pre conflict solutions");
+        for(var s : solutions.entrySet()){
+            IO.info(s.getKey().label + " " + s.getValue().get().serializeSteps());
+        }
         // assuming initial state is all right
         
         for(int step = 1; step < mergedSolution.size(); step++){
             var state = mergedSolution.getState(step);
+            IO.info(state.toString());
             var conflict = stateSpace.tryGetConflict(state, step);
             if(conflict.isPresent()){
+                // IO.info(conflict.toString());
                 return conflict;
             }
+            IO.info("no conflict");
         }
         return Optional.empty();
     }

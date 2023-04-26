@@ -173,6 +173,10 @@ public record StateSpace(
         !getBoxAt(state, position).isPresent() && this.problem.isFree(position, agent, timeStep);
     }
 
+    private boolean canStayAtCell(Position position, Agent agent, int timeStep){
+        return this.problem.isFree(position, agent, timeStep);
+    }
+
     private boolean notOwner(Agent agent, Box box) {
         return agent.color != box.color;
     }
@@ -206,7 +210,7 @@ public record StateSpace(
         Box box;
         switch (action.type) {
             case NoOp -> {
-                return true;
+                return canStayAtCell(agent.pos, agent, timeStep);
             }
             case Move -> {
                 agentDestination = moveAgent(agent, action);
@@ -237,9 +241,10 @@ public record StateSpace(
 
     public ArrayList<State> expand(State state) {
 
-        int timeStep = 0;
+        int timeStep = 1;
         State iterator = state;
         while (iterator.parent != null) {
+            // IO.info("Sth super strange");
             iterator = iterator.parent;
             timeStep++;
         }
@@ -310,11 +315,15 @@ public record StateSpace(
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
 
-    public Optional<Conflict> tryGetConflict(State nextState, int timeStep){
+    public Optional<Conflict> tryGetConflict(State nextState, int step){
         Optional<Conflict> conflict = Optional.empty();
         var state = nextState.parent;
         var actions = nextState.jointAction;
         
+        // CASE 1: vertex conflict check
+        conflict = tryGetVertexConflict(nextState, step);
+        
+        // CASE 2: edge conflict check
         for(int agentNumber = 0; agentNumber < actions.length; agentNumber++){
             var performingAgent = getAgentByNumber(state, agentNumber);
             var action = actions[agentNumber];
@@ -330,15 +339,42 @@ public record StateSpace(
             var agentResponsibleForOccupation = tryGetAgentResponsibleForOccupation(state, possibleConflictPosition.get());
 
             // CASE: cell not occupied
-            if(!agentResponsibleForOccupation.isPresent()) continue;
+            if(agentResponsibleForOccupation != null && !agentResponsibleForOccupation.isPresent()) continue;
 
             // CASE: conflict found
-            // TODO: very untidy this timestep with minus, should be handled nicer
-            if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), timeStep - 1));
-            conflict.get().involveAgent(agentResponsibleForOccupation.get());
+            if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), step));
+            if(agentResponsibleForOccupation != null) conflict.get().involveAgent(agentResponsibleForOccupation.get());
             conflict.get().involveAgent(performingAgent);
         }
         return conflict;
+    }
+
+    public Optional<Conflict> tryGetVertexConflict(State state, int timeStep){
+        Set<Position> occupiedPositions = new HashSet<>();
+        Optional<Position> conflictPosition = Optional.empty();
+        for (Agent agent : state.agents) {
+            if (!occupiedPositions.add(agent.pos)){
+                conflictPosition = Optional.of(agent.pos);
+                break;
+            }
+        }
+        if(!conflictPosition.isPresent()){
+            for (Box box : state.boxes) {
+                if (!occupiedPositions.add(box.pos)) {
+                    if (!occupiedPositions.add(box.pos)){
+                        conflictPosition = Optional.of(box.pos);
+                        break;
+                    }
+                }
+            }
+        }
+        if(!conflictPosition.isPresent()) return Optional.empty();
+        var pos = conflictPosition.get();
+        var involvedAgents = new HashSet<Agent>(state.agents.stream().filter(agent -> agent.pos.equals(pos)).collect(Collectors.toSet()));
+        // TODO: what with the boxes?
+        // var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
+        IO.info("Vertex conflict found!");
+        return Optional.of(new Conflict(conflictPosition.get(), timeStep, involvedAgents));
     }
 
     public Optional<Position> getPossibleConflictPosition(State state, Agent agent, Action action){
@@ -375,7 +411,9 @@ public record StateSpace(
             // var resposibleAgent = getResponsibleAgent(state, occupyingBox.get(), timeStep);
             // return Optional.of(new Pair<>(agent, responsibleAgent));
             IO.info("UNRESOLVABLE Conflict with box at " + pos);
-            return Optional.empty();
+
+            // TODO: this is a hack, should be handled better
+            return null;
         }
         // CASE 3: not occupied
         return Optional.empty();

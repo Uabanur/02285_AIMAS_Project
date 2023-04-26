@@ -35,6 +35,7 @@ public class ConflictBasedSearch implements Solver {
             if (isolatedSolution.isError()) 
                 return Result.passError(isolatedSolution);
             root.setSolutionFor(agent, isolatedSolution);
+            IO.info("initial solution for agent " + agent.label + ": " + isolatedSolution.get().serializeSteps());
         }
         root.calculateCost();
 
@@ -45,18 +46,24 @@ public class ConflictBasedSearch implements Solver {
                 return Result.error(new SolutionNotFound("CBS found no solutions."));
             var node = frontier.poll();
             var conflict = node.findFirstConflict(stateSpace);
-
+            IO.info("conflict: " + conflict.toString());
+            
             if (conflict.isEmpty()){
                 var sol = node.getSolution(stateSpace);
                 return sol;
             }
-                
+            IO.info("involved agents: " + conflict.get().getInvolvedAgents().size());
             for(var agent: conflict.get().getInvolvedAgents()) {
                 // CONSTRAINT
+                IO.info("constraining for agent " + agent.label);
                 var constrainedNode = node.constrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
                 var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.getConstraint());
                 var solution = subSolver.solve(constrainedProblem);
-
+                IO.info("Solution: ");
+                IO.info(solution.get().serializeSteps());
+                IO.info("Constraint: ");
+                IO.info(constrainedNode.getConstraint().toString());
+                
                 constrainedNode.setSolutionFor(agent, solution);
                 constrainedNode.calculateCost();
                 if(constrainedNode.isSolvable())
@@ -65,7 +72,6 @@ public class ConflictBasedSearch implements Solver {
                     // TODO: works without break, otherwise infite loop
                     //break;
                 }
-
                 // TODO: test with correct conflict detector whether needed or not, if not, remove
                 // // NEGATE CONSTRAINT
                 // var unconstrainedNode = node;
