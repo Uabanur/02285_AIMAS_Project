@@ -115,10 +115,11 @@ public class CBSNode implements Comparable<CBSNode> {
         return entryList;
     }
 
-    public CBSNode constrain(Agent agent, Position position, int timeStep) {
+    public Optional<CBSNode> tryConstrain(Agent agent, Position position, int timeStep) {
         var solutionsCopy = new HashMap<>(this.solutions);
+        if(constraint.contains(agent, position, timeStep)) return Optional.empty();
         var extendedConstraints = constraint.extend(agent, position, timeStep);
-        return new CBSNode(extendedConstraints, solutionsCopy);
+        return Optional.of(new CBSNode(extendedConstraints, solutionsCopy));
     }
 
     @Override

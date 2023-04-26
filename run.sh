@@ -6,4 +6,4 @@ arguments="-cbs"
 flags="-g"
 debugFlag="-agentlib:jdwp=transport=dt_socket,server=y,address=8000"
 
-java -jar ./mavis.jar -l "$levelDir/FollowPushConflict.lvl" -c "java -cp $classesDir $clientName $arguments" $flags
+java -jar ./mavis.jar -l "$levelDir/VertexConflict.lvl" -c "java $debugFlag -cp $classesDir $clientName $arguments" $flags

@@ -23,6 +23,12 @@ public class Constraint {
         return String.format("%c|%d", agent.label, timeStep);
     }
 
+    // TODO: checking can be done once and merged with extend
+    public boolean contains(Agent agent, Position position, int timeStep){
+        var key = createKey(agent, timeStep);
+        return constraints.containsKey(key) && constraints.get(key).contains(position);
+    }
+
     public Constraint extend(Agent agent, Position position, int timeStep) {
         var key = createKey(agent, timeStep);
         var extendedConstraints = constraints.entrySet().stream()

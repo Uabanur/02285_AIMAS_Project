@@ -56,19 +56,21 @@ public class ConflictBasedSearch implements Solver {
             for(var agent: conflict.get().getInvolvedAgents()) {
                 // CONSTRAINT
                 IO.info("constraining for agent " + agent.label);
-                var constrainedNode = node.constrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
-                var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.getConstraint());
+                var constrainedNode = node.tryConstrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
+                // If constraipreviously added, already investigated this branch
+                if(constrainedNode.isEmpty()) continue;
+                var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.get().getConstraint());
                 var solution = subSolver.solve(constrainedProblem);
                 IO.info("Solution: ");
                 IO.info(solution.get().serializeSteps());
                 IO.info("Constraint: ");
-                IO.info(constrainedNode.getConstraint().toString());
+                IO.info(constrainedNode.get().getConstraint().toString());
                 
-                constrainedNode.setSolutionFor(agent, solution);
-                constrainedNode.calculateCost();
-                if(constrainedNode.isSolvable())
+                constrainedNode.get().setSolutionFor(agent, solution);
+                constrainedNode.get().calculateCost();
+                if(constrainedNode.get().isSolvable())
                 {
-                    frontier.add(constrainedNode);
+                    frontier.add(constrainedNode.get());
                     // TODO: works without break, otherwise infite loop
                     //break;
                 }
