@@ -55,6 +55,6 @@ public class StateSolution implements Solution {
     }
 
     public int getMakespan() {
-        return 0;
+        return states.length;
     }
 }
