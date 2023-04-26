@@ -35,9 +35,9 @@ public class Conflict {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Agent agent : involvedAgents) {
-            sb.append(agent.label);
-            sb.append(", ");
+            sb.append(agent.label);    
+            sb.append(" ");
         }
-        return String.format("Position: %d,%d. TimeStep: %d. Num of agents: %d. Involved agents: %s", this.position.row, this.position.col, timeStep, involvedAgents.size(), sb.toString());
+        return String.format("conflict: (%d,%d) at %d, involved agents: %s", this.position.row, this.position.col, timeStep, sb.toString());
     }
 }

@@ -35,7 +35,6 @@ public class ConflictBasedSearch implements Solver {
             if (isolatedSolution.isError()) 
                 return Result.passError(isolatedSolution);
             root.setSolutionFor(agent, isolatedSolution);
-            IO.info("initial solution for agent " + agent.label + ": " + isolatedSolution.get().serializeSteps());
         }
         root.calculateCost();
 
@@ -45,50 +44,32 @@ public class ConflictBasedSearch implements Solver {
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("CBS found no solutions."));
             var node = frontier.poll();
-            var conflict = node.findFirstConflict(stateSpace);
-            IO.info("conflict: " + conflict.toString());
             
-            if (conflict.isEmpty()){
-                var sol = node.getSolution(stateSpace);
-                return sol;
-            }
-            IO.info("involved agents: " + conflict.get().getInvolvedAgents().size());
+            IO.info("Before constraint:");
+            IO.info(node.toString());
+
+            var conflict = node.findFirstConflict(stateSpace);
+            
+            if (conflict.isEmpty()) return node.getSolution(stateSpace);
+
+            IO.info(conflict.get().toString());
+
             for(var agent: conflict.get().getInvolvedAgents()) {
-                // CONSTRAINT
-                IO.info("constraining for agent " + agent.label);
+                IO.info("Constraining for agent " + agent.label);
                 var constrainedNode = node.tryConstrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
-                // If constraipreviously added, already investigated this branch
+                
+                // CASE: constraint previously added, already investigated this branch
                 if(constrainedNode.isEmpty()) continue;
+
                 var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.get().getConstraint());
                 var solution = subSolver.solve(constrainedProblem);
-                IO.info("Solution: ");
-                IO.info(solution.get().serializeSteps());
-                IO.info("Constraint: ");
-                IO.info(constrainedNode.get().getConstraint().toString());
-                
                 constrainedNode.get().setSolutionFor(agent, solution);
                 constrainedNode.get().calculateCost();
-                if(constrainedNode.get().isSolvable())
-                {
-                    frontier.add(constrainedNode.get());
-                    // TODO: works without break, otherwise infite loop
-                    //break;
-                }
-                // TODO: test with correct conflict detector whether needed or not, if not, remove
-                // // NEGATE CONSTRAINT
-                // var unconstrainedNode = node;
-                // var unconstrainedProblem = initialProblem.subProblemFor(agent);
-                // solution = subSolver.solve(unconstrainedProblem);
-                // unconstrainedNode.setSolutionFor(agent, solution);
-                // unconstrainedNode.calculateCost();
-                // if(unconstrainedNode.isSolvable())
-                // {
-                //     frontier.add(unconstrainedNode);
-                //     IO.info("Unconstrained solvable!");
-                //     break;
-                // }
-                // IO.info("No subproblem is solvable!");
-                // // BACKTRACK to the conflict and try different resolution
+
+                IO.info("After constraint:");
+                IO.info(constrainedNode.get().toString());
+
+                if(constrainedNode.get().isSolvable()) frontier.add(constrainedNode.get());
             }
         }
     }

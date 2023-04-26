@@ -69,6 +69,7 @@ public class CBSNode implements Comparable<CBSNode> {
         assert subSolutionsResult.isOk() : subSolutionsResult.getError().getMessage();
 
         // Delegate retrieval of the merge solution to the state space
+        // TODO(3): make use of SolutionMerger instead
         List<Map.Entry<Agent, Result<Solution>>> sortedSolutions = getSortedSolutions();
         Action[][] mergedPlan = stateSpace.extractPlanFromSubsolutions(sortedSolutions);
 
@@ -76,29 +77,24 @@ public class CBSNode implements Comparable<CBSNode> {
     }
 
     public Optional<Conflict> findFirstConflict(StateSpace stateSpace) {
-        // TODO: check if error checking works well
         var subSolutionsResult = Result.collapse(solutions.values());
         assert subSolutionsResult.isOk() : subSolutionsResult.getError().getMessage();
 
         List<StateSolution> listOfSolutions = solutions.values().stream().map(s -> (StateSolution)s.get()).collect(Collectors.toList());
         var mergedSolution = SolutionMerger.mergeSolutions(listOfSolutions);
-        IO.info("Pre conflict solutions");
-        for(var s : solutions.entrySet()){
-            IO.info(s.getKey().label + " " + s.getValue().get().serializeSteps());
-        }
-        // assuming initial state is all right
         
         for(int step = 1; step < mergedSolution.size(); step++){
             var state = mergedSolution.getState(step);
-            IO.info(state.toString());
             var conflict = stateSpace.tryGetConflict(state, step);
             if(conflict.isPresent()){
-                // IO.info(conflict.toString());
                 return conflict;
             }
-            IO.info("no conflict");
         }
         return Optional.empty();
+    }
+
+    public boolean startsWithWaiting(){
+        return solutions.values().stream().allMatch(s -> ((StateSolution)s.get()).getState(0) == ((StateSolution)s.get()).getState(1));
     }
 
     private List<Map.Entry<Agent, Result<Solution>>> getSortedSolutions() {
@@ -125,5 +121,21 @@ public class CBSNode implements Comparable<CBSNode> {
     @Override
     public int compareTo(CBSNode other) {
         return this.cost - other.cost;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        sb.append("=CBSNode=");
+        sb.append("\n");
+        for(var s : solutions.entrySet()){
+            sb.append(s.getKey().label + " " + s.getValue().get().serializeSteps());
+            sb.append("\n");
+        }
+        sb.append(constraint.toString());
+        sb.append("\n");
+        sb.append("=========");
+        return sb.toString();
     }
 }

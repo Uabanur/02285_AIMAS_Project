@@ -320,10 +320,10 @@ public record StateSpace(
         var state = nextState.parent;
         var actions = nextState.jointAction;
         
-        // CASE 1: vertex conflict check
+        // CASE 1: vertex conflict
         conflict = tryGetVertexConflict(nextState, step);
         
-        // CASE 2: edge conflict check
+        // CASE 2: edge/follow conflict
         for(int agentNumber = 0; agentNumber < actions.length; agentNumber++){
             var performingAgent = getAgentByNumber(state, agentNumber);
             var action = actions[agentNumber];
@@ -336,15 +336,22 @@ public record StateSpace(
             // CASE: already investigating conflict on different position
             if(conflict.isPresent() && conflict.get().getPosition() != possibleConflictPosition.get()) continue;
 
-            var agentResponsibleForOccupation = tryGetAgentResponsibleForOccupation(state, possibleConflictPosition.get());
+            var occupyingAgent = getAgentAt(state, possibleConflictPosition.get());
+            var occupyingBox = getBoxAt(state, possibleConflictPosition.get());
 
             // CASE: cell not occupied
-            if(agentResponsibleForOccupation != null && !agentResponsibleForOccupation.isPresent()) continue;
+            if(!occupyingAgent.isPresent() && !occupyingBox.isPresent()) continue;
 
-            // CASE: conflict found
+            // CASE: if no conflict detected yet, create new one
             if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), step));
-            if(agentResponsibleForOccupation != null) conflict.get().involveAgent(getAgentFromInitialState(agentResponsibleForOccupation.get()));
+            
             conflict.get().involveAgent(getAgentFromInitialState(performingAgent));
+
+            // CASE: agent is occupying the cell
+            if(occupyingAgent.isPresent()) conflict.get().involveAgent(getAgentFromInitialState(occupyingAgent.get()));
+
+            // CASE: box is occupying the cell
+            // TODO(2): right now we only mark this as one-agent conflict (the one that is performing the action)
         }
         return conflict;
     }
@@ -378,9 +385,10 @@ public record StateSpace(
                 .filter(agent -> agent.pos.equals(pos))
                 .map(agent -> getAgentFromInitialState(agent))
                 .collect(Collectors.toSet()));
-        // TODO: what with the boxes?
-        // var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
-        IO.info("Vertex conflict found!");
+        // TODO(1): get information who is responsible for pushing/pulling the box into this position
+        var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
+        if(involvedBoxesSet.size() > 0) IO.info("Box taking part in the conflict, but no agent is taken as responsible for that.");
+
         return Optional.of(new Conflict(conflictPosition.get(), timeStep, involvedAgents));
     }
 
@@ -403,46 +411,6 @@ public record StateSpace(
             default -> throw new UnreachableState();
         }
     }
-
-    private Optional<Agent> tryGetAgentResponsibleForOccupation(State state, Position pos)
-    {
-        // CASE 1: occupied by Agent
-        var occupyingAgent = getAgentAt(state, pos);
-        if(occupyingAgent.isPresent()){
-            return occupyingAgent;
-        }
-        // CASE 2: occupied by Box
-        var occupyingBox = getBoxAt(state, pos);
-        if(occupyingBox.isPresent()){
-            // TODO: plug in the responsible agent (who should it be? all the agents with box's color? the one assigned to the box?)
-            // var resposibleAgent = getResponsibleAgent(state, occupyingBox.get(), timeStep);
-            // return Optional.of(new Pair<>(agent, responsibleAgent));
-            IO.info("UNRESOLVABLE Conflict with box at " + pos);
-
-            // TODO: this is a hack, should be handled better
-            return null;
-        }
-        // CASE 3: not occupied
-        return Optional.empty();
-    }
-
-
-    // TODO: it may be useful while returning conflict
-    private ArrayList<Agent> getInitialStateAgents(ArrayList<Agent> agentCopies) {
-
-        ArrayList<Agent> matchingInitialAgents = new ArrayList<>();
-
-        for (var initialAgent: initialState.agents) {
-            for (var agentCopy: agentCopies) {
-                if (agentCopy.label == initialAgent.label) {
-                    matchingInitialAgents.add(initialAgent);
-                }
-            }  
-        }
-
-        return matchingInitialAgents;
-    }
-
 
     private State applyJointActions(State state, Action[] actionsToApply) {
         ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());
