@@ -343,10 +343,14 @@ public record StateSpace(
 
             // CASE: conflict found
             if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), step));
-            if(agentResponsibleForOccupation != null) conflict.get().involveAgent(agentResponsibleForOccupation.get());
-            conflict.get().involveAgent(performingAgent);
+            if(agentResponsibleForOccupation != null) conflict.get().involveAgent(getAgentFromInitialState(agentResponsibleForOccupation.get()));
+            conflict.get().involveAgent(getAgentFromInitialState(performingAgent));
         }
         return conflict;
+    }
+
+    public Agent getAgentFromInitialState(Agent agentInCurrentState){
+        return initialState.agents.stream().filter(agent -> agent.label == agentInCurrentState.label).findFirst().get();
     }
 
     public Optional<Conflict> tryGetVertexConflict(State state, int timeStep){
@@ -370,7 +374,10 @@ public record StateSpace(
         }
         if(!conflictPosition.isPresent()) return Optional.empty();
         var pos = conflictPosition.get();
-        var involvedAgents = new HashSet<Agent>(state.agents.stream().filter(agent -> agent.pos.equals(pos)).collect(Collectors.toSet()));
+        var involvedAgents = new HashSet<Agent>(state.agents.stream()
+                .filter(agent -> agent.pos.equals(pos))
+                .map(agent -> getAgentFromInitialState(agent))
+                .collect(Collectors.toSet()));
         // TODO: what with the boxes?
         // var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
         IO.info("Vertex conflict found!");
