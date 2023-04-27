@@ -34,7 +34,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         int[] agentCost = new int[problem.agents.size()];
         Arrays.fill(agentCost, 0);
 
-        for(Goal goal : problem.boxGoals) {
+        for(Goal goal : orderedBoxGoals) {
             List<Box> compatibleBoxes = problem.boxes.stream().filter(
                 b -> b.label == goal.label && !assignedBoxes.contains(b) 
                 && problem.agents.stream().anyMatch(a -> a.color.equals(b.color))
@@ -67,13 +67,11 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
             }
 
             if(!agentAssignedGoals.containsKey(closestAgent)) {
-                agentAssignedGoals.put(closestAgent, List.of(goal));
-                agentAssignedBoxes.put(closestAgent, List.of(closestBox));
+                agentAssignedGoals.put(closestAgent, new ArrayList<>());
+                agentAssignedBoxes.put(closestAgent, new ArrayList<>());
             }
-            else {
-                agentAssignedGoals.get(closestAgent).add(goal);
-                agentAssignedBoxes.get(closestAgent).add(closestBox);
-            }
+            agentAssignedGoals.get(closestAgent).add(goal);
+            agentAssignedBoxes.get(closestAgent).add(closestBox);
             assignedBoxes.add(closestBox);
             //2 times because it has to come back for calculations to be correct
             agentCost[Character.getNumericValue(closestAgent.label)] += (closestBoxDist + closestAgentDist)*2; 
@@ -99,7 +97,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
     }
 
     private void orderGoalsByPriority() {
-        orderedBoxGoals = new ArrayList<>();
+        orderedBoxGoals = new ArrayList<Goal>();
         //We want goals in dead-ends to be solved first and those in chokepoints last
         for(Goal goal : problem.boxGoals) {
             if(problem.isDeadEnd(goal.destination)) {
