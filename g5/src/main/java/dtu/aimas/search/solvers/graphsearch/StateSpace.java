@@ -244,7 +244,6 @@ public record StateSpace(
         int timeStep = 1;
         State iterator = state;
         while (iterator.parent != null) {
-            // IO.info("Sth super strange");
             iterator = iterator.parent;
             timeStep++;
         }

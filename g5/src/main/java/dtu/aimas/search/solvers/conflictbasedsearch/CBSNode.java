@@ -52,7 +52,6 @@ public class CBSNode implements Comparable<CBSNode> {
             return;
         }
         
-        // TODO : Add a cost function
         // makespan
         this.cost = solutions.values().stream().mapToInt(r -> r.get().getMakespan()).max().orElse(MAX_COST);
 

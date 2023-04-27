@@ -44,18 +44,11 @@ public class ConflictBasedSearch implements Solver {
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("CBS found no solutions."));
             var node = frontier.poll();
-            
-            IO.info("Investigated node");
-            IO.info(node.toString());
 
             var conflict = node.findFirstConflict(stateSpace);
-            
             if (conflict.isEmpty()) return node.getSolution(stateSpace);
 
-            IO.info(conflict.get().toString());
-
             for(var agent: conflict.get().getInvolvedAgents()) {
-                IO.info("Constraining for agent " + agent.label);
                 var constrainedNode = node.tryConstrain(agent, conflict.get().getPosition(), conflict.get().getTimeStep());
                 
                 // CASE: constraint previously added, already investigated this branch

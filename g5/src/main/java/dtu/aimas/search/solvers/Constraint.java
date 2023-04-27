@@ -23,7 +23,7 @@ public class Constraint {
         return String.format("%c|%d", agent.label, timeStep);
     }
 
-    // TODO: checking can be done once and merged with extend
+    // TODO(5): checking can be done once and merged with extend
     public boolean contains(Agent agent, Position position, int timeStep){
         var key = createKey(agent, timeStep);
         return constraints.containsKey(key) && constraints.get(key).contains(position);
@@ -34,7 +34,6 @@ public class Constraint {
         var extendedConstraints = constraints.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey(), e -> List.copyOf(e.getValue())));
         
-        // TODO: super untidy, but works. to cleanup
         if(extendedConstraints.containsKey(key)){
             var positions = extendedConstraints.get(key);
             var newPositions = new ArrayList<>(positions);
@@ -46,11 +45,6 @@ public class Constraint {
             extendedConstraints.put(key, List.of(position));
         }
         return new Constraint(extendedConstraints);
-
-        // did not work due to immutability of List
-        // var positions = extendedConstraints.computeIfAbsent(key, s -> new ArrayList<>());
-        // positions.add(position);
-        // return new Constraint(extendedConstraints);
     }
 
     public boolean isReserved(Agent agent, Position position, int timeStep) {
