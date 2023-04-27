@@ -260,6 +260,10 @@ public record StateSpace(
                     agentActions.add(action);
                 }
             }
+            // when no action is applicable due to constraints, return empty list
+            if(agentActions.isEmpty()){
+                return new ArrayList<>();
+            }
             applicableActions[agentId] = agentActions.toArray(new Action[0]);
         }
 

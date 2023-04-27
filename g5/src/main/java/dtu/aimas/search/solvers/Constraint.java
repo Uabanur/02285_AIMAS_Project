@@ -64,6 +64,6 @@ public class Constraint {
 
     @Override
     public String toString() {
-        return "constraints=" + constraints + "]";
+        return "constraints=" + constraints;
     }
 }
