@@ -104,11 +104,11 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
                 orderedBoxGoals.add(0, goal);
             }
             else if(problem.isChokepoint(goal.destination)) {
-                orderedBoxGoals.add(orderedBoxGoals.size()-1, goal);
+                orderedBoxGoals.add(Math.max(0,orderedBoxGoals.size()-1), goal);
             }
             else {
                 int insertPosition = Math.ceilDiv((orderedBoxGoals.size()-1),2);
-                orderedBoxGoals.add(insertPosition, goal);
+                orderedBoxGoals.add(Math.max(0,insertPosition), goal);
             }
         }
     }
