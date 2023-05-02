@@ -13,12 +13,16 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
+import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
+import dtu.aimas.search.problems.ProblemSplitter;
 
 public class ConflictBasedSearch implements Solver {
     private Solver subSolver;
+    private AgentBoxAssignationSplitter splitter;
 
     public ConflictBasedSearch(Solver subSolver){
         this.subSolver = subSolver;
+        this.splitter = new AgentBoxAssignationSplitter();
     }
 
     public Result<Solution> solve(Problem initialProblem) {
@@ -30,10 +34,12 @@ public class ConflictBasedSearch implements Solver {
         var frontier = new PriorityQueue<CBSNode>();
         var root = new CBSNode();
 
-        for(var agent : initialProblem.agents){
-            var isolatedSolution = subSolver.solve(initialProblem.subProblemFor(agent));
+        var subProblems = splitter.split(initialProblem);
+        for(Problem subProblem : subProblems){
+            var isolatedSolution = subSolver.solve(subProblem);
             if (isolatedSolution.isError()) 
                 return Result.passError(isolatedSolution);
+            Agent agent = subProblem.agents.iterator().next();
             root.setSolutionFor(agent, isolatedSolution);
         }
         root.calculateCost();
@@ -53,8 +59,8 @@ public class ConflictBasedSearch implements Solver {
                 
                 // CASE: constraint previously added, already investigated this branch
                 if(constrainedNode.isEmpty()) continue;
-
-                var constrainedProblem = ConstrainedProblem.from(initialProblem.subProblemFor(agent), constrainedNode.get().getConstraint());
+                
+                var constrainedProblem = ConstrainedProblem.from(splitter.subProblemForAgent(agent), constrainedNode.get().getConstraint());
                 var solution = subSolver.solve(constrainedProblem);
                 constrainedNode.get().setSolutionFor(agent, solution);
                 constrainedNode.get().calculateCost();
