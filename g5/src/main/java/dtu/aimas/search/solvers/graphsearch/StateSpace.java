@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import dtu.aimas.communication.IO;
 import dtu.aimas.common.*;
@@ -21,6 +22,7 @@ import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
 import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
@@ -171,6 +173,10 @@ public record StateSpace(
         !getBoxAt(state, position).isPresent() && this.problem.isFree(position, agent, timeStep);
     }
 
+    private boolean canStayAtCell(Position position, Agent agent, int timeStep){
+        return this.problem.isFree(position, agent, timeStep);
+    }
+
     private boolean notOwner(Agent agent, Box box) {
         return agent.color != box.color;
     }
@@ -204,7 +210,7 @@ public record StateSpace(
         Box box;
         switch (action.type) {
             case NoOp -> {
-                return true;
+                return canStayAtCell(agent.pos, agent, timeStep);
             }
             case Move -> {
                 agentDestination = moveAgent(agent, action);
@@ -235,7 +241,7 @@ public record StateSpace(
 
     public ArrayList<State> expand(State state) {
 
-        int timeStep = 0;
+        int timeStep = 1;
         State iterator = state;
         while (iterator.parent != null) {
             iterator = iterator.parent;
@@ -252,6 +258,10 @@ public record StateSpace(
                 if(isApplicable(state, agent, action, timeStep)){
                     agentActions.add(action);
                 }
+            }
+            // when no action is applicable due to constraints, return empty list
+            if(agentActions.isEmpty()){
+                return new ArrayList<>();
             }
             applicableActions[agentId] = agentActions.toArray(new Action[0]);
         }
@@ -308,125 +318,102 @@ public record StateSpace(
         return isValid(destinationState) ? Optional.of(destinationState) : Optional.empty();
     }
 
-    public ArrayList<Conflict> replaySolutionsForConflicts(List<Map.Entry<Agent, Result<Solution>>> solutions) {
-
-        ArrayList<Conflict> allConflicts = new ArrayList<Conflict>();
+    public Optional<Conflict> tryGetConflict(State nextState, int step){
+        Optional<Conflict> conflict = Optional.empty();
+        var state = nextState.parent;
+        var actions = nextState.jointAction;
         
-        var stepIndex = 0;
+        // CASE 1: vertex conflict
+        conflict = tryGetVertexConflict(nextState, step);
+        
+        // CASE 2: edge/follow conflict
+        for(int agentNumber = 0; agentNumber < actions.length; agentNumber++){
+            var performingAgent = getAgentByNumber(state, agentNumber);
+            var action = actions[agentNumber];
 
-        State currentState = this.initialState;
-        boolean longestSolutionReached = false;
-
-        while (!longestSolutionReached) {            
-            longestSolutionReached = true;
-            ArrayList<Action> agentActions = new ArrayList<Action>();
-
-            for (var solutionEntry: solutions) {
-                Result<Solution> result = solutionEntry.getValue();
-
-                if (result.isError()) {
-                    // A problem occurred with the result -> Silently return an empty list
-                    return new ArrayList<>();
-                }
-                
-                Solution agentSolution = result.get();
-
-                var agentSteps = new ArrayList<>(agentSolution.serializeSteps());
-
-                if (stepIndex < agentSteps.size()) {
-                    String agentStep = (String) agentSteps.get(stepIndex);
-                    agentActions.add(Action.fromName(agentStep));
-                    longestSolutionReached = false;
-                } else {
-                    // If an agent's solution was reached, but we are still investigating other agents, pad this agent's solution with NoOp
-                    agentActions.add(Action.NoOp);
-                }
-            }
-
-            Action[] actionArray = new Action[agentActions.size()];
-            agentActions.toArray(actionArray);
+            var possibleConflictPosition = getPossibleConflictPosition(state, performingAgent, action);
             
+            // CASE: NOOP action
+            if(!possibleConflictPosition.isPresent()) continue;
 
-            var nextState = this.applyJointActions(currentState, actionArray);
-            ArrayList<Conflict> currentStepConflicts = this.checkStateForConflicts(currentState, nextState, actionArray, stepIndex++);
+            // CASE: already investigating conflict on different position
+            if(conflict.isPresent() && conflict.get().getPosition() != possibleConflictPosition.get()) continue;
 
-            allConflicts.addAll(currentStepConflicts);
+            var occupyingAgent = getAgentAt(state, possibleConflictPosition.get());
+            var occupyingBox = getBoxAt(state, possibleConflictPosition.get());
+
+            // CASE: cell not occupied
+            if(!occupyingAgent.isPresent() && !occupyingBox.isPresent()) continue;
+
+            // CASE: if no conflict detected yet, create new one
+            if(!conflict.isPresent()) conflict = Optional.of(new Conflict(possibleConflictPosition.get(), step));
+            
+            conflict.get().involveAgent(getAgentFromInitialState(performingAgent));
+
+            // CASE: agent is occupying the cell
+            if(occupyingAgent.isPresent()) conflict.get().involveAgent(getAgentFromInitialState(occupyingAgent.get()));
+
+            // CASE: box is occupying the cell
+            // TODO(2): right now we only mark this as one-agent conflict (the one that is performing the action)
         }
-
-        return allConflicts;
+        return conflict;
     }
 
-    // TODO: deprecated - to be changed by external ConflictChecker
-    private ArrayList<Conflict> checkStateForConflicts(State previousState, State state, Action[] previousActions, int timeStep) {
-        ArrayList<Conflict> foundConflicts = new ArrayList<Conflict>();
+    public Agent getAgentFromInitialState(Agent agentInCurrentState){
+        return initialState.agents.stream().filter(agent -> agent.label == agentInCurrentState.label).findFirst().get();
+    }
 
-        var agentAndBoxPositions = new HashMap<Position, ArrayList<DomainObject>>();
-        for (var agent : state.agents) {
-            if (agentAndBoxPositions.containsKey(agent.pos)) {
-                agentAndBoxPositions.get(agent.pos).add(agent);
-            } else {
-                var agentsAtPos = new ArrayList<DomainObject>();
-                agentsAtPos.add(agent);
-                agentAndBoxPositions.put(agent.pos, agentsAtPos);
+    public Optional<Conflict> tryGetVertexConflict(State state, int timeStep){
+        Set<Position> occupiedPositions = new HashSet<>();
+        Optional<Position> conflictPosition = Optional.empty();
+        for (Agent agent : state.agents) {
+            if (!occupiedPositions.add(agent.pos)){
+                conflictPosition = Optional.of(agent.pos);
+                break;
             }
         }
-
-        for (var box : state.boxes) {
-            if (agentAndBoxPositions.containsKey(box.pos)) {
-                agentAndBoxPositions.get(box.pos).add(box);
-            } else {
-                var boxesAtPos = new ArrayList<DomainObject>();
-                boxesAtPos.add(box);
-                agentAndBoxPositions.put(box.pos, boxesAtPos);
-            }
-        }
-
-
-        // Report the conflicts
-        for (var entry : agentAndBoxPositions.entrySet()) {
-            var position = entry.getKey();
-            var objectsAtPos = entry.getValue();
-            ArrayList<Agent> involvedAgents = new ArrayList<Agent>();
-
-            if (objectsAtPos.size() <= 1) {
-                continue;
-            }
-
-            // We found a conflict. For each conflicting object: if it is an agents, report the agent; if it is a box, report the agent that moved it
-            for (var domainObject: objectsAtPos) {
-                if (domainObject instanceof Agent) {
-                    involvedAgents.add((Agent) domainObject);
-                } else if (domainObject instanceof Box) {
-                    // TODO: We currently don't have enough information to determine with certainty which agent moved the box.
-                    // Additionally we don't have a strategy of generally dealing with box conflicts. 
-                    // For example, what if no agent moved the box, which objects should be involved in the conflict?
-                    continue;
+        if(!conflictPosition.isPresent()){
+            for (Box box : state.boxes) {
+                if (!occupiedPositions.add(box.pos)) {
+                    if (!occupiedPositions.add(box.pos)){
+                        conflictPosition = Optional.of(box.pos);
+                        break;
+                    }
                 }
-            } 
-
-            Agent[] matchingInitialStateAgents = getInitialStateAgents(involvedAgents).toArray(new Agent[involvedAgents.size()]);
-            Conflict newConflict = new Conflict(position, timeStep, matchingInitialStateAgents);
-            foundConflicts.add(newConflict);
+            }
         }
+        if(!conflictPosition.isPresent()) return Optional.empty();
+        var pos = conflictPosition.get();
+        var involvedAgents = new HashSet<Agent>(state.agents.stream()
+                .filter(agent -> agent.pos.equals(pos))
+                .map(agent -> getAgentFromInitialState(agent))
+                .collect(Collectors.toSet()));
+        // TODO(1): get information who is responsible for pushing/pulling the box into this position
+        var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
+        if(involvedBoxesSet.size() > 0) IO.info("Box taking part in the conflict, but no agent is taken as responsible for that.");
 
-        return foundConflicts;
+        return Optional.of(new Conflict(conflictPosition.get(), timeStep, involvedAgents));
     }
 
-    private ArrayList<Agent> getInitialStateAgents(ArrayList<Agent> agentCopies) {
-
-        ArrayList<Agent> matchingInitialAgents = new ArrayList<>();
-
-        for (var initialAgent: initialState.agents) {
-            for (var agentCopy: agentCopies) {
-                if (agentCopy.label == initialAgent.label) {
-                    matchingInitialAgents.add(initialAgent);
-                }
-            }  
+    public Optional<Position> getPossibleConflictPosition(State state, Agent agent, Action action){
+        switch (action.type) {
+            case NoOp -> {
+                return Optional.empty();
+            }
+            case Move -> {
+                return Optional.of(moveAgent(agent, action));
+            }
+            case Push -> {
+                var agentDestination = moveAgent(agent, action);
+                var agentsBox = getBoxAt(state, agentDestination).get();
+                return Optional.of(moveBox(agentsBox, action));
+            }
+            case Pull -> {
+                return Optional.of(moveAgent(agent, action));
+            }
+            default -> throw new UnreachableState();
         }
-
-        return matchingInitialAgents;
     }
-
 
     private State applyJointActions(State state, Action[] actionsToApply) {
         ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());
@@ -542,4 +529,5 @@ public record StateSpace(
 
         return new State(agents, boxes);
     }
+
 }

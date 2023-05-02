@@ -4,5 +4,6 @@ classesDir="./g5/target/classes"
 clientName="dtu.aimas.SearchClient"
 arguments="-cbs"
 flags="-g"
+debugFlag="-agentlib:jdwp=transport=dt_socket,server=y,address=8000"
 
-java -jar ./mavis.jar -l "$levelDir/TwoAgentsConflict.lvl" -c "java -cp $classesDir $clientName $arguments" $flags
+java -jar ./mavis.jar -l "$levelDir/FewConflicts.lvl" -c "java -cp $classesDir $clientName $arguments" $flags

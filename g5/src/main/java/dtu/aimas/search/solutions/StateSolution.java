@@ -50,11 +50,11 @@ public class StateSolution implements Solution {
     }
 
     public int getFlowtime() {
-        // StateSolution does not support getFlowtime and getMakespan costs currently: only ActionSolution
+        // TODO(7): to implement and use instead of makespan in CBS
         return 0;
     }
 
     public int getMakespan() {
-        return 0;
+        return states.length;
     }
 }
