@@ -27,8 +27,7 @@ public class Problem {
     public final boolean[][] walls;
     public final char[][] goals;
     public final Collection<Goal> agentGoals;
-    // TODO(6): could be final, but then the ordering have to be done in the constructor
-    public Collection<Goal> boxGoals;
+    public final Collection<Goal> boxGoals;
     public final int expectedStateSize;
     private int[][][][] distances;
 
