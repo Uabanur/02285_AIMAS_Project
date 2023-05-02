@@ -376,6 +376,56 @@ public class AgentAssignationSplitterTest {
         Assert.assertArrayEquals(expectedAgentGoals1, subProblem1.agentGoals.toArray(Goal[]::new));
     }
     
+    @Test
+    public void SubProblem_Unreachable_Goals(){
+        var height = 10;
+        var width = 10;
+
+        var agents = List.of(
+            new Agent(new Position(0, 4), Color.Blue, '0'),
+            new Agent(new Position(9, 6), Color.Blue, '1')
+        );
+
+        var boxes = List.of(
+            new Box(new Position(0, 6), Color.Blue, 'A'),
+            new Box(new Position(9, 4), Color.Blue, 'A')
+        );
+
+        var walls = new boolean[width][height];
+        var goals = new char[width][height];
+        
+        walls[0][5] = true; walls[1][5] = true; walls[2][5] = true; walls[3][5] = true; 
+        walls[4][5] = true; walls[5][5] = true; walls[6][5] = true; walls[7][5] = true; 
+        walls[8][5] = true; walls[9][5] = true; 
+
+        goals[9][0] = 'A';
+        goals[0][9] = 'A';
+
+        var problem = new Problem(agents, boxes, walls, goals).precompute();
+        var subProblems = splitter.split(problem);
+
+        var subProblem0 = subProblems.get(0);
+        var expectedAgents0 = new Agent[]{agents.get(0)};
+        var expectedBoxes0 = new Box[]{boxes.get(1)};
+        var expectedBoxGoals0 = new Goal[]{new Goal('A', new Position(9,0))};
+        var expectedAgentGoals0 = problem.agentGoals.stream().filter(ag -> ag.label == agents.get(0).label).toArray();;
+        Assert.assertArrayEquals(expectedAgents0, subProblem0.agents.toArray(Agent[]::new));
+        Assert.assertArrayEquals(expectedBoxes0, subProblem0.boxes.toArray(Box[]::new));
+        Assert.assertTrue(subProblem0.boxes.contains(expectedBoxes0[0]));
+        Assert.assertTrue(subProblem0.boxGoals.contains(expectedBoxGoals0[0]));
+        //Assert.assertArrayEquals(expectedBoxGoals0, subProblem0.boxGoals.toArray(Goal[]::new));
+        Assert.assertArrayEquals(expectedAgentGoals0, subProblem0.agentGoals.toArray(Goal[]::new));
+        
+        var subProblem1 = subProblems.get(1);
+        var expectedAgents1 = new Agent[]{agents.get(1)};
+        var expectedBoxes1 = new Box[]{boxes.get(0)};
+        var expectedBoxGoals1 = new Goal[]{new Goal('A', new Position(0,9))};
+        var expectedAgentGoals1 = problem.agentGoals.stream().filter(ag -> ag.label == agents.get(1).label).toArray();
+        Assert.assertArrayEquals(expectedAgents1, subProblem1.agents.toArray(Agent[]::new));
+        Assert.assertArrayEquals(expectedBoxes1, subProblem1.boxes.toArray(Box[]::new));
+        Assert.assertArrayEquals(expectedBoxGoals1, subProblem1.boxGoals.toArray(Goal[]::new));
+        Assert.assertArrayEquals(expectedAgentGoals1, subProblem1.agentGoals.toArray(Goal[]::new));
+    }
 }
 
 

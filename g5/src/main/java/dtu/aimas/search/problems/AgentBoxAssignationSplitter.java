@@ -60,6 +60,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
             int closestAgentDist = Integer.MAX_VALUE;
             for(Agent agent : compatibleAgents) {
                 int dist = problem.admissibleDist(agent.pos, closestBox.pos) + agentCost[Character.getNumericValue(agent.label)];
+                if(dist < 0) dist = Integer.MAX_VALUE;
                 if(dist < closestAgentDist) {
                     closestAgent = agent;
                     closestAgentDist = dist;
