@@ -1,0 +1,16 @@
+#domain
+hospital
+#levelname
+FollowMoveConflict
+#colors
+blue: 0
+red: 1
+#initial
+++++++
++10  +
+++++++
+#goal
+++++++
++  10+
+++++++
+#end

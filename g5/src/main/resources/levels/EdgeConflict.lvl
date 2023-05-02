@@ -1,0 +1,18 @@
+#domain
+hospital
+#levelname
+EdgeConflict
+#colors
+blue: 0
+green: 1
+#initial
++++++
++10 +
+++ ++
++++++
+#goal
++++++
++0 1+
+++ ++
++++++
+#end

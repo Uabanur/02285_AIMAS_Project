@@ -23,14 +23,27 @@ public class Constraint {
         return String.format("%c|%d", agent.label, timeStep);
     }
 
+    // TODO(5): checking can be done once and merged with extend
+    public boolean contains(Agent agent, Position position, int timeStep){
+        var key = createKey(agent, timeStep);
+        return constraints.containsKey(key) && constraints.get(key).contains(position);
+    }
+
     public Constraint extend(Agent agent, Position position, int timeStep) {
         var key = createKey(agent, timeStep);
         var extendedConstraints = constraints.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey(), e -> List.copyOf(e.getValue())));
-
-        var positions = extendedConstraints.computeIfAbsent(key, s -> new ArrayList<>());
-        positions.add(position);
-
+        
+        if(extendedConstraints.containsKey(key)){
+            var positions = extendedConstraints.get(key);
+            var newPositions = new ArrayList<>(positions);
+            newPositions.add(position);
+            extendedConstraints.remove(position);
+            extendedConstraints.put(key, newPositions);
+        }
+        else{
+            extendedConstraints.put(key, List.of(position));
+        }
         return new Constraint(extendedConstraints);
     }
 
@@ -45,6 +58,6 @@ public class Constraint {
 
     @Override
     public String toString() {
-        return "Constraint [constraints=" + constraints + "]";
+        return "constraints=" + constraints;
     }
 }
