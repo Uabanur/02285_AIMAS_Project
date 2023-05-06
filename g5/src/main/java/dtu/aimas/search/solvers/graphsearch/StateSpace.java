@@ -355,7 +355,6 @@ public record StateSpace(
             if(occupyingAgent.isPresent()) conflict.get().involveAgent(getAgentFromInitialState(occupyingAgent.get()));
 
             // CASE: box is occupying the cell
-            // TODO(2): right now we only mark this as one-agent conflict (the one that is performing the action)
             if(occupyingBox.isPresent()) {
                 var responsibleAgent = tryGetAgentResponsibleForBox(occupyingBox.get(), nextState);
                 if(responsibleAgent.isPresent()) conflict.get().involveAgent(getAgentFromInitialState(responsibleAgent.get()));
@@ -410,7 +409,6 @@ public record StateSpace(
                                                                         .filter(agent -> agent.pos.equals(pos))
                                                                         .map(agent -> getAgentFromInitialState(agent))
                                                                         .collect(Collectors.toSet()));
-        // TODO(1): get information who is responsible for pushing/pulling the box into this position
         var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos.equals(pos)).collect(Collectors.toSet());
         for(var box : involvedBoxesSet){
             var responsibleAgent = tryGetAgentResponsibleForBox(box, state);
@@ -440,7 +438,7 @@ public record StateSpace(
         }
     }
 
-    private State applyJointActions(State state, Action[] actionsToApply) {
+    public State applyJointActions(State state, Action[] actionsToApply) {
         ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());
         ArrayList<Box> updatedBoxes = new ArrayList<>(state.boxes.size());
 
