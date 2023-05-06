@@ -415,7 +415,7 @@ public record StateSpace(
                                                                         .map(agent -> getAgentFromInitialState(agent))
                                                                         .collect(Collectors.toSet()));
         // TODO(1): get information who is responsible for pushing/pulling the box into this position
-        var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
+        var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos.equals(pos)).collect(Collectors.toSet());
         for(var box : involvedBoxesSet){
             var responsibleAgent = tryGetAgentResponsibleForBox(box, state);
             if(responsibleAgent.isPresent()) involvedAgents.add(getAgentFromInitialState(responsibleAgent.get()));

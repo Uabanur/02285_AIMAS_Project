@@ -33,3 +33,6 @@ hs_err_pid*
 
 # VSCode launch config
 .vscode/launch.json
+
+# local running config
+run_local.sh
