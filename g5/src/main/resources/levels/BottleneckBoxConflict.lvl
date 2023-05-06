@@ -1,18 +1,20 @@
 #domain
 hospital
 #levelname
-FewBoxConflicts
+BottleneckBoxConflict
 #colors
 blue: 0, A
 red: 1, B
 #initial
 ++++++++
-+0A    +
-+1B    +
++0A+   +
+++   +++
++1B+   +
 ++++++++
 #goal
 ++++++++
-+     B+
-+     A+
++  +  A+
+++   +++
++  +  B+
 ++++++++
 #end
