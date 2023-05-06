@@ -338,7 +338,7 @@ public record StateSpace(
             if(!possibleConflictPosition.isPresent()) continue;
 
             // CASE: already investigating conflict on different position
-            if(conflict.isPresent() && conflict.get().getPosition() != possibleConflictPosition.get()) continue;
+            if(conflict.isPresent() && !conflict.get().getPosition().equals(possibleConflictPosition.get())) continue;
 
             var occupyingAgent = getAgentAt(state, possibleConflictPosition.get());
             var occupyingBox = getBoxAt(state, possibleConflictPosition.get());
