@@ -371,7 +371,7 @@ public record StateSpace(
         var closestDistance = Integer.MAX_VALUE;
         for(Agent agent : state.agents){
             if(!notOwner(agent, box)){
-                var distance = computeManhattanDistance(agent.pos,box.pos);
+                var distance = Math.abs(agent.pos.row - box.pos.row) + Math.abs(agent.pos.col - box.pos.col);
                 if(closestDistance > distance){
                     distance = closestDistance;
                     responsibleAgent = Optional.of(agent);
@@ -379,10 +379,6 @@ public record StateSpace(
             }
         }
         return responsibleAgent;
-    }
-
-    private int computeManhattanDistance(Position from, Position to){
-        return Math.abs(from.row - to.row) + Math.abs(from.col - to.col);
     }
 
     public Agent getAgentFromInitialState(Agent agentInCurrentState){
