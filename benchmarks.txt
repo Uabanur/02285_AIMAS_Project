@@ -1,0 +1,47 @@
+
+
+Level                   |   Solver                                       |  Time/s   |   Solution length |
+---------------------------------------------------------------------------------------------------------
+MAPF00                  |   Blackboard (AStarMinLength, DistanceMinCost) |    0.075  |           14      |
+MAPF03C                 |   Blackboard (AStarMinLength, DistanceMinCost) |    0.097  |           16      |
+MAPFslidingpuzzle       |   Blackboard (AStarMinLength, DistanceMinCost) |    0.325  |           30      |
+MAPFreorder2            |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+MASeparate              |   Blackboard (AStarMinLength, DistanceMinCost) |    0.546  |           30      |
+MAthomasAppartment_blue |   Blackboard (AStarMinLength, DistanceMinCost) |    0.477  |           29      |
+MAthomasAppartment_red  |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+SAthomasAppartment      |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+SAWatsOn                |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+SAtowersOfSaigon10      |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+SACrunch                |   Blackboard (AStarMinLength, DistanceMinCost) |   14,470  |          102      |
+SADangerBot             |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+SAchoice                |   Blackboard (AStarMinLength, DistanceMinCost) |    0.075  |           11      |
+SAboXboXboX             |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+TwoAgentsConflict       |   Blackboard (AStarMinLength, DistanceMinCost) |    0.056  |            4      |
+ManyConflicts           |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+Tunnel                  |   Blackboard (AStarMinLength, DistanceMinCost) |    0.059  |            4      |
+TunnelWithBox           |   Blackboard (AStarMinLength, DistanceMinCost) |    0.061  |            3      |
+VertexConflict          |   Blackboard (AStarMinLength, DistanceMinCost) |    -----  |        Unsolved   |
+
+MAPF00                  |   CBS (AStar, MAAdmissableCost)                |    0.058  |           15      |
+MAPF03C                 |   CBS (AStar, MAAdmissableCost)                |    0.196  |         15   |
+MAPFslidingpuzzle       |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+MAPFreorder2            |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+MASeparate              |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+MAthomasAppartment_blue |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+MAthomasAppartment_red  |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+SAthomasAppartment      |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+SAWatsOn                |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+SAtowersOfSaigon10      |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+SACrunch                |   CBS (AStar, MAAdmissableCost)                |   25.152  |          105      |
+SADangerBot             |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+SAchoice                |   CBS (AStar, MAAdmissableCost)                |    0.051  |           12      |
+SAboXboXboX             |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+TwoAgentsConflict       |   CBS (AStar, MAAdmissableCost)                |    0.084  |            5      |
+ManyConflicts           |   CBS (AStar, MAAdmissableCost)                |    -----  |        Unsolved   |
+Tunnel                  |   CBS (AStar, MAAdmissableCost)                |    0.059  |            5      |
+TunnelWithBox           |   CBS (AStar, MAAdmissableCost)                |    0.061  |            4      |
+VertexConflict          |   CBS (AStar, MAAdmissableCost)                |    0.121  |            7      |
+
+
+
+
