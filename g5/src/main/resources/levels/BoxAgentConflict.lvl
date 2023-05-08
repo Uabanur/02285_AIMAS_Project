@@ -1,0 +1,22 @@
+#domain
+hospital
+#levelname
+BoxAgentConflict
+#colors
+blue: 0, A
+red: 1
+#initial
++++++++
+++0++++
+++A++++
++1  +++
+++ ++++
++++++++
+#goal
++++++++
+++ ++++
+++ ++++
++  1+++
+++A++++
++++++++
+#end

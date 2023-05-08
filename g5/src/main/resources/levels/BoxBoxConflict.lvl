@@ -1,0 +1,24 @@
+#domain
+hospital
+#levelname
+BoxBoxConflict
+#colors
+blue: 0, A
+red: 1, B
+#initial
+++++++++
++++0++++
++++A++++
++1B   +
++++ ++++
++++ ++++
+++++++++
+#goal
+++++++++
++++ ++++
++++ ++++
++    B+
++++ ++++
++++A++++
+++++++++
+#end

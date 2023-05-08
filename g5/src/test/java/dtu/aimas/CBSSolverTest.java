@@ -244,4 +244,74 @@ public class CBSSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Test
+    public void TwoColors_BottleneckBoxConflicts(){
+        var level = """
+                    #initial
+                    ++++++++
+                    +0A+   +
+                    ++   +++
+                    +1B+   +
+                    ++++++++
+                    #goal
+                    ++++++++
+                    +  +  A+
+                    ++   +++
+                    +  +  B+
+                    ++++++++
+                    #end
+                    """;
+        var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        solution = solver.solve(problem);
+        Assert.assertTrue(solution.isOk());
+    }
+
+    @Test
+    public void ThreeColors_BottleneckBoxConflicts(){
+        var level = """
+                    #initial
+                    ++++++++++
+                    +++0A+   +
+                    ++++ + +++
+                    +2C      +
+                    ++++ + +++
+                    +++1B+   +
+                    ++++++++++
+                    #goal
+                    ++++++++++
+                    +++  +  A+
+                    ++++ + +++
+                    +       C+
+                    ++++ + +++
+                    +++  +  B+
+                    ++++++++++
+                    #end
+                    """;
+        var problem = getProblem(level, "red: 0, A", "blue: 1, B", "cyan: 2, C");
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        solution = solver.solve(problem);
+        Assert.assertTrue(solution.isOk());
+    }
+
+    @Test
+    public void TwoColors_FewBoxConflicts(){
+        var level = """
+                    #initial
+                    ++++++++
+                    +0A    +
+                    +1B    +
+                    ++++++++
+                    #goal
+                    ++++++++
+                    +     B+
+                    +     A+
+                    ++++++++
+                    #end
+                    """;
+        var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        solution = solver.solve(problem);
+        Assert.assertTrue(solution.isOk());
+    }
 }

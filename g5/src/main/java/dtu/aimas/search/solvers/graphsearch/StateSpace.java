@@ -20,6 +20,7 @@ import dtu.aimas.common.*;
 import dtu.aimas.errors.InvalidOperation;
 import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.search.Action;
+import dtu.aimas.search.ActionType;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SolutionMerger;
@@ -337,7 +338,7 @@ public record StateSpace(
             if(!possibleConflictPosition.isPresent()) continue;
 
             // CASE: already investigating conflict on different position
-            if(conflict.isPresent() && conflict.get().getPosition() != possibleConflictPosition.get()) continue;
+            if(conflict.isPresent() && !conflict.get().getPosition().equals(possibleConflictPosition.get())) continue;
 
             var occupyingAgent = getAgentAt(state, possibleConflictPosition.get());
             var occupyingBox = getBoxAt(state, possibleConflictPosition.get());
@@ -354,9 +355,29 @@ public record StateSpace(
             if(occupyingAgent.isPresent()) conflict.get().involveAgent(getAgentFromInitialState(occupyingAgent.get()));
 
             // CASE: box is occupying the cell
-            // TODO(2): right now we only mark this as one-agent conflict (the one that is performing the action)
+            if(occupyingBox.isPresent()) {
+                var responsibleAgent = tryGetAgentResponsibleForBox(occupyingBox.get(), nextState);
+                if(responsibleAgent.isPresent()) conflict.get().involveAgent(getAgentFromInitialState(responsibleAgent.get()));
+            }
         }
         return conflict;
+    }
+
+    private Optional<Agent> tryGetAgentResponsibleForBox(Box box, State state){
+        // APPROACH DESCRIPTION:
+        // take the closest agent of the same color as responsible for the box
+        Optional<Agent> responsibleAgent = Optional.empty();
+        var closestDistance = Integer.MAX_VALUE;
+        for(Agent agent : state.agents){
+            if(!notOwner(agent, box)){
+                var distance = Math.abs(agent.pos.row - box.pos.row) + Math.abs(agent.pos.col - box.pos.col);
+                if(closestDistance > distance){
+                    distance = closestDistance;
+                    responsibleAgent = Optional.of(agent);
+                }
+            }
+        }
+        return responsibleAgent;
     }
 
     public Agent getAgentFromInitialState(Agent agentInCurrentState){
@@ -384,13 +405,15 @@ public record StateSpace(
         }
         if(!conflictPosition.isPresent()) return Optional.empty();
         var pos = conflictPosition.get();
-        var involvedAgents = new HashSet<Agent>(state.agents.stream()
-                .filter(agent -> agent.pos.equals(pos))
-                .map(agent -> getAgentFromInitialState(agent))
-                .collect(Collectors.toSet()));
-        // TODO(1): get information who is responsible for pushing/pulling the box into this position
-        var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos == pos).collect(Collectors.toSet());
-        if(involvedBoxesSet.size() > 0) IO.info("Box taking part in the conflict, but no agent is taken as responsible for that.");
+        HashSet<Agent> involvedAgents = new HashSet<Agent>(state.agents.stream()
+                                                                        .filter(agent -> agent.pos.equals(pos))
+                                                                        .map(agent -> getAgentFromInitialState(agent))
+                                                                        .collect(Collectors.toSet()));
+        var involvedBoxesSet = state.boxes.stream().filter(box -> box.pos.equals(pos)).collect(Collectors.toSet());
+        for(var box : involvedBoxesSet){
+            var responsibleAgent = tryGetAgentResponsibleForBox(box, state);
+            if(responsibleAgent.isPresent()) involvedAgents.add(getAgentFromInitialState(responsibleAgent.get()));
+        }
 
         return Optional.of(new Conflict(conflictPosition.get(), timeStep, involvedAgents));
     }
@@ -415,7 +438,7 @@ public record StateSpace(
         }
     }
 
-    private State applyJointActions(State state, Action[] actionsToApply) {
+    public State applyJointActions(State state, Action[] actionsToApply) {
         ArrayList<Agent> updatedAgents = new ArrayList<>(state.agents.size());
         ArrayList<Box> updatedBoxes = new ArrayList<>(state.boxes.size());
 

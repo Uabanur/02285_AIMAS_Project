@@ -1,0 +1,21 @@
+#domain
+hospital
+#levelname
+ThreeAgentsFewBoxConflicts
+#colors
+blue: 0, A
+red: 1, B
+cyan: 2, C
+#initial
+++++++++
++0A    +
++1B    +
++2C    +
+++++++++
+#goal
+++++++++
++     B+
++     C+
++     A+
+++++++++
+#end

@@ -1,0 +1,25 @@
+#domain
+hospital
+#levelname
+BottleneckThreeBoxesConflict
+#colors
+blue: 0, A
+red: 1, B
+cyan: 2, C
+#initial
+++++++++++
++++0A+   +
+++++ + +++
++2C      +
+++++ + +++
++++1B+   +
+++++++++++
+#goal
+++++++++++
++++  +  A+
+++++ + +++
++       C+
+++++ + +++
++++  +  B+
+++++++++++
+#end
