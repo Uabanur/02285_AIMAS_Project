@@ -11,7 +11,7 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.graphsearch.Greedy;
-import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
 import dtu.aimas.search.solvers.heuristics.MixedDistanceSumCost;
 
 import org.junit.*;
@@ -75,7 +75,7 @@ public class CBSSolverTest {
                     """;
 
         var problem = getProblem(level);
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -94,7 +94,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -117,7 +117,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -140,7 +140,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -161,7 +161,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -180,7 +180,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -199,7 +199,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -218,7 +218,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1, A");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -241,7 +241,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, 1, 2");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -264,7 +264,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -291,7 +291,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B", "cyan: 2, C");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -312,32 +312,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new ConflictBasedSearch(new AStar(new DistanceSumCost()));
-        solution = solver.solve(problem);
-        Assert.assertTrue(solution.isOk());
-    }
-
-    @Test
-    public void debugging_test(){
-        var level = """
-                    #initial
-                    +++++++
-                    +  0  +
-                    +B+ + +
-                    +A+ + +
-                    +C+ + +
-                    +++++++
-                    #goal
-                    +++++++
-                    +     +
-                    + + +A+
-                    + + +B+
-                    + + +C+
-                    +++++++
-                    #end
-                    """;
-        var problem = getProblem(level, "blue: 0, A, B, C");
-        var solver = (new Greedy(new MixedDistanceSumCost()));
+        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
