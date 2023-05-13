@@ -11,6 +11,7 @@ import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
 import dtu.aimas.search.solvers.safeinterval.SafeIntervalSolver;
@@ -159,6 +160,14 @@ public class LevelSolvingTest {
     @Test
     public void TestMAsimple5_AStar_GoalCount() {
         TestMap("MAsimple5", new AStar(new GoalCount()));
+    }
+
+    @Ignore
+    @Test
+    public void TestMishMash_BlackBoard(){
+        var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
+        IO.logLevel = LogLevel.Debug;
+        TestMap("mishmash", solver);
     }
 
     @Ignore

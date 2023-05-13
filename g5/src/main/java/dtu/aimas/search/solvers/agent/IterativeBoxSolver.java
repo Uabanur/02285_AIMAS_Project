@@ -15,7 +15,6 @@ import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class IterativeBoxSolver implements Solver {
 
@@ -102,7 +101,6 @@ public class IterativeBoxSolver implements Solver {
 
                 // states are linked to update parent links and step counter
                 lastState = new State(lastState, state.agents, state.boxes, state.jointAction);
-//                states.add(lastState);
             }
         }
 

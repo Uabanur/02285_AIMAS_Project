@@ -20,7 +20,7 @@ public class SafeIntervalSolverTest {
 
     @Before
     public void setup(){
-        IO.logLevel = LogLevel.Information;
+        IO.logLevel = LogLevel.Debug;
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
     }

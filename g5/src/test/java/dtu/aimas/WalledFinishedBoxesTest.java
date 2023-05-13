@@ -3,11 +3,12 @@ package dtu.aimas;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.search.solvers.agent.IterativeBoxSolver;
+import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class IterativeBoxSolverTest extends  LevelSolvingTest{
+public class WalledFinishedBoxesTest extends  LevelSolvingTest{
 
     @Before
     public void setup() {
@@ -15,18 +16,18 @@ public class IterativeBoxSolverTest extends  LevelSolvingTest{
     }
 
     @Test
-    public void Test_SAsimple4_IterativeBoxSolver(){
-        TestMap("SAsimple4", new IterativeBoxSolver());
+    public void Test_SAsimple4_WalledFinishedBoxes(){
+        TestMap("SAsimple4", new WalledFinishedBoxes());
     }
 
     @Test
     public void Test_SAsoko3_08(){
-        TestMap("SAsoko3_08", new IterativeBoxSolver());
+        TestMap("SAsoko3_08", new WalledFinishedBoxes());
     }
 
     @Ignore
     @Test
     public void Test_Saigon03() {
-        TestMap("SAtowersOfSaigon03", new IterativeBoxSolver());
+        TestMap("SAtowersOfSaigon03", new WalledFinishedBoxes());
     }
 }

@@ -13,7 +13,8 @@ public enum Color
     Pink,
     Grey,
     Lightblue,
-    Brown;
+    Brown,
+    Mishmash;
 
     public static Color fromString(String s)
     {

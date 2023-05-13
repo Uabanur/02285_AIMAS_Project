@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Problem {
-
+    public final int MAX_DISTANCE = Integer.MAX_VALUE;
     public final Collection<Agent> agents;
     public final Collection<Box> boxes;
     public final boolean[][] walls;
@@ -35,13 +35,17 @@ public class Problem {
     // todo these should be private and only called by `copyWith` method which can be overwritten by
     // ConstrainedProblem and SafeProblem, such that sub problem contain the parent problem restrictions.
     public Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, Problem parent) {
+        this(agents, boxes, goals, parent.walls, parent);
+    }
+
+    private Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, boolean[][] walls, Problem parent) {
         this.agents = agents;
         this.boxes = boxes;
         this.goals = goals;
         this.agentGoals = extractGoals(Agent::isLabel);
         this.boxGoals = extractGoals(Box::isLabel);
 
-        this.walls = parent.walls;
+        this.walls = walls;
         this.expectedStateSize = parent.expectedStateSize;
         this.distances = parent.distances;
     }
@@ -64,7 +68,7 @@ public class Problem {
         Arrays.stream(distances)
                 .flatMap(Arrays::stream)
                 .flatMap(Arrays::stream)
-                .forEach(a -> Arrays.fill(a, Integer.MAX_VALUE));
+                .forEach(a -> Arrays.fill(a, MAX_DISTANCE));
         return distances;
     }
 
@@ -76,7 +80,7 @@ public class Problem {
         while(!neighbors.isEmpty()) {
             Position curr = neighbors.remove();
             int distToCurr = distances[src.row][src.col][curr.row][curr.col];
-            if(distToCurr == Integer.MAX_VALUE) continue;
+            if(distToCurr == MAX_DISTANCE) continue;
 
             Position top = new Position(curr.row-1,curr.col);
             if(top.row >= 0 && !walls[top.row][top.col]
@@ -245,5 +249,9 @@ public class Problem {
 
     public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals) {
         return new Problem(agents, boxes, goals, this);
+    }
+
+    public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals, boolean[][] walls) {
+        return new Problem(agents, boxes, walls, goals).precompute();
     }
 }
