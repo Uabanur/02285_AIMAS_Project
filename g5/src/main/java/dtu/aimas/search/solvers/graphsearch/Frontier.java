@@ -6,4 +6,5 @@ public interface Frontier
     boolean isEmpty();
     boolean contains(State child);
     State next();
+    int size();
 }

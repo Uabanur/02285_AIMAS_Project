@@ -37,4 +37,8 @@ public class BasicFrontier implements Frontier {
         set.remove(state);
         return state;
     }
+
+    public int size() {
+        return queue.size();
+    }
 }
