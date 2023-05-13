@@ -22,7 +22,7 @@ import java.util.concurrent.*;
 
 
 public class LevelSolvingTest {
-    private void TestMap(String levelName, Solver solver)
+    protected void TestMap(String levelName, Solver solver)
     {
         var solution = LevelSolver.solve(levelName, parser, solver, logOutputToFile);
         Assert.assertTrue(solution.toString(), solution.isOk());

@@ -28,6 +28,10 @@ public class StateSolution implements Solution {
         return states[index];
     }
 
+    public State getLastState(){
+        return states[states.length-1];
+    }
+
     public Collection<String> serializeSteps() {
         var steps = new ArrayList<String>(states.length);
         for(var i = 1; i < states.length; i++){
