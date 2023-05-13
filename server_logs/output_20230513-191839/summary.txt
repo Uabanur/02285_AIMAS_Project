@@ -1,0 +1,630 @@
+Level name: SAD2
+Level solved: Yes.
+Actions used: 19.
+Time to solve: 2.045 seconds.
+
+Level name: SApushing
+Level solved: Yes.
+Actions used: 23.
+Time to solve: 0.196 seconds.
+
+Level name: SAlabyrinthOfStBertin
+Level solved: Yes.
+Actions used: 1,110.
+Time to solve: 0.391 seconds.
+
+Level name: SAtowersOfSaigon03
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAD3
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: Yes.
+Actions used: 29.
+Time to solve: 0.537 seconds.
+
+Level name: SAsoko3_16
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAchallenge
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAD1
+Level solved: Yes.
+Actions used: 19.
+Time to solve: 0.188 seconds.
+
+Level name: SAsoko1_04
+Level solved: Yes.
+Actions used: 2.
+Time to solve: 0.160 seconds.
+
+Level name: SAsimple4
+Level solved: Yes.
+Actions used: 30.
+Time to solve: 0.170 seconds.
+
+Level name: SAsoko3_05
+Level solved: Yes.
+Actions used: 20.
+Time to solve: 3.791 seconds.
+
+Level name: SAsimple0
+Level solved: Yes.
+Actions used: 5.
+Time to solve: 0.198 seconds.
+
+Level name: SAtowersOfSaigon04
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAtowersOfSaigon10
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPF02
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.288 seconds.
+
+Level name: SAWatsOn
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAchoice
+Level solved: Yes.
+Actions used: 11.
+Time to solve: 0.166 seconds.
+
+Level name: MAPF03
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 1.089 seconds.
+
+Level name: SAtowersOfSaigon05
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsimple1
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.244 seconds.
+
+Level name: SACrunch
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko3_04
+Level solved: Yes.
+Actions used: 11.
+Time to solve: 0.335 seconds.
+
+Level name: SAsoko3_06
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsimple3
+Level solved: Yes.
+Actions used: 35.
+Time to solve: 0.175 seconds.
+
+Level name: SAsokobanLevel96
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPF01
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.167 seconds.
+
+Level name: SAtest
+Level solved: Yes.
+Actions used: 40.
+Time to solve: 2.050 seconds.
+
+Level name: SAsoko1_16
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.149 seconds.
+
+Level name: MAbispebjergHospital
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: Yes.
+Actions used: 58.
+Time to solve: 0.954 seconds.
+
+Level name: MAPF00
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.154 seconds.
+
+Level name: SAsimple2
+Level solved: Yes.
+Actions used: 30.
+Time to solve: 0.194 seconds.
+
+Level name: SAsoko3_07
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPF03
+Level solved: Yes.
+Actions used: 16.
+Time to solve: 0.201 seconds.
+
+Level name: SAsoko2_08
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.161 seconds.
+
+Level name: SAanagram
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko1_64
+Level solved: Yes.
+Actions used: 62.
+Time to solve: 0.193 seconds.
+
+Level name: MAPF03
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.166 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SApacman
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAFirefly
+Level solved: Yes.
+Actions used: 66.
+Time to solve: 0.342 seconds.
+
+Level name: SATheRedDot
+Level solved: Yes.
+Actions used: 81.
+Time to solve: 6.228 seconds.
+
+Level name: SAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MApacman
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAtowersOfSaigon5
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko2_32
+Level solved: Yes.
+Actions used: 30.
+Time to solve: 0.300 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAExample
+Level solved: Yes.
+Actions used: 32.
+Time to solve: 1.317 seconds.
+
+Level name: SAtowersOfHoChiMinh26
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAlabyrinth
+Level solved: Yes.
+Actions used: 676.
+Time to solve: 0.580 seconds.
+
+Level name: SAsorting
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPF03
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.181 seconds.
+
+Level name: MAmultiagentSort
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPF02C
+Level solved: Yes.
+Actions used: 15.
+Time to solve: 0.168 seconds.
+
+Level name: SAsoko3_64
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAbispebjergHospital
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SADangerBot
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAsimple3
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAsimple2
+Level solved: Yes.
+Actions used: 32.
+Time to solve: 1.316 seconds.
+
+Level name: SAsoko3_128
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAmicromouseContest2011
+Level solved: Yes.
+Actions used: 112.
+Time to solve: 0.217 seconds.
+
+Level name: SASolo
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAtowersOfHoChiMinh03
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko2_16
+Level solved: Yes.
+Actions used: 14.
+Time to solve: 0.186 seconds.
+
+Level name: MAsimple1
+Level solved: Yes.
+Actions used: 17.
+Time to solve: 0.161 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAOptimal
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: Yes.
+Actions used: 58.
+Time to solve: 1.092 seconds.
+
+Level name: MAPFreorder
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAsimple5
+Level solved: Yes.
+Actions used: 8.
+Time to solve: 0.196 seconds.
+
+Level name: SAbotbot
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAbispebjerg
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAsimple4
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.222 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko2_04
+Level solved: Yes.
+Actions used: 2.
+Time to solve: 0.156 seconds.
+
+Level name: SAtowersOfHoChiMinh05
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SALazarus
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko2_128
+Level solved: Yes.
+Actions used: 126.
+Time to solve: 7.312 seconds.
+
+Level name: SAtowersOfHoChiMinh04
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAtowersOfHoChiMinh10
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: friendofDFS
+Level solved: Yes.
+Actions used: 8.
+Time to solve: 0.249 seconds.
+
+Level name: SAsoko1_32
+Level solved: Yes.
+Actions used: 30.
+Time to solve: 0.179 seconds.
+
+Level name: SAboXboXboX
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko3_08
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAthomasAppartment
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko2_64
+Level solved: Yes.
+Actions used: 62.
+Time to solve: 0.712 seconds.
+
+Level name: SAsoko1_08
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.169 seconds.
+
+Level name: SAsoko1_128
+Level solved: Yes.
+Actions used: 126.
+Time to solve: 0.164 seconds.
+
+Level name: MAPFreorder
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAtowersOfSaigon26
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPFreorder
+Level solved: Yes.
+Actions used: 30.
+Time to solve: 0.397 seconds.
+
+Level name: MAPFreorder
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko3_32
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: BFSFriendly
+Level solved: Yes.
+Actions used: 1.
+Time to solve: 0.215 seconds.
+
+Level name: PushBox
+Level solved: Yes.
+Actions used: 12.
+Time to solve: 0.176 seconds.
+
+Level name: SAsoko3_08
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: SAsoko3_08
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: MAPF00
+Level solved: Yes.
+Actions used: 30.
+Time to solve: 0.530 seconds.
+
+Level name: RowsOfAgentsAndBoxes
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+
+Level name: Tunnel
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.150 seconds.
+
+Level name: TunnelWithBox
+Level solved: Yes.
+Actions used: 4.
+Time to solve: 0.198 seconds.
+
+Level name: CBSTest
+Level solved: Yes.
+Actions used: 19.
+Time to solve: 0.194 seconds.
+
+Level name: CBSTest
+Level solved: Yes.
+Actions used: 5.
+Time to solve: 0.123 seconds.
+
+Level name: EdgeConflict
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.164 seconds.
+
+Level name: FewConflicts
+Level solved: Yes.
+Actions used: 9.
+Time to solve: 0.158 seconds.
+
+Level name: FollowMoveConflict
+Level solved: Yes.
+Actions used: 4.
+Time to solve: 0.152 seconds.
+
+Level name: FollowPullConflict
+Level solved: Yes.
+Actions used: 3.
+Time to solve: 0.139 seconds.
+
+Level name: FollowPushConflict
+Level solved: Yes.
+Actions used: 3.
+Time to solve: 0.139 seconds.
+
+Level name: ManyConflicts
+Level solved: Yes.
+Actions used: 11.
+Time to solve: 1.984 seconds.
+
+Level name: VertexConflict
+Level solved: Yes.
+Actions used: 8.
+Time to solve: 0.211 seconds.
+
+Level name: BottleneckBoxConflict
+Level solved: Yes.
+Actions used: 9.
+Time to solve: 0.193 seconds.
+
+Level name: BottleneckThreeBoxesConflict
+Level solved: Yes.
+Actions used: 13.
+Time to solve: 0.289 seconds.
+
+Level name: BoxAgentConflict
+Level solved: Yes.
+Actions used: 4.
+Time to solve: 0.150 seconds.
+
+Level name: BoxBoxConflict
+Level solved: Yes.
+Actions used: 6.
+Time to solve: 0.135 seconds.
+
+Level name: HelpNeeded
+Level solved: Yes.
+Actions used: 11.
+Time to solve: 0.244 seconds.
+
+Level name: ThreeAgentsFewBoxConflicts
+Level solved: Yes.
+Actions used: 8.
+Time to solve: 2.746 seconds.
+
+Level name: TwoAgentsFewBoxConflicts
+Level solved: Yes.
+Actions used: 8.
+Time to solve: 0.446 seconds.
+
+Level name: mishmash
+Level solved: No.
+Actions used: 0.
+Time to solve: 0.000 seconds.
+

@@ -1,6 +1,7 @@
 package dtu.aimas.search.solvers;
 
 import dtu.aimas.common.Position;
+import dtu.aimas.communication.IO;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.blackboard.Attempt;
@@ -220,7 +221,10 @@ public class ConflictChecker {
 
 
     private static Optional<Integer> getFirstConflictStep(StateSolution solution, StateSpace space){
-        if(!space.isValid(solution.getState(0))) return Optional.of(0);
+        if(!space.isValid(solution.getState(0))) {
+            IO.error("Conflict on initial states should not occur");
+            return Optional.of(0);
+        }
 
         for(var step = 1; step < solution.size(); step++) {
             var state = solution.getState(step);

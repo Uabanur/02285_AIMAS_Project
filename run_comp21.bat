@@ -21,7 +21,7 @@ set LOG_DIR="server_logs"
 if not exist %LOG_DIR% mkdir %LOG_DIR% > NUL
 set OUTPUT_PATH="%LOG_DIR%/%LOG_NAME%"
 
-set levelDir=.\g5\src\main\resources\levels
+set levelDir=.\complevelsSP21\complevelsSP21
 set classesDir=.\g5\target\classes
 set clientName=dtu.aimas.SearchClient
 set arguments=-si
