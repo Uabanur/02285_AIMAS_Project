@@ -2,10 +2,12 @@ package dtu.aimas.search.problems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import dtu.aimas.common.Agent;
@@ -16,6 +18,7 @@ import dtu.aimas.search.Problem;
 public class AgentBoxAssignationSplitter implements ProblemSplitter {
     private HashMap<Agent, List<Goal>> agentAssignedGoals;
     private HashMap<Agent, List<Box>> agentAssignedBoxes;
+    private Set<Box> unnassignedBoxes;
     private Problem problem; 
     private ArrayList<Goal> orderedBoxGoals;
     
@@ -24,19 +27,18 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         this.problem = problem;
         agentAssignedGoals = new HashMap<>();
         agentAssignedBoxes = new HashMap<>();
+        unnassignedBoxes = new HashSet<>(problem.boxes);
         orderGoalsByPriority();
         assignGoals();
         return problem.agents.stream().map(a -> subProblemForAgent(a)).toList();
     }
 
     private void assignGoals() {
-        Set<Box> assignedBoxes = new HashSet<>();
-        int[] agentCost = new int[problem.agents.size()];
-        Arrays.fill(agentCost, 0);
+        HashMap<Agent, Integer> agentCost = new HashMap<>();
 
         for(Goal goal : orderedBoxGoals) {
-            List<Box> compatibleBoxes = problem.boxes.stream().filter(
-                b -> b.label == goal.label && !assignedBoxes.contains(b) 
+            List<Box> compatibleBoxes = unnassignedBoxes.stream().filter(
+                b -> b.label == goal.label 
                 && problem.agents.stream().anyMatch(a -> a.color.equals(b.color))
                 ).collect(Collectors.toList());
             if(compatibleBoxes.isEmpty()) continue; //Goal isn't solvable!
@@ -59,7 +61,8 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
 
             int closestAgentDist = Integer.MAX_VALUE;
             for(Agent agent : compatibleAgents) {
-                int dist = problem.admissibleDist(agent.pos, closestBox.pos) + agentCost[Character.getNumericValue(agent.label)];
+                if(!agentCost.containsKey(agent)) agentCost.put(agent, 0);
+                int dist = problem.admissibleDist(agent.pos, closestBox.pos) + agentCost.get(agent);
                 if(dist < 0) dist = Integer.MAX_VALUE;
                 if(dist < closestAgentDist) {
                     closestAgent = agent;
@@ -73,9 +76,9 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
             }
             agentAssignedGoals.get(closestAgent).add(goal);
             agentAssignedBoxes.get(closestAgent).add(closestBox);
-            assignedBoxes.add(closestBox);
+            unnassignedBoxes.remove(closestBox);
             //2 times because it has to come back for calculations to be correct
-            agentCost[Character.getNumericValue(closestAgent.label)] += (closestBoxDist + closestAgentDist)*2; 
+            agentCost.put(closestAgent, agentCost.get(closestAgent)+ (closestBoxDist + closestAgentDist)*2); 
         }        
 
     }
@@ -87,8 +90,9 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         if(agentAssignedGoals.containsKey(agent)) {
             agentAssignedGoals.get(agent).stream().forEach(g -> goals[g.destination.row][g.destination.col] = g.label);
             boxes = agentAssignedBoxes.get(agent);
+            boxes.addAll(unnassignedBoxes.stream().filter(ub -> ub.color.equals(agent.color)).toList());
         }
-        else boxes = List.of();
+        else boxes = new ArrayList<>();
         var agentGoal = problem.agentGoals.stream().filter(ag -> ag.label == agent.label).findAny();
         if(agentGoal.isPresent()) {
             var goal = agentGoal.get();
@@ -114,3 +118,4 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         }
     }
 }
+
