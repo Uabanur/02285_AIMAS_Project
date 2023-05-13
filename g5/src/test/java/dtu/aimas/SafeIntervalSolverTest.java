@@ -4,6 +4,7 @@ import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.errors.SolutionNotFound;
+import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.graphsearch.AStar;
@@ -14,7 +15,6 @@ import org.junit.*;
 import static dtu.aimas.helpers.LevelHelper.getProblem;
 
 public class SafeIntervalSolverTest {
-    private SafeIntervalSolver solver;
     private Result<Solution> solution;
     private long startTimeMs = 0;
 
@@ -23,11 +23,6 @@ public class SafeIntervalSolverTest {
         IO.logLevel = LogLevel.Information;
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
-
-        solver = new SafeIntervalSolver(
-                new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter()
-        );
     }
 
     @After
@@ -78,6 +73,7 @@ public class SafeIntervalSolverTest {
                     """;
 
         var problem = getProblem(level, "red:0,A");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -100,6 +96,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -122,6 +119,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -142,6 +140,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -160,6 +159,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -178,6 +178,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -196,6 +197,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1, A");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -218,6 +220,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, 1, 2");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -240,6 +243,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -266,6 +270,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B", "cyan: 2, C");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -286,6 +291,7 @@ public class SafeIntervalSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -310,6 +316,7 @@ public class SafeIntervalSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -333,6 +340,7 @@ public class SafeIntervalSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,1,2,3,4");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
@@ -365,6 +373,7 @@ public class SafeIntervalSolverTest {
             "cyan: 3, D"
         );
 
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
@@ -385,6 +394,7 @@ public class SafeIntervalSolverTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0", "blue: 1");
+        var solver = new SafeIntervalSolver();
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
@@ -408,6 +418,36 @@ public class SafeIntervalSolverTest {
                 """;
 
         var problem = getProblem(level, "red: 0,1,A,B");
+        var solver = new SafeIntervalSolver();
+        solution = solver.solve(problem);
+        Assert.assertTrue(solution.isOk());
+    }
+
+    @Test
+    public void AgentBoxSplitter(){
+        var level = """
+                #initial
+                +++++++++
+                +0 D+A 1+
+                +ABC+BDC+
+                +   +   +
+                +   +   +
+                +++++++++
+                #goal
+                +++++++++
+                +   +   +
+                +   +   +
+                +  D+A  +
+                +ABC+BDC+
+                +++++++++
+                #end
+                """;
+
+        var problem = getProblem(level, "red: 0,1,A,B,C,D");
+        var solver = new SafeIntervalSolver(
+                new AStar(new DistanceSumCost()),
+                new AgentBoxAssignationSplitter()
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }

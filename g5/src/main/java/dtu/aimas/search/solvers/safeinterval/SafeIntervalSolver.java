@@ -6,11 +6,14 @@ import dtu.aimas.communication.Stopwatch;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
+import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.ProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 
 import java.util.PriorityQueue;
 import java.util.function.Function;
@@ -23,6 +26,8 @@ public class SafeIntervalSolver implements Solver {
         this.subSolver = subSolver;
         this.splitter = splitter;
     }
+    public SafeIntervalSolver(ProblemSplitter splitter){this(new AStar(new DistanceSumCost()), splitter);}
+    public SafeIntervalSolver(){this(new ColorProblemSplitter());}
 
     @Override
     public Result<Solution> solve(Problem initial) {
@@ -54,6 +59,7 @@ public class SafeIntervalSolver implements Solver {
                 return Result.error(new SolutionNotFound("SafeIntervalSolver found no solutions."));
 
             var node = queue.poll();
+            IO.debug("## New node");
 
             start = Stopwatch.getTimeMs();
             var conflictResult = node.firstConflict(space);
@@ -68,12 +74,16 @@ public class SafeIntervalSolver implements Solver {
 
                 if(restrictedNode.isEmpty()) continue;
 
+                start = Stopwatch.getTimeMs();
                 var next = restrictedNode.get();
                 var safeProblem = next.safeProblemFor(problem);
                 var solution = subSolver.solve(safeProblem).map(s -> (StateSolution)s);
                 next.bind(problem, solution);
                 next.calculateCost();
                 if(next.isSolvable()) queue.add(next);
+
+                IO.debug("new solution time: %d ms", Stopwatch.getTimeSinceMs(start));
+                IO.debug("new solution size: %d", solution.map(StateSolution::size).getOrElse(() -> -1));
             }
         }
     }

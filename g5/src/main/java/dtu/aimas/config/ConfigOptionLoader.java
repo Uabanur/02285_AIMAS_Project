@@ -10,6 +10,7 @@ public class ConfigOptionLoader {
                 DFSConfigOption.OptionName, DFSConfigOption::new,
                 CBSConfigOption.OptionName, CBSConfigOption::new,
                 BlackboardConfigOption.OptionName, BlackboardConfigOption::new,
+                SafeIntervalConfigOption.OptionName, SafeIntervalConfigOption::new,
                 LoggingConfigOption.OptionName, LoggingConfigOption::new
         );
     }
