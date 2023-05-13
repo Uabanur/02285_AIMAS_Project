@@ -221,7 +221,7 @@ public class AgentAssignationSplitterTest {
 
         var subProblem0 = subProblems.get(0);
         var expectedAgents0 = new Agent[]{agents.get(0)};
-        var expectedBoxes0 = new Box[]{boxes.get(2)};
+        var expectedBoxes0 = new Box[]{boxes.get(2),boxes.get(1)};
         var expectedBoxGoals0 = new Goal[]{new Goal('A', new Position(0,9))};
         var expectedAgentGoals0 = problem.agentGoals.stream().filter(ag -> ag.label == agents.get(0).label).toArray();
         Assert.assertArrayEquals(expectedAgents0, subProblem0.agents.toArray(Agent[]::new));
