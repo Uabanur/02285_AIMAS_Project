@@ -2,15 +2,20 @@ package dtu.aimas;
 
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
+import dtu.aimas.communication.LogLevel;
 import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.helpers.SolveLevelTask;
 import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
+import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
+import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
+import dtu.aimas.search.solvers.safeinterval.SafeIntervalSolver;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.*;
@@ -154,5 +159,22 @@ public class LevelSolvingTest {
     @Test
     public void TestMAsimple5_AStar_GoalCount() {
         TestMap("MAsimple5", new AStar(new GoalCount()));
+    }
+
+    @Ignore
+    @Test
+    public void TestMishMash_SafeInterval(){
+        var subSolver = new SafeIntervalSolver(
+                new AStar(new DistanceSumCost()),
+                new AgentBoxAssignationSplitter()
+        );
+        var solver = new SafeIntervalSolver(
+//                subSolver,
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter()
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        TestMap("mishmash", solver);
     }
 }
