@@ -249,4 +249,11 @@ public class Problem {
         return freeNeighbors < 2;
     }
 
+    public boolean validGoalState(State state) {
+        return true;
+    }
+
+    public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals) {
+        return new Problem(agents, boxes, goals, this);
+    }
 }

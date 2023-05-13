@@ -1,0 +1,21 @@
+#domain
+hospital
+#levelname
+G5 room roar
+#colors
+blue: 0
+red: 1
+green: 2
+#initial
++++++++
++01   +
++++ +++
++2   3+
++++++++
+#goal
++++++++
++3   2+
++++ +++
++1   0+
++++++++
+#end
