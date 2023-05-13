@@ -42,6 +42,7 @@ public class Problem {
         this.agentGoals = extractGoals(Agent::isLabel);
         this.boxGoals = extractGoals(Box::isLabel);
         this.distances = initializeDistances();
+        precompute();
     }
 
     public Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, Problem parent) {

@@ -8,6 +8,9 @@ import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.graphsearch.AStarMinLength;
 import dtu.aimas.search.solvers.graphsearch.BFS;
+import dtu.aimas.search.solvers.graphsearch.Greedy;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.MixedDistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
 
 public class CBSConfigOption extends ConfigOption {
@@ -17,7 +20,7 @@ public class CBSConfigOption extends ConfigOption {
     }
 
     public void apply(Configuration conf) {
-        conf.setSolver(new ConflictBasedSearch(new AStar(new MAAdmissibleCost())));
+        conf.setSolver(new ConflictBasedSearch(new AStar(new MixedDistanceSumCost())));
     }
     
     public Result<ConfigOption> bindInner(List<String> tokens) {
