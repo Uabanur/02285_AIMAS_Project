@@ -16,8 +16,6 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static dtu.aimas.helpers.LevelSolver.testMap;
-
 public class LevelSolvingTest {
 
     @Test

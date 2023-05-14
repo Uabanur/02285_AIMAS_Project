@@ -6,7 +6,9 @@ import dtu.aimas.communication.LogLevel;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
+import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
+import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
@@ -21,7 +23,6 @@ public class SafePathSolverTest {
 
     @Before
     public void setup(){
-        IO.logLevel = LogLevel.Debug;
         startTimeMs = System.currentTimeMillis();
         solution = Result.error(new SolutionNotFound());
     }
@@ -522,14 +523,30 @@ public class SafePathSolverTest {
     }
 
     @Test
-    public void G5_room_roar(){
+    public void Test_MishMash_R1(){
 
         var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new AgentBoxAssignationSplitter(),
+                new AgentProblemSplitter(),
                 true
         );
 
-        LevelSolver.testMap("G5_room_roar", solver);
+        LevelSolver.testMap("mishmash_r1", solver);
+    }
+
+    @Test
+    public void Test_MishMash_RegionSplit(){
+        var agentSolver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new AgentProblemSplitter(),
+                100
+        );
+
+        var solver = new SafePathSolver(
+                agentSolver,
+                new RegionProblemSplitter()
+        );
+
+        LevelSolver.testMap("mishmash", solver);
     }
 }

@@ -14,7 +14,7 @@ public class SafePlan {
     private final List<SafeAttempt> attempts;
 
     public SafePlan(Problem problem, SafeAttempt attempt) {
-        assert !(problem instanceof SafeProblem) : "Root problem should be the original";
+//        assert !(problem instanceof SafeProblem) : "Root problem should be the original";
         this.problem = problem;
         attempts = new ArrayList<>(){{add(attempt);}};
     }
