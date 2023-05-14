@@ -22,7 +22,7 @@ public class SingleGoalDistanceCost implements Cost {
         for(var goal : problem.boxGoals){
             if(state.boxes.stream().anyMatch(b -> b.label == goal.label && b.pos.equals(goal.destination)))
                 continue;
-            var compatibleBoxes = problem.boxes.stream().filter(b -> b.label == goal.label).toList();
+            var compatibleBoxes = state.boxes.stream().filter(b -> b.label == goal.label).toList();
             var closestBox = compatibleBoxes.get(0);
             var minDist = Integer.MAX_VALUE;
             for(Box box : compatibleBoxes) {
@@ -33,25 +33,16 @@ public class SingleGoalDistanceCost implements Cost {
                 }
             }
             result += minDist;
+            //focus on keeping boxes in goals
             if(minDist > 0) {
-                //go towards the box if it's out of its goal
                 Box b = closestBox;
-                var agent = problem.agents.stream().filter(a -> a.color == b.color).findFirst().get();
-                result += problem.admissibleDist(agent.pos, closestBox.pos)+1;
+                var agent = state.agents.stream().filter(a -> a.color == b.color).findFirst().get();
+                result += problem.admissibleDist(agent.pos, closestBox.pos);
             }
             
         }
         //if(result < 2)IO.info(result);
         //if(result > 0) result += 10; //penalty to keep agent from going to his goal
-        
-        for(var agent : problem.agents) {
-            var minAgentBoxDist = state.boxes.stream()
-                    .filter(b -> b.color == agent.color && problem.goals[b.pos.row][b.pos.col] != b.label)
-                    .map(b -> problem.admissibleDist(b.pos, agent.pos))
-                    .min(Integer::compareTo)
-                    .orElse(0);
-            result += minAgentBoxDist/2;
-        }
 
         for(var goal: problem.agentGoals){
             var agent = state.agents.stream().filter(a -> a.label == goal.label).findAny();

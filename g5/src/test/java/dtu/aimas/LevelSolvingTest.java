@@ -7,7 +7,10 @@ import dtu.aimas.helpers.SolveLevelTask;
 import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.SAOrderedSolver;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
 import org.junit.Assert;
@@ -154,5 +157,10 @@ public class LevelSolvingTest {
     @Test
     public void TestMAsimple5_AStar_GoalCount() {
         TestMap("MAsimple5", new AStar(new GoalCount()));
+    }
+
+    @Test
+    public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
+        TestMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
     }
 }
