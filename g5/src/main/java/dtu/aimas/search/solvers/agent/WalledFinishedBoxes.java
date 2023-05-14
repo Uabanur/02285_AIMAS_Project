@@ -42,8 +42,10 @@ public class WalledFinishedBoxes implements Solver {
 
         ArrayList<StateSolution> solutions;
 
+        // get box goals in solvable order
+        var boxGoals = getSolvablyOrderedBoxGoals(fullProblem.boxGoals, initial.agents, initial.boxes, fullProblem);
+
         IO.debug("solving boxes...");
-        var boxGoals = new ArrayDeque<>(fullProblem.boxGoals);
 
         while(true){
             var solutionGoalPair = solveBoxes(boxGoals, fullProblem, initial);
@@ -52,10 +54,6 @@ public class WalledFinishedBoxes implements Solver {
                 solutions = solutionsResult.get();
                 break;
             }
-
-            var unsolvableBoxGoal = solutionGoalPair.goal();
-            boxGoals.remove(unsolvableBoxGoal);
-            boxGoals.addFirst(unsolvableBoxGoal);
         }
 
 
@@ -112,6 +110,38 @@ public class WalledFinishedBoxes implements Solver {
         return Result.ok(mergedSolution);
     }
 
+    private Collection<Goal> getSolvablyOrderedBoxGoals(Collection<Goal> goals, ArrayList<Agent> initialAgents, ArrayList<Box> initialBoxes, Problem fullProblem){
+        // we still need to recreate the problems, so it's a big duplication of code.
+        // on the other hand - it saves some subsolver runs what is pretty nice
+        var boxGoals = new ArrayDeque<>(fullProblem.boxGoals);
+        while(true){
+            var agents = new ArrayList<>(initialAgents);
+            var boxes = new ArrayList<>(initialBoxes);
+
+            IO.debug("setting right order...");
+            var subGoal = new char[fullProblem.goals.length][fullProblem.goals[0].length];
+
+            var walls = new boolean[fullProblem.walls.length][fullProblem.walls[0].length];
+            for(var i = 0; i < walls.length; i++){
+                for(var j = 0; j < walls[0].length; j++){
+                walls[i][j] = fullProblem.walls[i][j];
+                }
+            }
+            boolean solvableOrder = true;
+            for(var boxGoal: boxGoals){
+                var iterativeProblem = fullProblem.copyWith(agents, boxes, subGoal, walls);
+                if(!isSolvable(iterativeProblem, agents, boxes, boxGoal)){
+                    solvableOrder = false;
+                    boxGoals.remove(boxGoal);
+                    boxGoals.addFirst(boxGoal);
+                    break;
+                }
+                walls[boxGoal.destination.row][boxGoal.destination.col] = true;
+            }
+            if(solvableOrder) return Collections.unmodifiableCollection(boxGoals);
+        }
+    }
+
     private void resetBoxColors(ArrayList<StateSolution> solutions, Color color) {
         for(var solution: solutions){
             for(var i = 0; i < solution.size(); i++){
@@ -148,6 +178,7 @@ public class WalledFinishedBoxes implements Solver {
             IO.debug("problem:\n" + iterativeProblem.toString());
 
             // check if box is reachable for the new goal
+            // maciek: this is still necessary yet, cause we could have unfortunatelly locked an agent...
             var solvable = isSolvable(iterativeProblem, agents, boxes, boxGoal);
             if(!solvable) return new SolutionGoalPair(Result.empty(), boxGoal);
 
