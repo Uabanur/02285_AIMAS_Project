@@ -89,21 +89,17 @@ public class SolutionMerger {
 
     public static StateSolution sequentialJoin(List<StateSolution> solutions) {
         var solutionLength = solutions.stream()
-                .mapToInt(StateSolution::size)
+                .mapToInt(StateSolution::size).map(s -> s-1)
                 .sum();
 
-        var states = new State[solutionLength];
-        int step = 0;
+        var states = new State[solutionLength+1];
+        states[0] = solutions.get(0).getState(0);
+        int step = 1;
         for(StateSolution sol : solutions) {
-            for(int i = 0; i < sol.size(); i++) {
+            for(int i = 1; i < sol.size(); i++) {
                 State s = sol.getState(i);
-                if(step == 0) {
-                    states[step] = new State(s.agents, s.boxes);
-                }
-                else {
-                    var parent = states[step-1];
-                    states[step] = new State(parent, s.agents, s.boxes, s.jointAction);
-                }
+                var parent = states[step-1];
+                states[step] = new State(parent, s.agents, s.boxes, s.jointAction);
                 step+=1;
             }
         }

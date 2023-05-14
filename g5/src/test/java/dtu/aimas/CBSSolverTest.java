@@ -8,9 +8,11 @@ import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.SAOrderedSolver;
 import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.graphsearch.Greedy;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
 import dtu.aimas.search.solvers.heuristics.MixedDistanceSumCost;
 
@@ -75,7 +77,7 @@ public class CBSSolverTest {
                     """;
 
         var problem = getProblem(level);
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -94,7 +96,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -117,7 +119,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new DistanceSumCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -140,7 +142,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -161,7 +163,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -180,7 +182,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -199,7 +201,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -218,7 +220,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1, A");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new DistanceSumCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -241,7 +243,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, 1, 2");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -264,7 +266,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -291,7 +293,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B", "cyan: 2, C");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -312,7 +314,7 @@ public class CBSSolverTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
+        var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new MAAdmissibleCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
