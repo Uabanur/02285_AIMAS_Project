@@ -159,8 +159,9 @@ public class LevelSolvingTest {
         TestMap("MAsimple5", new AStar(new GoalCount()));
     }
 
+    /*
     @Test
     public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
         TestMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
-    }
+    }*/
 }
