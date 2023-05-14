@@ -98,7 +98,8 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
             var goal = agentGoal.get();
             goals[goal.destination.row][goal.destination.col] = goal.label;
         }
-        return new Problem(agents, boxes, goals, problem);
+//        return new Problem(agents, boxes, goals, problem);
+        return problem.copyWith(agents, boxes, goals);
     }
 
     private void orderGoalsByPriority() {

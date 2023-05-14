@@ -24,7 +24,7 @@ set OUTPUT_PATH="%LOG_DIR%/%LOG_NAME%"
 set levelDir=.\g5\src\main\resources\levels
 set classesDir=.\g5\target\classes
 set clientName=dtu.aimas.SearchClient
-set arguments=-bb
+set arguments=-si
 
 : -l            level file or directory
 : -g            start in gui mode

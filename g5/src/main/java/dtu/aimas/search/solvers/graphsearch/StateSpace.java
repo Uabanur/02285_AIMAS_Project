@@ -65,7 +65,8 @@ public record StateSpace(
                 return false;
             }
         }
-        return true;
+
+        return problem.validGoalState(state);
     }
 
     private State[] extractStates(State state) {
@@ -205,39 +206,83 @@ public record StateSpace(
         return isApplicable(state, agent, action, -1);
     }
 
-    public boolean isApplicable(State state, Agent agent, Action action, int timeStep){
+    public Optional<Position> findConflictingPosition(State state, Agent agent, Action action, int timeStep){
         Position agentDestination;
         Optional<Box> boxResult;
         Box box;
         switch (action.type) {
             case NoOp -> {
-                return canStayAtCell(agent.pos, agent, timeStep);
+                return canStayAtCell(agent.pos, agent, timeStep)
+                        ? Optional.empty()
+                        : Optional.of(agent.pos);
             }
             case Move -> {
                 agentDestination = moveAgent(agent, action);
-                return isCellFree(agentDestination, state, agent, timeStep);
+                return isCellFree(agentDestination, state, agent, timeStep)
+                        ? Optional.empty()
+                        : Optional.of(agentDestination);
             }
             case Push -> {
                 agentDestination = moveAgent(agent, action);
                 boxResult = getBoxAt(state, agentDestination);
-                if (boxResult.isEmpty()) return false;
+                if (boxResult.isEmpty()) return Optional.of(agentDestination);
                 box = boxResult.get();
-                if (notOwner(agent, box)) return false;
+                if (notOwner(agent, box)) return Optional.of(agentDestination);
                 Position boxDestination = moveBox(box, action);
-                return isCellFree(boxDestination, state, agent, timeStep);
+                return isCellFree(boxDestination, state, agent, timeStep)
+                        ? Optional.empty()
+                        : Optional.of(boxDestination);
             }
             case Pull -> {
                 Position boxSource = getPullSource(agent, action);
                 boxResult = getBoxAt(state, boxSource);
-                if (boxResult.isEmpty()) return false;
+                if (boxResult.isEmpty()) return Optional.of(boxSource);
                 box = boxResult.get();
-                if (notOwner(agent, box)) return false;
+                if (notOwner(agent, box)) return Optional.of(boxSource);
                 agentDestination = moveAgent(agent, action);
-                return isCellFree(agentDestination, state, agent, timeStep);
+                return isCellFree(agentDestination, state, agent, timeStep)
+                        ? Optional.empty()
+                        : Optional.of(agentDestination);
             }
         }
 
         throw new UnreachableState();
+    }
+
+    public boolean isApplicable(State state, Agent agent, Action action, int timeStep){
+        return findConflictingPosition(state,agent,action,timeStep).isEmpty();
+//        Position agentDestination;
+//        Optional<Box> boxResult;
+//        Box box;
+//        switch (action.type) {
+//            case NoOp -> {
+//                return canStayAtCell(agent.pos, agent, timeStep);
+//            }
+//            case Move -> {
+//                agentDestination = moveAgent(agent, action);
+//                return isCellFree(agentDestination, state, agent, timeStep);
+//            }
+//            case Push -> {
+//                agentDestination = moveAgent(agent, action);
+//                boxResult = getBoxAt(state, agentDestination);
+//                if (boxResult.isEmpty()) return false;
+//                box = boxResult.get();
+//                if (notOwner(agent, box)) return false;
+//                Position boxDestination = moveBox(box, action);
+//                return isCellFree(boxDestination, state, agent, timeStep);
+//            }
+//            case Pull -> {
+//                Position boxSource = getPullSource(agent, action);
+//                boxResult = getBoxAt(state, boxSource);
+//                if (boxResult.isEmpty()) return false;
+//                box = boxResult.get();
+//                if (notOwner(agent, box)) return false;
+//                agentDestination = moveAgent(agent, action);
+//                return isCellFree(agentDestination, state, agent, timeStep);
+//            }
+//        }
+//
+//        throw new UnreachableState();
     }
 
     public ArrayList<State> expand(State state) {
@@ -553,4 +598,14 @@ public record StateSpace(
         return new State(agents, boxes);
     }
 
+    public State shallowMerge(List<State> states){
+        var agents = new ArrayList<Agent>();
+        var boxes = new ArrayList<Box>();
+        for(var state: states){
+            agents.addAll(state.agents);
+            boxes.addAll(state.boxes);
+        }
+
+        return new State(agents, boxes);
+    }
 }

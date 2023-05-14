@@ -2,9 +2,9 @@ package dtu.aimas.parsers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import dtu.aimas.common.Result;
-import dtu.aimas.communication.IO;
 import dtu.aimas.config.*;
 
 public class ArgumentParser {
@@ -20,7 +20,7 @@ public class ArgumentParser {
         return conf;
     }
 
-    private static Result<Collection<ConfigOption>> parseArgs(String[] args){
+    private static Result<List<ConfigOption>> parseArgs(String[] args){
         var tokens = new ArrayList<String>();
         var options = new ArrayList<Result<ConfigOption>>();
 
@@ -31,7 +31,6 @@ public class ArgumentParser {
             tokens.add(args[i]);
             i++;
         }
-        IO.info(tokens);
         options.add(DefaultConfigOption.bind(tokens));
         tokens.clear();
 

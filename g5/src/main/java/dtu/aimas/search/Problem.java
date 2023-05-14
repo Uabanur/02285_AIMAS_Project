@@ -1,27 +1,15 @@
 package dtu.aimas.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.stream.Collector;
+import dtu.aimas.common.*;
+import dtu.aimas.search.solvers.graphsearch.State;
+
+import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.Queue;
-import java.util.Set;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import dtu.aimas.common.Position;
-import dtu.aimas.common.Agent;
-import dtu.aimas.common.Box;
-import dtu.aimas.common.Color;
-import dtu.aimas.common.Goal;
 
 public class Problem {
-
+    public final int MAX_DISTANCE = Integer.MAX_VALUE;
     public final Collection<Agent> agents;
     public final Collection<Box> boxes;
     public final boolean[][] walls;
@@ -31,7 +19,7 @@ public class Problem {
     public final int expectedStateSize;
     private int[][][][] distances;
 
-    public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals) 
+    public Problem(Collection<Agent> agentCollection, Collection<Box> boxCollection, boolean[][] walls, char[][] goals)
     {
         this.agents = agentCollection;
         this.boxes = boxCollection;
@@ -44,14 +32,20 @@ public class Problem {
         this.distances = initializeDistances();
     }
 
+    // todo these should be private and only called by `copyWith` method which can be overwritten by
+    // ConstrainedProblem and SafeProblem, such that sub problem contain the parent problem restrictions.
     public Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, Problem parent) {
+        this(agents, boxes, goals, parent.walls, parent);
+    }
+
+    private Problem(Collection<Agent> agents, Collection<Box> boxes, char[][] goals, boolean[][] walls, Problem parent) {
         this.agents = agents;
         this.boxes = boxes;
         this.goals = goals;
         this.agentGoals = extractGoals(Agent::isLabel);
         this.boxGoals = extractGoals(Box::isLabel);
 
-        this.walls = parent.walls;
+        this.walls = walls;
         this.expectedStateSize = parent.expectedStateSize;
         this.distances = parent.distances;
     }
@@ -74,7 +68,7 @@ public class Problem {
         Arrays.stream(distances)
                 .flatMap(Arrays::stream)
                 .flatMap(Arrays::stream)
-                .forEach(a -> Arrays.fill(a, Integer.MAX_VALUE));
+                .forEach(a -> Arrays.fill(a, MAX_DISTANCE));
         return distances;
     }
 
@@ -86,7 +80,7 @@ public class Problem {
         while(!neighbors.isEmpty()) {
             Position curr = neighbors.remove();
             int distToCurr = distances[src.row][src.col][curr.row][curr.col];
-            if(distToCurr == Integer.MAX_VALUE) continue;
+            if(distToCurr == MAX_DISTANCE) continue;
 
             Position top = new Position(curr.row-1,curr.col);
             if(top.row >= 0 && !walls[top.row][top.col]
@@ -249,4 +243,15 @@ public class Problem {
         return freeNeighbors < 2;
     }
 
+    public boolean validGoalState(State state) {
+        return true;
+    }
+
+    public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals) {
+        return new Problem(agents, boxes, goals, this);
+    }
+
+    public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals, boolean[][] walls) {
+        return new Problem(agents, boxes, walls, goals).precompute();
+    }
 }

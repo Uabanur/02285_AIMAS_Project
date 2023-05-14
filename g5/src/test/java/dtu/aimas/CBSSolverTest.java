@@ -16,6 +16,8 @@ import org.junit.*;
 
 import java.io.StringReader;
 
+import static dtu.aimas.helpers.LevelHelper.getProblem;
+
 public class CBSSolverTest {
     private final LevelParser levelParser = CourseLevelParser.Instance;
     private Result<Solution> solution;
@@ -36,27 +38,6 @@ public class CBSSolverTest {
             s.serializeSteps().forEach(IO::debug);
         });
     }
-    
-    private Problem getProblem(String level, String... colors){
-        var levelWithHeader = String.format("%s\n%s", createLevelHeader(colors), level);
-        var parsed = this.levelParser.parse(new StringReader(levelWithHeader));
-        Assert.assertTrue(parsed.getErrorMessageOrEmpty(), parsed.isOk());
-        return parsed.get();
-    }
-
-    private String createLevelHeader(String... colors){
-        var colorString = String.join("\n", colors);
-        var template = """
-                        #domain
-                        hospital
-                        #levelname
-                        test
-                        #colors
-                        %s
-                        """;
-    
-        return String.format(template, colorString).trim();
-    }
 
     @Test
     public void EmptyProblem() {
@@ -72,7 +53,7 @@ public class CBSSolverTest {
                     #end
                     """;
 
-        var problem = getProblem(level);
+        var problem = getProblem(level, "red: 0");
         var solver = new ConflictBasedSearch(new AStar(new MAAdmissibleCost()));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
