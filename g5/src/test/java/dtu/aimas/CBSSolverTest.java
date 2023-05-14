@@ -57,7 +57,7 @@ public class CBSSolverTest {
                     #end
                     """;
 
-        var problem = getProblem(level);
+        var problem = getProblem(level, "red: 0");
         var solver = new ConflictBasedSearch(new SAOrderedSolver(new AStar(new DistanceSumCost())));
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
