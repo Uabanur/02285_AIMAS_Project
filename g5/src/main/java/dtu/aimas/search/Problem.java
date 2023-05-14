@@ -249,4 +249,8 @@ public class Problem {
         return freeNeighbors < 2;
     }
 
+    public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals) {
+        return new Problem(agents, boxes, goals, this);
+    }
+
 }
