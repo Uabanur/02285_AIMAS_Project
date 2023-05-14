@@ -6,6 +6,8 @@ import dtu.aimas.parsers.ArgumentParser;
 import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.search.Problem;
 
+import java.util.Arrays;
+
 public class SearchClient 
 {
     public static Configuration config;
@@ -31,18 +33,20 @@ public class SearchClient
     }
 
     private static void handleConfigs(String[] args) {
-        IO.debug(args);
         var configuration = ArgumentParser.parse(args);
-        
-        IO.debug(configuration);
+
         if(configuration.isError()){
             IO.error("Invalid arguments.");
+            IO.error(args);
             IO.logException(configuration.getError());
             System.exit(0);
         }
 
         SearchClient.config = configuration.get();
         config.configureIO();
+
+        IO.debug("arguments: " + Arrays.toString(args));
+        IO.debug(configuration);
     }
 
     private static Problem logStart(Problem p){

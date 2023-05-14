@@ -34,8 +34,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
     }
 
     private void assignGoals() {
-        int[] agentCost = new int[problem.agents.size()];
-        Arrays.fill(agentCost, 0);
+        HashMap<Agent, Integer> agentCost = new HashMap<>();
 
         for(Goal goal : orderedBoxGoals) {
             List<Box> compatibleBoxes = unnassignedBoxes.stream().filter(
@@ -62,7 +61,8 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
 
             int closestAgentDist = Integer.MAX_VALUE;
             for(Agent agent : compatibleAgents) {
-                int dist = problem.admissibleDist(agent.pos, closestBox.pos) + agentCost[Character.getNumericValue(agent.label)];
+                if(!agentCost.containsKey(agent)) agentCost.put(agent, 0);
+                int dist = problem.admissibleDist(agent.pos, closestBox.pos) + agentCost.get(agent);
                 if(dist < 0) dist = Integer.MAX_VALUE;
                 if(dist < closestAgentDist) {
                     closestAgent = agent;
@@ -78,7 +78,7 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
             agentAssignedBoxes.get(closestAgent).add(closestBox);
             unnassignedBoxes.remove(closestBox);
             //2 times because it has to come back for calculations to be correct
-            agentCost[Character.getNumericValue(closestAgent.label)] += (closestBoxDist + closestAgentDist)*2; 
+            agentCost.put(closestAgent, agentCost.get(closestAgent)+ (closestBoxDist + closestAgentDist)*2); 
         }        
 
     }
@@ -98,7 +98,8 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
             var goal = agentGoal.get();
             goals[goal.destination.row][goal.destination.col] = goal.label;
         }
-        return new Problem(agents, boxes, goals, problem);
+//        return new Problem(agents, boxes, goals, problem);
+        return problem.copyWith(agents, boxes, goals);
     }
 
     private void orderGoalsByPriority() {
@@ -118,3 +119,4 @@ public class AgentBoxAssignationSplitter implements ProblemSplitter {
         }
     }
 }
+

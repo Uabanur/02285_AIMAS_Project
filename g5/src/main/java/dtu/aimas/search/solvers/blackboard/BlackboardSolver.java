@@ -1,31 +1,44 @@
 package dtu.aimas.search.solvers.blackboard;
 
-import dtu.aimas.common.Color;
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
+import dtu.aimas.search.problems.ColorProblemSplitter;
+import dtu.aimas.search.problems.ProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
-import dtu.aimas.search.solvers.*;
+import dtu.aimas.search.solvers.SolutionChecker;
+import dtu.aimas.search.solvers.SolutionMerger;
+import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.SolverMinLength;
 import dtu.aimas.search.solvers.graphsearch.State;
 import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import dtu.aimas.search.solvers.heuristics.ConflictPenalizedCost;
 import dtu.aimas.search.solvers.heuristics.Cost;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BlackboardSolver implements Solver {
     private final Cost baseCost;
     private final Function<Cost, SolverMinLength> subSolverGenerator;
-    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator, Cost baseCost){
+    private final ProblemSplitter splitter;
+
+    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator, Cost baseCost, ProblemSplitter splitter){
         this.subSolverGenerator = subSolverGenerator;
         this.baseCost = baseCost;
+        this.splitter = splitter;
     }
+    public BlackboardSolver(Function<Cost, SolverMinLength> subSolverGenerator, Cost baseCost){
+        this(subSolverGenerator, baseCost, new ColorProblemSplitter());
+    }
+
 
     public Result<Solution> solve(Problem problem) {
         return ProblemParser.parse(problem).flatMap(this::solve);
@@ -37,22 +50,20 @@ public class BlackboardSolver implements Solver {
         var fullProblem = space.problem();
 
         // Solve sub problems naively initially
-        var colors = initialState.agents.stream().map(a -> a.color)
-                .collect(Collectors.toSet())
-                .toArray(Color[]::new);
+        var subProblems = splitter.split(fullProblem);
 
-        var planCount = Math.max(1, colors.length);
+        var planCount = Math.max(1, subProblems.size());
         var plans = new Plan[planCount];
-        if(colors.length == 0){
-            IO.debug("No colors found. Initial state solution attempt with no actions.");
+        if(subProblems.isEmpty()){
+            IO.debug("No sub problems found. Initial state solution attempt with no actions.");
             var solution = new StateSolution(new State[]{initialState});
             plans[0] = new Plan(fullProblem, Result.ok(solution));
         } else {
-            IO.debug("Found %d colors. Solving sub problems independently.", colors.length);
+            IO.debug("Found %d sub problems. Solving sub problems independently.", subProblems.size());
             var startTime = System.currentTimeMillis();
+
             for(var i = 0; i < plans.length; i++){
-                var color = colors[i];
-                var subProblem = ProblemSplitter.singleColor(fullProblem, color);
+                var subProblem = subProblems.get(i);
                 var solution = subSolverGenerator.apply(this.baseCost)
                         .solve(subProblem)
                         .map(s -> (StateSolution)s);

@@ -1,0 +1,22 @@
+#domain
+hospital
+#levelname
+AgentGoalBeforeBoxGoal
+#colors
+blue: 0, A
+red: 1
+#initial
+++++++++
++1     +
++0A    +
+++++ +++
++    +++
+++++++++
+#goal
+++++++++
++      +
++      +
+++++ +++
++1A  +++
+++++++++
+#end

@@ -31,7 +31,7 @@ public abstract class ConfigOption {
         var option = Result.ofNullable(
                 options.get(optionName), 
                 () -> new UnknownArguments(optionName)
-            ).map(o -> o.get());
+            ).map(Supplier::get);
 
         return option.flatMap(o -> o.bindInner(tokens));
     }

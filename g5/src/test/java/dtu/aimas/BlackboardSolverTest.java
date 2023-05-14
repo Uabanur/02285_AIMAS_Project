@@ -24,8 +24,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static dtu.aimas.helpers.LevelHelper.getProblem;
+
 public class BlackboardSolverTest {
-    private final LevelParser levelParser = CourseLevelParser.Instance;
     private Result<Solution> solution;
     private long startTimeMs = 0;
 
@@ -44,27 +45,7 @@ public class BlackboardSolverTest {
             s.serializeSteps().forEach(IO::debug);
         });
     }
-    
-    private Problem getProblem(String level, String... colors){
-        var levelWithHeader = String.format("%s\n%s", createLevelHeader(colors), level);
-        var parsed = this.levelParser.parse(new StringReader(levelWithHeader));
-        Assert.assertTrue(parsed.getErrorMessageOrEmpty(), parsed.isOk());
-        return parsed.get();
-    }
 
-    private String createLevelHeader(String... colors){
-        var colorString = String.join("\n", colors);
-        var template = """
-                        #domain
-                        hospital
-                        #levelname
-                        test
-                        #colors
-                        %s
-                        """;
-    
-        return String.format(template, colorString).trim();
-    }
 
     @Test
     public void EmptyProblem() {
@@ -80,7 +61,7 @@ public class BlackboardSolverTest {
                     #end
                     """;
 
-        var problem = getProblem(level);
+        var problem = getProblem(level,"red:0");
         var solver = new BlackboardSolver(AStarMinLength::new, new GoalCount());
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
@@ -220,7 +201,7 @@ public class BlackboardSolverTest {
                 +++++++++++
                 #end
                 """;
-        var colors = IntStream.range(0, 4).mapToObj(i ->
+        var colors = IntStream.range(0, 5).mapToObj(i ->
                 (Color.values()[i]).name() + ": " + i + "," + (char)('A'+i)
         ).toArray(String[]::new);
 
