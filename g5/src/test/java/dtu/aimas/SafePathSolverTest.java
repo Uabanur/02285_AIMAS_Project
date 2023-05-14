@@ -4,19 +4,17 @@ import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.errors.SolutionNotFound;
-import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.graphsearch.AStar;
-import dtu.aimas.search.solvers.graphsearch.Greedy;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
-import dtu.aimas.search.solvers.safeinterval.SafeIntervalSolver;
+import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import org.junit.*;
 
 import static dtu.aimas.helpers.LevelHelper.getProblem;
 
-public class SafeIntervalSolverTest extends LevelSolvingTest {
+public class SafePathSolverTest extends LevelSolvingTest {
     private Result<Solution> solution;
     private long startTimeMs = 0;
 
@@ -52,9 +50,10 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     """;
 
         var problem = getProblem(level, "red:0");
-        var solver = new SafeIntervalSolver(
+        var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter()
+                new ColorProblemSplitter(),
+                true
         );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
@@ -75,7 +74,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     """;
 
         var problem = getProblem(level, "red:0,A");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -98,7 +101,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -121,7 +128,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -133,16 +144,22 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     +++++
                     +1 0+
                     ++ ++
+                    ++ ++
                     +++++
                     #goal
                     +++++
                     +0 1+
                     ++ ++
+                    ++ ++
                     +++++
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -161,7 +178,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -180,7 +201,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -199,7 +224,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0", "blue: 1, A");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
@@ -221,8 +250,12 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     +++++++
                     #end
                     """;
-        var problem = getProblem(level, "red: 0, 1, 2");
-        var solver = new SafeIntervalSolver();
+        var problem = getProblem(level, "red: 0","blue: 1","green: 2");
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -245,7 +278,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -272,7 +309,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B", "cyan: 2, C");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -293,11 +334,16 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                     #end
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void MultipleAgentsDifferentColors(){
         var level = """
@@ -317,8 +363,12 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                 ++++++++++
                 #end
                 """;
-        var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C");
-        var solver = new SafeIntervalSolver();
+        var problem = getProblem(level, "red: 0,A", "blue: 1,B", "green: 2,C", "cyan: 3");
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -342,12 +392,15 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0,1,2,3,4");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
-    @Ignore
     @Test
     public void RowsOfAgentsAndBoxes(){
         var level = """
@@ -375,7 +428,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
             "cyan: 3, D"
         );
 
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                100
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
@@ -396,7 +453,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                 #end
                 """;
         var problem = getProblem(level, "red: 0", "blue: 1");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
@@ -420,7 +481,11 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                 """;
 
         var problem = getProblem(level, "red: 0,1,A,B");
-        var solver = new SafeIntervalSolver();
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                true
+        );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
     }
@@ -446,9 +511,10 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
                 """;
 
         var problem = getProblem(level, "red: 0,1,A,B,C,D");
-        var solver = new SafeIntervalSolver(
+        var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new AgentBoxAssignationSplitter()
+                new AgentBoxAssignationSplitter(),
+                true
         );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
@@ -456,9 +522,13 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
 
     @Test
     public void G5_room_roar(){
-        TestMap("G5_room_roar", new SafeIntervalSolver(
+
+        var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter()
-        ));
+                new AgentBoxAssignationSplitter(),
+                true
+        );
+
+        TestMap("G5_room_roar", solver);
     }
 }

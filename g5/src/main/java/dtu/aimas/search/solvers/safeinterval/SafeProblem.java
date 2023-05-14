@@ -22,27 +22,37 @@ public class SafeProblem extends Problem {
         this(agentCollection, boxCollection, walls, goals, new HashMap<>());
     }
 
-    public static Optional<SafeProblem> from(Problem problem, ConflictInterval conflictInterval) {
+    public static Optional<SafeProblem> from(Problem problem, ReservedCell reservedCell) {
         var child = from(problem);
-        boolean change = child.updateInterval(conflictInterval);
+        boolean change = child.updateInterval(reservedCell);
 //        IO.debug("Interval count: %d", child.conflictingIntervals.values().stream().mapToInt(List::size).sum());
         return change ? Optional.of(child) : Optional.empty();
     }
 
-    private boolean updateInterval(ConflictInterval conflictInterval) {
-        var intervals = conflictingIntervals.get(conflictInterval.cell());
+    public static Optional<SafeProblem> from(Problem problem, List<ReservedCell> reservedCells) {
+        var child = from(problem);
+        var changes = false;
+        for(var reservation: reservedCells){
+            changes |= child.updateInterval(reservation);
+        }
+//        IO.debug("Interval count: %d", child.conflictingIntervals.values().stream().mapToInt(List::size).sum());
+        return changes ? Optional.of(child) : Optional.empty();
+    }
+
+    private boolean updateInterval(ReservedCell reservation) {
+        var intervals = conflictingIntervals.get(reservation.getCell());
         if(intervals == null){
-            conflictingIntervals.put(conflictInterval.cell(),
-                    new ArrayList<>(){{add(conflictInterval.interval());}}
+            conflictingIntervals.put(reservation.getCell(),
+                    new ArrayList<>(){{add(reservation.getInterval());}}
             );
             return true;
         }
 
-        if (intervals.contains(conflictInterval.interval())){
+        if (intervals.contains(reservation.getInterval())){
             return false;
         }
 
-        intervals.add(conflictInterval.interval());
+        intervals.add(reservation.getInterval());
         return true;
     }
 
@@ -101,5 +111,23 @@ public class SafeProblem extends Problem {
             clone.conflictingIntervals.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
         return clone;
+    }
+
+    @Override
+    public String toString() {
+        var sb = new StringBuilder();
+        var newline = System.lineSeparator();
+        sb.append(super.toString()).append(newline);
+        if(!conflictingIntervals.isEmpty()) sb.append("reserves:").append(newline);
+        for(var entry: conflictingIntervals.entrySet()){
+            var pos = entry.getKey();
+            sb.append(" ").append(pos).append(":");
+            for(var interval: entry.getValue()){
+                sb.append(" ").append(interval);
+            }
+            sb.append(newline);
+        }
+
+        return sb.toString();
     }
 }

@@ -5,14 +5,17 @@ import dtu.aimas.search.Problem;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ColorProblemSplitter implements ProblemSplitter {
     @Override
     public List<Problem> split(Problem problem) {
-        return problem.agents.stream()
-                .map(a -> a.color)
-                .collect(Collectors.toSet()) // remove duplicates
-                .stream()
+        var colors = Stream.concat(
+                problem.agents.stream().map(a -> a.color),
+                problem.boxes.stream().map(b -> b.color))
+            .collect(Collectors.toSet());
+
+        return colors.stream()
                 .map(color -> singleColor(problem, color))
                 .toList();
     }

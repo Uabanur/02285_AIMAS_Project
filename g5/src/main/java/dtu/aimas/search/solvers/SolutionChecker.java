@@ -7,9 +7,10 @@ import dtu.aimas.search.solvers.graphsearch.StateSpace;
 import java.util.List;
 
 public class SolutionChecker {
+
     public static boolean validAttempts(List<Attempt> attempts, StateSpace space){
         for(var attempt: attempts){
-            if (attempt.getSolution() == null) return false;
+            if (attempt.getSolution().isError()) return false;
             if (!attempt.getConflicts().isEmpty()) return false;
         }
 

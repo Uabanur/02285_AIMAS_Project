@@ -67,7 +67,7 @@ public class SafeIntervalSolver implements Solver {
             if(conflictResult.isEmpty()) return node.merge().map(Function.identity());
 
             var conflictInterval = conflictResult.get();
-            for(var problem : conflictInterval.involvedProblems()){
+            for(var problem : conflictInterval.getInvolvedProblems()){
                 start = Stopwatch.getTimeMs();
                 var restrictedNode = node.restrict(problem, conflictInterval);
                 IO.debug("node restrict time: %d ms", Stopwatch.getTimeSinceMs(start));
