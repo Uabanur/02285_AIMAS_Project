@@ -150,7 +150,9 @@ public class SafePathSolver implements Solver {
                 var restrictedProblem = restrictedProblemResult.get();
 //                IO.debug("New restricted problem:\n"+restrictedProblem);
                 var solution = subSolver.solve(restrictedProblem).map(s -> (StateSolution)s);
-                if(solution.isError()) continue; // unsolvable sub problem
+                if(solution.isError()){
+                    continue; // unsolvable sub problem
+                }
 
                 plans[i].addAttempt(new SafeAttempt(restrictedProblem, solution));
 
