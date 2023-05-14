@@ -3,6 +3,7 @@ package dtu.aimas;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.helpers.LevelSolver;
+import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
@@ -179,11 +180,25 @@ public class LevelSolvingTest {
     public void Test_MishMash_R3(){
         var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter(),
-                1000
+                new AgentProblemSplitter(),
+                10000
         );
 
         IO.logLevel = LogLevel.Debug;
         LevelSolver.testMap("mishmash_r3", solver);
+    }
+
+
+    @Ignore
+    @Test
+    public void Test_MishMash_R4(){
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new AgentProblemSplitter(),
+                1000
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("mishmash_r4", solver);
     }
 }

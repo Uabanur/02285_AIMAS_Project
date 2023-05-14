@@ -11,6 +11,7 @@ public class ConfigOptionLoader {
                 CBSConfigOption.OptionName, CBSConfigOption::new,
                 BlackboardConfigOption.OptionName, BlackboardConfigOption::new,
                 SafeIntervalConfigOption.OptionName, SafeIntervalConfigOption::new,
+                SafePathConfigOption.OptionName, SafePathConfigOption::new,
                 LoggingConfigOption.OptionName, LoggingConfigOption::new
         );
     }
