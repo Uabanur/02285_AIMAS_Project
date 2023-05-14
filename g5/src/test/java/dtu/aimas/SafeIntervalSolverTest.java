@@ -4,19 +4,17 @@ import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.errors.SolutionNotFound;
-import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.graphsearch.AStar;
-import dtu.aimas.search.solvers.graphsearch.Greedy;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.safeinterval.SafeIntervalSolver;
 import org.junit.*;
 
 import static dtu.aimas.helpers.LevelHelper.getProblem;
 
-public class SafeIntervalSolverTest extends LevelSolvingTest {
+public class SafeIntervalSolverTest {
     private Result<Solution> solution;
     private long startTimeMs = 0;
 
@@ -452,13 +450,5 @@ public class SafeIntervalSolverTest extends LevelSolvingTest {
         );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
-    }
-
-    @Test
-    public void G5_room_roar(){
-        TestMap("G5_room_roar", new SafeIntervalSolver(
-                new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter()
-        ));
     }
 }

@@ -1,165 +1,130 @@
 package dtu.aimas;
 
-import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.helpers.LevelSolver;
-import dtu.aimas.helpers.SolveLevelTask;
-import dtu.aimas.parsers.CourseLevelParser;
-import dtu.aimas.parsers.LevelParser;
-import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
-import dtu.aimas.search.solutions.Solution;
-import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
-import dtu.aimas.search.solvers.heuristics.*;
-import dtu.aimas.search.solvers.safeinterval.SafeIntervalSolver;
-import org.junit.Assert;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.GoalCount;
+import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
+import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 
+import static dtu.aimas.helpers.LevelSolver.testMap;
 
 public class LevelSolvingTest {
-    protected void TestMap(String levelName, Solver solver)
-    {
-        var solution = LevelSolver.solve(levelName, parser, solver, logOutputToFile);
-        Assert.assertTrue(solution.toString(), solution.isOk());
-    }
-
-    private void TestMap(String levelName, Solver solver, long timeout, TimeUnit timeUnit) {
-        try {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<Result<Solution>> future = executor.submit(new SolveLevelTask(levelName, parser, solver, logOutputToFile));
-
-            try {
-                var solution = future.get(timeout, timeUnit);
-                Assert.assertTrue(solution.toString(), solution.isOk());
-            } catch (TimeoutException e) {
-                future.cancel(true);
-                IO.logException(e);
-                Assert.fail("Timeout exceeded");
-            } finally {
-                executor.shutdownNow();
-            }
-
-         } catch (Exception e) {
-                IO.logException(e);
-                Assert.fail("Unexpected error occurred: " + e.getMessage());
-        }
-    }
-
-    static final boolean logOutputToFile = false;
-    static final LevelParser parser = CourseLevelParser.Instance;
 
     @Test
     public void TestMAPF00_BFS_TimeLimit_500ms() {
-        TestMap("MAPF00", new BFS(), 500, TimeUnit.MILLISECONDS);
+        LevelSolver.testMap("MAPF00", new BFS(), 500, TimeUnit.MILLISECONDS);
     }
 
     @Test
     public void TestMAPF00_DFS_TimeLimit_500ms() {
-        TestMap("MAPF00", new DFS(), 500, TimeUnit.MILLISECONDS);
+        LevelSolver.testMap("MAPF00", new DFS(), 500, TimeUnit.MILLISECONDS);
     }
 
     @Test
     public void TestMAPF01_BFS_TimeLimit_1Second() {
-        TestMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
+        LevelSolver.testMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
     }
 
     @Test
     public void TestMAPF01_DFS_TimeLimit_1Second() {
-        TestMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
+        LevelSolver.testMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
     }
     @Test
     public void TestMAPF00_AStar_GoalCount() {
-        TestMap("MAPF00", new AStar(new GoalCount()));
+        LevelSolver.testMap("MAPF00", new AStar(new GoalCount()));
     }
 
     @Test
     public void TestMAPF00_AStar_DistanceCost() {
-        TestMap("MAPF00", new AStar(new MAAdmissibleCost()));
+        LevelSolver.testMap("MAPF00", new AStar(new MAAdmissibleCost()));
     }
 
     @Test
     public void TestMAPF00_Greedy_GoalCount() {
-        TestMap("MAPF00", new Greedy(new GoalCount()));
+        LevelSolver.testMap("MAPF00", new Greedy(new GoalCount()));
     }
 
     @Test
     public void TestMAPF01_BFS() {
-        TestMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
+        LevelSolver.testMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
     }
 
     @Test
     public void TestMAPF01_DFS() {
-        TestMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
+        LevelSolver.testMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
     }
 
     @Test
     public void TestMAPF01_AStar_GoalCount() {
-        TestMap("MAPF01", new AStar(new GoalCount()));
+        LevelSolver.testMap("MAPF01", new AStar(new GoalCount()));
     }
 
     @Test
     public void TestMAPF01_AStar_MAAdmissibleCost() {
-        TestMap("MAPF01", new AStar(new MAAdmissibleCost()));
+        LevelSolver.testMap("MAPF01", new AStar(new MAAdmissibleCost()));
     }
 
     @Test
     public void TestMAPF01_Greedy_GoalCount() {
-        TestMap("MAPF01", new Greedy(new GoalCount()));
+        LevelSolver.testMap("MAPF01", new Greedy(new GoalCount()));
     }
 
     @Test
     public void TestSAD1_BFS() {
-        TestMap("SAD1", new BFS());
+        LevelSolver.testMap("SAD1", new BFS());
     }
 
     @Test
     public void TestMAPF02_AStar_GoalCount() {
-        TestMap("MAPF02", new AStar(new GoalCount()));
+        LevelSolver.testMap("MAPF02", new AStar(new GoalCount()));
     }
 
     @Test
     public void TestMAPF02_AStar_DistanceCost() {
-        TestMap("MAPF02", new AStar(new DistanceSumCost()));
+        LevelSolver.testMap("MAPF02", new AStar(new DistanceSumCost()));
     }
     @Test
     public void TestMAPF02_AStar_MAAdmissibleCost() {
-        TestMap("MAPF02", new AStar(new MAAdmissibleCost()));
+        LevelSolver.testMap("MAPF02", new AStar(new MAAdmissibleCost()));
     }
 
     @Test
     public void TestMAsimple4_AStar_DistanceCost() {
-        TestMap("MAsimple4", new AStar(new DistanceSumCost()));
+        LevelSolver.testMap("MAsimple4", new AStar(new DistanceSumCost()));
     }
 
     @Test
     public void TestMAsimple4_AStar_MAAdmissibleCost() {
-        TestMap("MAsimple4", new AStar(new MAAdmissibleCost()));
+        LevelSolver.testMap("MAsimple4", new AStar(new MAAdmissibleCost()));
     }
 
     @Test
     public void TestMAsimple4_AStar_GoalCount() {
-        TestMap("MAsimple4", new AStar(new GoalCount()));
+        LevelSolver.testMap("MAsimple4", new AStar(new GoalCount()));
     }
 
     @Test
     public void TestMAsimple5_AStar_DistanceCost() {
-        TestMap("MAsimple5", new AStar(new DistanceSumCost()));
+        LevelSolver.testMap("MAsimple5", new AStar(new DistanceSumCost()));
     }
 
     @Test
     public void TestMAsimple5_AStar_MAAdmissibleCost() {
-        TestMap("MAsimple5", new AStar(new MAAdmissibleCost()));
+        LevelSolver.testMap("MAsimple5", new AStar(new MAAdmissibleCost()));
     }
 
     @Test
     public void TestMAsimple5_AStar_GoalCount() {
-        TestMap("MAsimple5", new AStar(new GoalCount()));
+        LevelSolver.testMap("MAsimple5", new AStar(new GoalCount()));
     }
 
     @Ignore
@@ -167,23 +132,58 @@ public class LevelSolvingTest {
     public void TestMishMash_BlackBoard(){
         var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
         IO.logLevel = LogLevel.Debug;
-        TestMap("mishmash", solver);
+        LevelSolver.testMap("mishmash", solver);
     }
 
     @Ignore
     @Test
-    public void TestMishMash_SafeInterval(){
-        var subSolver = new SafeIntervalSolver(
+    public void TestMishMash_SafePath(){
+        var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new AgentBoxAssignationSplitter()
-        );
-        var solver = new SafeIntervalSolver(
-//                subSolver,
-                new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter()
+                new ColorProblemSplitter(),
+                100
         );
 
         IO.logLevel = LogLevel.Debug;
-        TestMap("mishmash", solver);
+        LevelSolver.testMap("mishmash", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_MishMash_R1(){
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                1000
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("mishmash_r1", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_MishMash_R2(){
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                1000
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("mishmash_r2", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_MishMash_R3(){
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new ColorProblemSplitter(),
+                1000
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("mishmash_r3", solver);
     }
 }

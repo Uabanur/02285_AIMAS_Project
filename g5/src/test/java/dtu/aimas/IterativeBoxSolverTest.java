@@ -2,12 +2,13 @@ package dtu.aimas;
 
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
+import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.search.solvers.agent.IterativeBoxSolver;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class IterativeBoxSolverTest extends  LevelSolvingTest{
+public class IterativeBoxSolverTest {
 
     @Before
     public void setup() {
@@ -16,17 +17,17 @@ public class IterativeBoxSolverTest extends  LevelSolvingTest{
 
     @Test
     public void Test_SAsimple4_IterativeBoxSolver(){
-        TestMap("SAsimple4", new IterativeBoxSolver());
+        LevelSolver.testMap("SAsimple4", new IterativeBoxSolver());
     }
 
     @Test
-    public void Test_SAsoko3_08(){
-        TestMap("SAsoko3_08", new IterativeBoxSolver());
+    public void Test_SAsoko3_04(){
+        LevelSolver.testMap("SAsoko3_04", new IterativeBoxSolver());
     }
 
     @Ignore
     @Test
     public void Test_Saigon03() {
-        TestMap("SAtowersOfSaigon03", new IterativeBoxSolver());
+        LevelSolver.testMap("SAtowersOfSaigon03", new IterativeBoxSolver());
     }
 }

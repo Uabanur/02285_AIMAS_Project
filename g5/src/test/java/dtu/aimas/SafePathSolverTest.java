@@ -4,6 +4,7 @@ import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.errors.SolutionNotFound;
+import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
@@ -14,7 +15,7 @@ import org.junit.*;
 
 import static dtu.aimas.helpers.LevelHelper.getProblem;
 
-public class SafePathSolverTest extends LevelSolvingTest {
+public class SafePathSolverTest {
     private Result<Solution> solution;
     private long startTimeMs = 0;
 
@@ -529,6 +530,6 @@ public class SafePathSolverTest extends LevelSolvingTest {
                 true
         );
 
-        TestMap("G5_room_roar", solver);
+        LevelSolver.testMap("G5_room_roar", solver);
     }
 }
