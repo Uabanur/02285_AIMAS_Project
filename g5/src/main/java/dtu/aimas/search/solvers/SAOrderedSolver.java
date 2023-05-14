@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow.Subscriber;
 
+import dtu.aimas.common.Goal;
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.parsers.ProblemParser;
@@ -20,14 +21,14 @@ public class SAOrderedSolver implements Solver {
     
     public Result<Solution> solve(Problem initial) {
         IO.debug("Solving goals one at a time");
-        var space = ProblemParser.parse(initial).get();
         int height = initial.goals.length;
         int width = initial.goals[0].length;
         ArrayList<StateSolution> solutions = new ArrayList<>();
         char goals[][] = new char[height][width];
         var agents = initial.agents;
         var boxes = initial.boxes;
-        for(var goal : initial.boxGoals) {
+        var boxGoals = orderedGoalsByPriority(initial);
+        for(var goal : boxGoals) {
             IO.debug("Solving goal %c",goal.label);
             //add one goal at a time
             goals[goal.destination.row][goal.destination.col] = goal.label;
@@ -57,5 +58,23 @@ public class SAOrderedSolver implements Solver {
             }
         }
         return Result.ok(SolutionMerger.sequentialJoin(solutions));
+    }
+
+    private List<Goal> orderedGoalsByPriority(Problem problem) {
+        List<Goal> orderedBoxGoals = new ArrayList<Goal>();
+        //We want goals in dead-ends to be solved first and those in chokepoints last
+        for(Goal goal : problem.boxGoals) {
+            if(problem.isDeadEnd(goal.destination)) {
+                orderedBoxGoals.add(0, goal);
+            }
+            else if(problem.isChokepoint(goal.destination)) {
+                orderedBoxGoals.add(Math.max(0,orderedBoxGoals.size()-1), goal);
+            }
+            else {
+                int insertPosition = Math.ceilDiv((orderedBoxGoals.size()-1),2);
+                orderedBoxGoals.add(Math.max(0,insertPosition), goal);
+            }
+        }
+        return orderedBoxGoals;
     }
 }
