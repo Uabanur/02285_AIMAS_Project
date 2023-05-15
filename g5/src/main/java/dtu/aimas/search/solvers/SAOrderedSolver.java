@@ -9,18 +9,34 @@ import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
+import dtu.aimas.search.problems.ProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
 import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
 
 public class SAOrderedSolver implements Solver {
     private Solver subSolver;
+    private ProblemSplitter splitter;
     
     public SAOrderedSolver(Solver subSolver){
         this.subSolver = subSolver;
+        this.splitter = null;
+    }
+
+    public SAOrderedSolver(Solver subSolver, ProblemSplitter splitter) {
+        this.subSolver = subSolver;
+        this.splitter = splitter;
+    }
+
+    public Result<Solution> solve(Problem initial) {
+        if(splitter != null) {
+            var sols = splitter.split(initial).stream().map(this::solveSplit).map(r -> (StateSolution)r.get()).toList();
+            return Result.ok(SolutionMerger.mergeSolutions(sols));
+        }
+        return solveSplit(initial);
     }
     
-    public Result<Solution> solve(Problem initial) {
+    private Result<Solution> solveSplit(Problem initial) {
         IO.debug("Solving goals one at a time");
         int height = initial.goals.length;
         int width = initial.goals[0].length;

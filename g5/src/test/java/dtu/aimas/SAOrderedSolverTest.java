@@ -3,6 +3,7 @@ package dtu.aimas;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.helpers.LevelSolver;
+import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
@@ -28,7 +29,7 @@ public class SAOrderedSolverTest {
     
     @Test
     public void MAPF03B_SAOrdered_SafePath_AStar() {
-        var solver = new SAOrderedSolver(new AStar(new DistanceSumCost()));
+        var solver = new SAOrderedSolver(new AStar(new DistanceSumCost()), new AgentBoxAssignationSplitter());
         LevelSolver.testMap("MAPF03B", solver);
     }
 
@@ -48,14 +49,10 @@ public class SAOrderedSolverTest {
         LevelSolver.testMap("SAtowersOfSaigon04", new SAOrderedSolver(new AStar(new SingleGoalDistanceCost())));
     }
 
-    //@Ignore //is instant locally, GH runs out of memory...
+    @Ignore //is instant locally, GH runs out of memory...
     @Test
     public void TestSAtowersOfSaigon03_SAOrdered_SafePath_AStar() {
-        var solver = new SafePathSolver(
-                new SAOrderedSolver(new AStar(new DistanceSumCost())),
-                new AgentProblemSplitter(),
-                1000
-        );
+        var solver = new SAOrderedSolver(new AStar(new DistanceSumCost()), new AgentBoxAssignationSplitter());
         LevelSolver.testMap("mishmash_r4", solver);
     }
 }
