@@ -206,21 +206,4 @@ public class LevelSolvingTest {
         IO.logLevel = LogLevel.Debug;
         LevelSolver.testMap("mishmash_r4", solver);
     }
-
-    @Ignore //is instant locally, GH runs out of memory...
-    @Test
-    public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
-        LevelSolver.testMap("SAtowersOfSaigon04", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
-    }
-
-    @Ignore //is instant locally, GH runs out of memory...
-    @Test
-    public void TestSAtowersOfSaigon03_SAOrdered_SafePath_AStar() {
-        var solver = new SafePathSolver(
-                new SAOrderedSolver(new AStar(new DistanceSumCost())),
-                new AgentProblemSplitter(),
-                1000
-        );
-        LevelSolver.testMap("mishmash_r4", solver);
-    }
 }
