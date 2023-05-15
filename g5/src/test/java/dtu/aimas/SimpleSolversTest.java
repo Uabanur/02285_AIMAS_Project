@@ -16,7 +16,7 @@ public class SimpleSolversTest {
     private final AStar astarSolver = new AStar(new DistanceSumCost());
 
     private void benchmarkMaps(String[] maps){
-        IO.logLevel = LogLevel.Debug;
+        // IO.logLevel = LogLevel.Debug;
         
         var focalTimes = new long[maps.length];
         var astarTimes = new long[maps.length];
