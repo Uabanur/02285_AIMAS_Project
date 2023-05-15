@@ -31,7 +31,6 @@ public abstract class FocalGraphSearch
 
         while (true) 
         {
-            IO.info("expanding...");
             frontier.updateFMin();
 
             if(frontier.isEmpty()) 

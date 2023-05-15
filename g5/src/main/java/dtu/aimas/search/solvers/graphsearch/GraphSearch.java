@@ -31,7 +31,6 @@ public abstract class GraphSearch
 
         while (true) 
         {
-            IO.info("expanding...");
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("Empty frontier"));
 
