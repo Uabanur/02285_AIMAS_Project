@@ -75,24 +75,28 @@ public class SimpleSolversTest {
     }
 
     @Test
+    public void Look_How_Fast_Focal_Is() {
+        var maps = new String[] { "SAsoko3_04", "MAPF03"};
+        benchmarkMaps(maps, 2.0);
+    }
+    
+    // run locally - benchmarks are a little to long for github
+    @Ignore
+    @Test
     public void DifferentFocalBounds_SAsoko3_04() {
         var bounds = new double[]{1.2, 1.4, 1.6, 1.8, 2.0};
         benchmarkBounds("SAsoko3_04", bounds);
     }
 
+    // run locally - benchmarks are a little to long for github
+    @Ignore
     @Test
     public void AStarVsFocal_MAsimple() {
         var maps = new String[] { "MAsimple1", "MAsimple2", "MAsimple3", "MAsimple4" };
         benchmarkMaps(maps, 2.0);
     }
 
-    @Test
-    public void Look_How_Fast_Focal_Is() {
-        var maps = new String[] { "SAsoko3_04", "MAPF03"};
-        benchmarkMaps(maps, 2.0);
-    }
-
-    // github does not like this test, passes locally
+    // run locally - benchmarks are a little to long for github
     @Ignore
     @Test
     public void AStarUnfriendly_DifferentFocalBounds() {

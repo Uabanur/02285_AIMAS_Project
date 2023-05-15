@@ -51,16 +51,26 @@ public class FocalFrontier implements Frontier {
         double oldB = w * fMin;
         double newB = w * heuristic.f(open.peek());
 
-        //todo: use priority queue instead of set (o(N) -> o(logN))
-        for(var state: set){
-            int f = heuristic.f(state); 
-            if(f > oldB && f <= newB){
-                focal.add(state);
-            }
+        var openCopy = new PriorityQueue<>(open);
+        while(true){
+            if(openCopy.isEmpty()) break;
+            var state = openCopy.poll();
+            var f = heuristic.f(state);
+            // case: state already in focal -> skip
+            if(f <= oldB) continue;
+            // case: state exceeds new bound -> stop
+            if(f > newB) break;
+            // case: state within bound and not in focal -> add
+            focal.add(state);
         }
     }
 
     public void updateFMin()  {
         this.fMin = heuristic.f(open.peek());
+    }
+
+    @Override
+    public int size() {
+        return open.size();
     }
 }
