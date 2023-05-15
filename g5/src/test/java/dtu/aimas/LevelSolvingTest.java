@@ -210,6 +210,16 @@ public class LevelSolvingTest {
     
     @Test
     public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
-        LevelSolver.testMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
+        LevelSolver.testMap("SAtowersOfSaigon04", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
+    }
+
+    @Test
+    public void TestSAtowersOfSaigon03_SAOrdered_SafePath_AStar() {
+        var solver = new SafePathSolver(
+                new SAOrderedSolver(new AStar(new DistanceSumCost())),
+                new AgentProblemSplitter(),
+                1000
+        );
+        LevelSolver.testMap("mishmash_r4", solver);
     }
 }

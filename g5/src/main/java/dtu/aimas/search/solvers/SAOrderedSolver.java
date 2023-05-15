@@ -59,6 +59,14 @@ public class SAOrderedSolver implements Solver {
                 return Result.error(subSol.getError());
             }
         }
+        if(solutions.isEmpty()) {
+            //For problems without goals
+            var emptySol = subSolver.solve(initial);
+            if(emptySol.isOk()) {
+                solutions.add((StateSolution)emptySol.get());
+            }
+            
+        }
         return Result.ok(SolutionMerger.sequentialJoin(solutions));
     }
 
