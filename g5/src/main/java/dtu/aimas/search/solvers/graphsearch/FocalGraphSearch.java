@@ -10,21 +10,21 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
 
-public abstract class GraphSearch
+public abstract class FocalGraphSearch
 {
-    public Result<Solution> solve(Problem problem, Heuristic heuristic) {
+    public Result<Solution> solve(Problem problem, Heuristic heuristic, double w) {
         return ProblemParser.parse(problem)
             .map(heuristic::attachStateSpace)
-            .flatMap(space -> solve(space, new BestFirstFrontier(heuristic, problem.expectedStateSize)));
+            .flatMap(space -> solve(space, new FocalFrontier(heuristic, problem.expectedStateSize, w)));
     }
 
-    public Result<Solution> solve(Problem problem, BasicFrontier frontier) 
-    {
-        return ProblemParser.parse(problem)
-                .flatMap(space -> solve(space, frontier));
-    }
+    // public Result<Solution> solve(Problem problem, BasicFrontier frontier, double w) 
+    // {
+    //     return ProblemParser.parse(problem)
+    //             .flatMap(space -> solve(space, frontier, w));
+    // }
     
-    private Result<Solution> solve(StateSpace space, Frontier frontier)
+    private Result<Solution> solve(StateSpace space, FocalFrontier frontier)
     {
         frontier.add(space.initialState());
         HashSet<State> expanded = new HashSet<>();
@@ -32,6 +32,8 @@ public abstract class GraphSearch
         while (true) 
         {
             IO.info("expanding...");
+            frontier.updateFMin();
+
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("Empty frontier"));
 
@@ -45,6 +47,8 @@ public abstract class GraphSearch
                     frontier.add(child);
                 }
             }
+            
+            frontier.fillFocal();
         }
     }
 }
