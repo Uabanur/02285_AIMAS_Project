@@ -137,7 +137,7 @@ public class LevelSolvingTest {
     @Test
     public void TestMishMash_BlackBoard(){
         var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash", solver);
     }
 
@@ -150,7 +150,7 @@ public class LevelSolvingTest {
                 100
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash", solver);
     }
 
@@ -163,7 +163,7 @@ public class LevelSolvingTest {
                 1000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r1", solver);
     }
 
@@ -176,7 +176,7 @@ public class LevelSolvingTest {
                 1000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r2", solver);
     }
 
@@ -189,7 +189,7 @@ public class LevelSolvingTest {
                 10000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r3", solver);
     }
 
@@ -203,7 +203,7 @@ public class LevelSolvingTest {
                 1000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r4", solver);
     }
 }

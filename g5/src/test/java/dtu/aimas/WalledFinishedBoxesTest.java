@@ -14,7 +14,7 @@ public class WalledFinishedBoxesTest {
 
     @Before
     public void setup() {
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
     }
 
     @Test
