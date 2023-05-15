@@ -11,6 +11,12 @@ import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.GoalCount;
 import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
+import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.SAOrderedSolver;
+import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -199,4 +205,10 @@ public class LevelSolvingTest {
         IO.logLevel = LogLevel.Debug;
         LevelSolver.testMap("mishmash_r4", solver);
     }
+
+    /*
+    @Test
+    public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
+        TestMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
+    }*/
 }

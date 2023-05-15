@@ -254,4 +254,5 @@ public class Problem {
     public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals, boolean[][] walls) {
         return new Problem(agents, boxes, walls, goals).precompute();
     }
+
 }

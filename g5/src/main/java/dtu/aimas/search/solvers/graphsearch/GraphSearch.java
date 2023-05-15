@@ -3,6 +3,7 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.HashSet;
 
 import dtu.aimas.common.Result;
+import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
@@ -22,14 +23,23 @@ public abstract class GraphSearch
         return ProblemParser.parse(problem)
                 .flatMap(space -> solve(space, frontier));
     }
+
+    private static long startTime = System.nanoTime();
     
     private Result<Solution> solve(StateSpace space, Frontier frontier)
     {
         frontier.add(space.initialState());
         HashSet<State> expanded = new HashSet<>();
 
+        int iterations = 0;
+        startTime = System.nanoTime();
         while (true) 
         {
+            //Print a status message every 10000 iteration
+            if (++iterations % 10000 == 0) {
+                IO.debug(getSearchStatus(expanded, frontier));
+            }
+
             if(frontier.isEmpty()) 
                 return Result.error(new SolutionNotFound("Empty frontier"));
 
@@ -44,5 +54,12 @@ public abstract class GraphSearch
                 }
             }
         }
+    }
+
+    private static String getSearchStatus(HashSet<State> expanded, Frontier frontier)
+    {
+        String statusTemplate = "#Expanded: %,8d, #Frontier: %,8d, #Generated: %,8d, Time: %3.3f s\n";
+        double elapsedTime = (System.nanoTime() - startTime) / 1_000_000_000d;
+        return String.format(statusTemplate, expanded.size(), frontier.size(), expanded.size() + frontier.size(), elapsedTime);
     }
 }

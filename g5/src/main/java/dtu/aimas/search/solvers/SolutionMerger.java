@@ -86,4 +86,23 @@ public class SolutionMerger {
             return Character.compare(this.agents[first].label, this.agents[second].label);
         }
     }
+
+    public static StateSolution sequentialJoin(List<StateSolution> solutions) {
+        var solutionLength = solutions.stream()
+                .mapToInt(StateSolution::size).map(s -> s-1)
+                .sum();
+
+        var states = new State[solutionLength+1];
+        states[0] = solutions.get(0).getState(0);
+        int step = 1;
+        for(StateSolution sol : solutions) {
+            for(int i = 1; i < sol.size(); i++) {
+                State s = sol.getState(i);
+                var parent = states[step-1];
+                states[step] = new State(parent, s.agents, s.boxes, s.jointAction);
+                step+=1;
+            }
+        }
+        return new StateSolution(states);
+    }
 }
