@@ -11,6 +11,7 @@ import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solutions.StateSolution;
+import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
 
 public class SAOrderedSolver implements Solver {
     private Solver subSolver;
@@ -27,7 +28,8 @@ public class SAOrderedSolver implements Solver {
         char goals[][] = new char[height][width];
         var agents = initial.agents;
         var boxes = initial.boxes;
-        var boxGoals = orderedGoalsByPriority(initial);
+        //var boxGoals = orderedGoalsByPriority(initial);
+        var boxGoals = WalledFinishedBoxes.getSolvablyOrderedBoxGoals(initial.boxGoals, new ArrayList<>(agents), new ArrayList<>(boxes), initial);
         for(var goal : boxGoals) {
             IO.debug("Solving goal %c",goal.label);
             //add one goal at a time

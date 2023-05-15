@@ -110,7 +110,7 @@ public class WalledFinishedBoxes implements Solver {
         return Result.ok(mergedSolution);
     }
 
-    private Collection<Goal> getSolvablyOrderedBoxGoals(Collection<Goal> goals, ArrayList<Agent> initialAgents, ArrayList<Box> initialBoxes, Problem fullProblem){
+    public static Collection<Goal> getSolvablyOrderedBoxGoals(Collection<Goal> goals, ArrayList<Agent> initialAgents, ArrayList<Box> initialBoxes, Problem fullProblem){
         // we still need to recreate the problems, so it's a big duplication of code.
         // on the other hand - it saves some subsolver runs what is pretty nice
         var boxGoals = new ArrayDeque<>(fullProblem.boxGoals);

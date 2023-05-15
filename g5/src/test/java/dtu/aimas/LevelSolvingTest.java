@@ -10,6 +10,7 @@ import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.GoalCount;
 import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
+import dtu.aimas.search.solvers.heuristics.SingleGoalDistanceCost;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SAOrderedSolver;
@@ -206,9 +207,9 @@ public class LevelSolvingTest {
         LevelSolver.testMap("mishmash_r4", solver);
     }
 
-    /*
+    
     @Test
     public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
-        TestMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
-    }*/
+        LevelSolver.testMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
+    }
 }
