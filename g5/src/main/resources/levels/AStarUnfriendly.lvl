@@ -1,0 +1,21 @@
+#domain
+hospital
+#levelname
+AStarUnfriendly
+#colors
+blue: 0, A, B, C
+#initial
++++++++
++  0  +
++B+ + +
++A+ + +
++C+ + +
++++++++
+#goal
++++++++
++     +
++ + + +
++ + + +
++ + +C+
++++++++
+#end
