@@ -12,17 +12,11 @@ import dtu.aimas.search.solvers.heuristics.Heuristic;
 
 public abstract class FocalGraphSearch
 {
-    public Result<Solution> solve(Problem problem, Heuristic heuristic, double w) {
+    public Result<Solution> solve(Problem problem, Heuristic heuristic) {
         return ProblemParser.parse(problem)
             .map(heuristic::attachStateSpace)
-            .flatMap(space -> solve(space, new FocalFrontier(heuristic, problem.expectedStateSize, w)));
+            .flatMap(space -> solve(space, new FocalFrontier(heuristic, problem.expectedStateSize)));
     }
-
-    // public Result<Solution> solve(Problem problem, BasicFrontier frontier, double w) 
-    // {
-    //     return ProblemParser.parse(problem)
-    //             .flatMap(space -> solve(space, frontier, w));
-    // }
     
     private Result<Solution> solve(StateSpace space, FocalFrontier frontier)
     {

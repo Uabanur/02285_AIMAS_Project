@@ -5,6 +5,7 @@ import java.util.PriorityQueue;
 
 import dtu.aimas.errors.NotImplemented;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
+import dtu.aimas.search.solvers.heuristics.WAStarHeuristic;
 
 public class FocalFrontier implements Frontier {
     private final PriorityQueue<State> open;
@@ -14,18 +15,14 @@ public class FocalFrontier implements Frontier {
     private final double w;
     private double fMin;
 
-    public FocalFrontier(Heuristic h, int expectedStateSpaceSize, double w){
+    public FocalFrontier(Heuristic h, int expectedStateSpaceSize){
         this.open = new PriorityQueue<>(expectedStateSpaceSize, h);
         this.focal = new PriorityQueue<>(expectedStateSpaceSize, h);
         this.set = new HashSet<>(expectedStateSpaceSize);
         this.heuristic = h;
-        this.w = w;
-        this.fMin = Double.POSITIVE_INFINITY;
+        this.w = ((WAStarHeuristic)h).getW();
+        this.fMin = Double.MAX_VALUE;
     }
-
-    // public FocalFrontier(Heuristic h) { 
-    //     this(h, 2<<15);
-    // }
 
     public void add(State state) {
         open.add(state);
@@ -53,11 +50,11 @@ public class FocalFrontier implements Frontier {
     public void fillFocal() {
         double oldB = w * fMin;
         double newB = w * heuristic.f(open.peek());
-        var openCopy = new PriorityQueue<>(open);
-        if(!open.isEmpty() && fMin < heuristic.f(open.peek())){
-            while(true){
-                var state = openCopy.poll();
-                if(openCopy.isEmpty() || heuristic.f(state) <= oldB || heuristic.f(state) > newB) break;
+
+        //todo: use priority queue instead of set (o(N) -> o(logN))
+        for(var state: set){
+            int f = heuristic.f(state); 
+            if(f > oldB && f <= newB){
                 focal.add(state);
             }
         }
