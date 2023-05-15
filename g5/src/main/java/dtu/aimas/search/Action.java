@@ -16,8 +16,7 @@ public enum Action
         Note: Origo (0,0) is in the upper left corner. So +1 in the vertical direction is down (S) 
         and +1 in the horisontal direction is right (E).
     */
-    NoOp("NoOp", ActionType.NoOp, 0, 0, 0, 0),
-
+   
     MoveN("Move(N)", ActionType.Move, -1, 0, 0, 0),
     MoveS("Move(S)", ActionType.Move, 1, 0, 0, 0),
     MoveE("Move(E)", ActionType.Move, 0, 1, 0, 0),
@@ -47,7 +46,9 @@ public enum Action
     PullWN("Pull(W,N)", ActionType.Pull, 0, -1, -1, 0),
     PullEE("Pull(E,E)", ActionType.Pull, 0, 1, 0, 1),
     PullES("Pull(E,S)", ActionType.Pull, 0, 1, 1, 0),
-    PullEN("Pull(E,N)", ActionType.Pull, 0, 1, -1, 0);
+    PullEN("Pull(E,N)", ActionType.Pull, 0, 1, -1, 0),
+    
+    NoOp("NoOp", ActionType.NoOp, 0, 0, 0, 0);
 
     public final String name;
     public final ActionType type;

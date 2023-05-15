@@ -98,8 +98,7 @@ public class SolutionMerger {
         for(StateSolution sol : solutions) {
             for(int i = 1; i < sol.size(); i++) {
                 State s = sol.getState(i);
-                var parent = states[step-1];
-                states[step] = new State(parent, s.agents, s.boxes, s.jointAction);
+                states[step] = new State(states[step-1], s.agents, s.boxes, s.jointAction);
                 step+=1;
             }
         }

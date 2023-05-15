@@ -10,6 +10,7 @@ import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.GoalCount;
 import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
+import dtu.aimas.search.solvers.heuristics.SingleGoalDistanceCost;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SAOrderedSolver;
@@ -136,7 +137,7 @@ public class LevelSolvingTest {
     @Test
     public void TestMishMash_BlackBoard(){
         var solver = new BlackboardSolver(AStarMinLength::new, new DistanceSumCost());
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash", solver);
     }
 
@@ -149,7 +150,7 @@ public class LevelSolvingTest {
                 100
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash", solver);
     }
 
@@ -162,7 +163,7 @@ public class LevelSolvingTest {
                 1000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r1", solver);
     }
 
@@ -175,7 +176,7 @@ public class LevelSolvingTest {
                 1000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r2", solver);
     }
 
@@ -188,7 +189,7 @@ public class LevelSolvingTest {
                 10000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r3", solver);
     }
 
@@ -202,13 +203,7 @@ public class LevelSolvingTest {
                 1000
         );
 
-        IO.logLevel = LogLevel.Debug;
+        IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r4", solver);
     }
-
-    /*
-    @Test
-    public void TestSAtowersOfSaigon03_SAOrdered_AStar() {
-        TestMap("SAtowersOfSaigon03", new ConflictBasedSearch(new SAOrderedSolver(new AStar(new SingleGoalDistanceCost()))));
-    }*/
 }
