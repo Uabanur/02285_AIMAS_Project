@@ -3,7 +3,6 @@ package dtu.aimas.search.solvers.graphsearch;
 import java.util.HashSet;
 
 import dtu.aimas.common.Result;
-import dtu.aimas.communication.IO;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
@@ -23,12 +22,13 @@ public abstract class FocalGraphSearch
         frontier.add(space.initialState());
         HashSet<State> expanded = new HashSet<>();
 
-        while (true) 
+        while (true)
         {
-            frontier.updateFMin();
 
-            if(frontier.isEmpty()) 
+            if(frontier.isEmpty())
                 return Result.error(new SolutionNotFound("Empty frontier"));
+
+            frontier.updateFMin();
 
             State state = frontier.next();
             if(space.isGoalState(state)) 
@@ -40,7 +40,7 @@ public abstract class FocalGraphSearch
                     frontier.add(child);
                 }
             }
-            
+
             frontier.fillFocal();
         }
     }

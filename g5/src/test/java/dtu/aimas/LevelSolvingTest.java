@@ -247,4 +247,11 @@ public class LevelSolvingTest {
             IO.debug(solution);
         }
     }
+
+    @Test
+    public void Test_comp_Colada(){
+        // Colada
+//        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("Colada", IO.CompLevelDir, new Focal(new SingleGoalDistanceCost(), 2));
+    }
 }
