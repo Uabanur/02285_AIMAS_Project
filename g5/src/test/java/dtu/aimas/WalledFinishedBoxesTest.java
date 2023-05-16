@@ -34,7 +34,7 @@ public class WalledFinishedBoxesTest {
         LevelSolver.testMap("SAtowersOfSaigon03", new WalledFinishedBoxes(new Greedy(new DistanceSumCost())));
     }
 
-    @Ignore 
+     
     @Test
     public void AgentGoalAfterBoxGoals(){
         LevelSolver.testMap("AgentGoalAfterBoxGoals", new WalledFinishedBoxes());

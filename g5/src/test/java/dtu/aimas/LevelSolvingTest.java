@@ -16,6 +16,7 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SAOrderedSolver;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
 import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 
 import org.junit.Ignore;
@@ -205,5 +206,17 @@ public class LevelSolvingTest {
 
         IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r4", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_Group80(){
+        var solver = new SafePathSolver(
+                new WalledFinishedBoxes(new AStar(new DistanceSumCost())),
+                new AgentProblemSplitter(),
+                1000
+        );
+
+        LevelSolver.testMap("Group80", solver);
     }
 }

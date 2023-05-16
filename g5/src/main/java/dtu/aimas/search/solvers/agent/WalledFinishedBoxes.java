@@ -54,23 +54,24 @@ public class WalledFinishedBoxes implements Solver {
                 // could be solved with the hack of putting agent goal before last goal then
 
                 solutions = solutionsResult.get();
+                
+                // no agent goal to solve
+                if(fullProblem.agentGoals.size() == 0) break;
 
                 // initial state for agent goals solver
                 var stateAfterBoxesGoals = solutions.get(solutions.size()-1).getLastState();
+                var agentGoal = fullProblem.agentGoals.iterator().next();
                 
-                // get agent goals in solvable order
-                var agentGoals = getSolvablyOrderedAgentGoals(fullProblem.agentGoals, stateAfterBoxesGoals.agents, stateAfterBoxesGoals.boxes, fullProblem);
+                var agentGoalResultSolution = solveAgent(agentGoal, fullProblem, stateAfterBoxesGoals);
                 
-                var solutionGoalPairAgents = solveAgents(agentGoals, fullProblem, stateAfterBoxesGoals);
-                var solutionsResultAgents = solutionGoalPairAgents.solutions();
-                
-                // if agent goals are not solvable, try again
-                if(solutionsResultAgents.isError()) continue;
+                // if agent goal is not solvable, try again
+                // todo: it should be reordered to try again only if agent is blocked
+                if(agentGoalResultSolution.isError()) continue;
 
-                var solutionsAgents = solutionsResultAgents.get();
+                var agentSolution = agentGoalResultSolution.get();
 
-                // add agents' solutions at the end of box solutions
-                solutions.addAll(solutionsAgents);
+                // add agent's solutions at the end of box solutions
+                solutions.add(agentSolution);
                 break;
             }
         }
@@ -139,12 +140,6 @@ public class WalledFinishedBoxes implements Solver {
             if(solvableOrder) return Collections.unmodifiableCollection(boxGoals);
         }
     }
-
-    public static Collection<Goal> getSolvablyOrderedAgentGoals(Collection<Goal> goals, ArrayList<Agent> agentsAfterBoxes, ArrayList<Box> finishedBoxes, Problem fullProblem){
-        // we assume one agent problems only
-        return goals;
-    }
-
 
     private void resetBoxColors(ArrayList<StateSolution> solutions, Color color) {
         for(var solution: solutions){
@@ -217,11 +212,11 @@ public class WalledFinishedBoxes implements Solver {
         return new SolutionGoalPair(Result.ok(solutions), null);
     }
 
-    private SolutionGoalPair solveAgents(Collection<Goal> agentGoals, Problem fullProblem, State initial) {
+    private Result<StateSolution> solveAgent(Goal agentGoal, Problem fullProblem, State initial) {
         var agents = new ArrayList<>(initial.agents);
         var boxes = new ArrayList<>(initial.boxes);
 
-        IO.debug("solving agents...");
+        IO.debug("solving agent...");
         var subGoal = new char[fullProblem.goals.length][fullProblem.goals[0].length];
 
         var walls = new boolean[fullProblem.walls.length][fullProblem.walls[0].length];
@@ -231,39 +226,22 @@ public class WalledFinishedBoxes implements Solver {
             }
         }
 
-        var solutions = new ArrayList<StateSolution>();
-        for(var agentGoal: agentGoals){
-            // add next box goal
-            subGoal[agentGoal.destination.row][agentGoal.destination.col] = agentGoal.label;
-            var iterativeProblem = fullProblem.copyWith(agents, boxes, subGoal, walls);
-            IO.debug("#agent goals: %d", iterativeProblem.agentGoals.size());
-            IO.debug("problem:\n" + iterativeProblem.toString());
+        // add agent's goal
+        subGoal[agentGoal.destination.row][agentGoal.destination.col] = agentGoal.label;
+        var iterativeProblem = fullProblem.copyWith(agents, boxes, subGoal, walls);
+        IO.debug("#agent goal: %d", iterativeProblem.agentGoals.size());
+        IO.debug("problem:\n" + iterativeProblem.toString());
 
-            // check if agent did not close himself while solving all box goals
-            var solvable = isSolvable(iterativeProblem, agents, agentGoal);
-            if(!solvable) return new SolutionGoalPair(Result.empty(), agentGoal);
+        // check if agent did not close himself while solving all box goals (could be done earlier)
+        var solvable = isSolvable(iterativeProblem, initial.agents, agentGoal);
+        if(!solvable) return Result.empty();
 
-            // solve partial solution
-            var start = Stopwatch.getTimeMs();
-            var solutionResult = subSolver.solve(iterativeProblem).map(s -> (StateSolution)s);
-            IO.debug("solve time: %d ms", Stopwatch.getTimeSinceMs(start));
-            if(solutionResult.isError()) {
-                return new SolutionGoalPair(Result.passError(solutionResult), agentGoal);
-            }
-
-            // save solution and iterate on next sub goal
-            var solution = solutionResult.get();
-            solutions.add(solution);
-
-            // update agents and boxes to where they left off from previous solution
-            var finalState = solution.getState(solution.size()-1);
-            agents = new ArrayList<>(finalState.agents);
-            boxes = new ArrayList<>(finalState.boxes);
-
-            subGoal[agentGoal.destination.row][agentGoal.destination.col] = 0;
-        }
-
-        return new SolutionGoalPair(Result.ok(solutions), null);
+        // solve partial solution
+        var start = Stopwatch.getTimeMs();
+        var solutionResult = subSolver.solve(iterativeProblem).map(s -> (StateSolution)s);
+        IO.debug("solve time: %d ms", Stopwatch.getTimeSinceMs(start));
+        
+        return solutionResult;
     }
         
     
@@ -283,7 +261,7 @@ public class WalledFinishedBoxes implements Solver {
     }
 
     private static boolean isSolvable(Problem problem, ArrayList<Agent> agents, Goal agentGoal) {
-        var agent = agents.get(agentGoal.label - '0');
+        var agent = agents.stream().filter(a -> a.label == agentGoal.label).findFirst().get();
         if(problem.admissibleDist(agent.pos, agentGoal.destination) == problem.MAX_DISTANCE)
             return false;
         else
