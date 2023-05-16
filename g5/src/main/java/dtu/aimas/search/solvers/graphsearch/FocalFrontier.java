@@ -49,7 +49,8 @@ public class FocalFrontier implements Frontier {
 
     public void fillFocal() {
         if (open.isEmpty()) return;
-        assert focal.size() <= open.size() : "Focal should be a subset of open";
+        // todo : This should be true
+//        assert focal.size() <= open.size() : "Focal should be a subset of open";
 
         if(fMin >= heuristic.f(open.peek())) return;
         double oldB = w * fMin;

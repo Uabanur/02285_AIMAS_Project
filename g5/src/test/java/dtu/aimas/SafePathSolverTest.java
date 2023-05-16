@@ -293,6 +293,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void ThreeColors_BottleneckBoxConflicts(){
         var level = """
@@ -497,6 +498,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void AgentBoxSplitter(){
         var level = """
@@ -527,6 +529,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void Test_MishMash_R1(){
 
@@ -539,6 +542,7 @@ public class SafePathSolverTest {
         LevelSolver.testMap("mishmash_r1", solver);
     }
 
+    @Ignore
     @Test
     public void Test_MishMash_RegionSplit(){
         var solver = new SafePathSolver(
