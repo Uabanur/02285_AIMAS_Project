@@ -3,7 +3,6 @@ package dtu.aimas.search.solvers.graphsearch;
 import dtu.aimas.common.Result;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
-import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.SolverMinLength;
 import dtu.aimas.search.solvers.heuristics.AStarHeuristic;
 import dtu.aimas.search.solvers.heuristics.Cost;
@@ -17,6 +16,7 @@ public class AStarMinLength extends GraphSearchMinLength implements SolverMinLen
     }
 
     public Result<Solution> solve(Problem initial, int minSolutionLength) {
+        heuristic.reset();
         return solve(initial, heuristic, minSolutionLength);
     }
 

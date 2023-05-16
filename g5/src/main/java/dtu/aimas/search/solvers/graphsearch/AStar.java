@@ -15,7 +15,9 @@ public class AStar extends GraphSearch implements Solver {
         this.heuristic = new AStarHeuristic(cost);
     }
 
+
     public Result<Solution> solve(Problem initial) {
+        heuristic.reset();
         return solve(initial, heuristic);
     }
 }
