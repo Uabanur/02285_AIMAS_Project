@@ -25,6 +25,7 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.conflictbasedsearch.Conflict;
+import dtu.aimas.search.solvers.safeinterval.SafeProblem;
 import dtu.aimas.search.solutions.StateSolution;
 import lombok.Getter;
 import lombok.NonNull;
@@ -354,6 +355,11 @@ public record StateSpace(
         }
         for (Box box : state.boxes) {
             if (!occupiedPositions.add(box.pos)) return false;
+        }
+        if (problem instanceof SafeProblem){
+            for( Box box: state.boxes){
+                if(!problem.isFree(box.pos, null, state.g())) return false;
+            }
         }
         return true;
     }

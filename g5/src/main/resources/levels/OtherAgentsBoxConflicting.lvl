@@ -1,0 +1,20 @@
+#domain
+hospital
+#levelname
+OtherAgentsBoxConflicting
+#colors
+blue: 0, A
+cyan: 1, B
+#initial
+++++++++
++0   +++
++   AB +
++1   +++
+++++++++
+#goal
+++++++++
++0   +++
++    BA+
++1   +++
+++++++++
+#end
