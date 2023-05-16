@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,6 +30,7 @@ public class IO {
 
     public final static Path LogDir = Paths.get(TargetsPath.toString(), "logs");
     public final static Path LevelDir = Paths.get(TargetClassesPath.toString(), "levels");
+    public final static Path CompLevelDir = Paths.get(LevelDir.toString(), "complevels");
 
     public static LogLevel logLevel = LogLevel.Information;
     public static boolean debugServerMessages = false;

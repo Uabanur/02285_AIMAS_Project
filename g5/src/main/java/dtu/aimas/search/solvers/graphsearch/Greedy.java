@@ -16,7 +16,7 @@ public class Greedy extends GraphSearch implements Solver {
     }
 
     public Result<Solution> solve(Problem initial) {
+        heuristic.reset();
         return solve(initial, heuristic);
     }
-
 }

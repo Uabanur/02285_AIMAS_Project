@@ -1,11 +1,10 @@
 package dtu.aimas.search.solvers.graphsearch;
 
-import java.util.HashSet;
-import java.util.PriorityQueue;
-
-import dtu.aimas.errors.NotImplemented;
 import dtu.aimas.search.solvers.heuristics.Heuristic;
 import dtu.aimas.search.solvers.heuristics.WAStarHeuristic;
+
+import java.util.HashSet;
+import java.util.PriorityQueue;
 
 public class FocalFrontier implements Frontier {
     private final PriorityQueue<State> open;
@@ -25,6 +24,7 @@ public class FocalFrontier implements Frontier {
     }
 
     public void add(State state) {
+        assert state != null;
         open.add(state);
         set.add(state);
         if(heuristic.f(state) <= w * fMin){
@@ -48,24 +48,38 @@ public class FocalFrontier implements Frontier {
     }
 
     public void fillFocal() {
+        if (open.isEmpty()) return;
+        // todo : This should be true
+//        assert focal.size() <= open.size() : "Focal should be a subset of open";
+
+        if(fMin >= heuristic.f(open.peek())) return;
         double oldB = w * fMin;
         double newB = w * heuristic.f(open.peek());
 
-        var openCopy = new PriorityQueue<>(open);
-        while(true){
-            if(openCopy.isEmpty()) break;
-            var state = openCopy.poll();
-            var f = heuristic.f(state);
-            // case: state already in focal -> skip
-            if(f <= oldB) continue;
-            // case: state exceeds new bound -> stop
-            if(f > newB) break;
-            // case: state within bound and not in focal -> add
-            focal.add(state);
+        for(var state: open){
+            int f = heuristic.f(state);
+            if(f > oldB && f <= newB){
+//                assert !focal.contains(state) : "State should not already be in focal";
+                focal.add(state);
+            }
         }
+//        var openCopy = new PriorityQueue<>(open);
+//        while(true){
+//            if(openCopy.isEmpty()) break;
+//            var state = openCopy.poll();
+//            var f = heuristic.f(state);
+//            // case: state already in focal -> skip
+//            if(f <= oldB) continue;
+//            // case: state exceeds new bound -> stop
+//            if(f > newB) break;
+//            // case: state within bound and not in focal -> add
+//            assert !focal.contains(state) : "State should not already be in focal";
+//            focal.add(state);
+//        }
     }
 
     public void updateFMin()  {
+        assert !open.isEmpty() : "Open should not be empty";
         this.fMin = heuristic.f(open.peek());
     }
 

@@ -83,10 +83,16 @@ public class RegionProblemSplitter implements ProblemSplitter {
         while(!queue.isEmpty()){
             var pos = queue.poll();
             world[pos.row][pos.col] = regionId;
-            if(world[pos.row+1][pos.col] == 0) queue.add(new Position(pos.row+1, pos.col));
-            if(world[pos.row-1][pos.col] == 0) queue.add(new Position(pos.row-1, pos.col));
-            if(world[pos.row][pos.col+1] == 0) queue.add(new Position(pos.row, pos.col+1));
-            if(world[pos.row][pos.col-1] == 0) queue.add(new Position(pos.row, pos.col-1));
+            addToQueueIfEmpty(pos.row+1, pos.col, world, queue);
+            addToQueueIfEmpty(pos.row-1, pos.col, world, queue);
+            addToQueueIfEmpty(pos.row, pos.col+1, world, queue);
+            addToQueueIfEmpty(pos.row, pos.col-1, world, queue);
         }
+    }
+
+    private static void addToQueueIfEmpty(int row, int col, char[][] world, ArrayDeque<Position> queue){
+        if(row < 0 || row >= world.length) return;
+        if(col < 0 || col >= world[0].length) return;
+        if(world[row][col] == 0) queue.add(new Position(row, col));
     }
 }

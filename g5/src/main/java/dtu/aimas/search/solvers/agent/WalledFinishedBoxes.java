@@ -4,6 +4,7 @@ import dtu.aimas.common.*;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.Stopwatch;
 import dtu.aimas.errors.SolutionNotFound;
+import dtu.aimas.errors.UnreachableState;
 import dtu.aimas.parsers.ProblemParser;
 import dtu.aimas.search.Problem;
 import dtu.aimas.search.solutions.Solution;
@@ -35,8 +36,8 @@ public class WalledFinishedBoxes implements Solver {
     private Result<Solution> solve(StateSpace space) {
         var fullProblem = space.getProblem();
         var initial = space.getInitialState();
-        assert initial.agents.size() == 1 : "Single agent solver";
-        assert fullProblem.agentGoals.size() <= 1 : "Single agent solver";
+        assert initial.agents.size() <= 1 : "Single agent solver. Got %d agents".formatted(initial.agents.size());
+        assert fullProblem.agentGoals.size() <= 1 : "Single agent solver. Got %d agent goals".formatted(fullProblem.agentGoals.size());
 
         var agent = initial.agents.iterator().next();
 
@@ -45,39 +46,37 @@ public class WalledFinishedBoxes implements Solver {
         // get box goals in solvable order
         var boxGoals = getSolvablyOrderedBoxGoals(fullProblem.boxGoals, initial.agents, initial.boxes, fullProblem);
 
-        IO.debug("solving boxes...");
-
         while(true){
             var solutionGoalPair = solveBoxes(boxGoals, fullProblem, initial);
             var solutionsResult = solutionGoalPair.solutions();
             if(solutionsResult.isOk()) {
+                // todo: there can be the case, that last solution blocks the agent so he cannot complete his goal
+                // could be solved with the hack of putting agent goal before last goal then
+
                 solutions = solutionsResult.get();
+                
+                // no agent goal to solve
+                if(fullProblem.agentGoals.size() == 0) break;
+
+                // initial state for agent goals solver
+                var stateAfterBoxesGoals = solutions.get(solutions.size()-1).getLastState();
+                var agentGoal = fullProblem.agentGoals.iterator().next();
+                
+                var agentGoalResultSolution = solveAgent(agentGoal, fullProblem, stateAfterBoxesGoals);
+                
+                // if agent goal is not solvable, try again
+                // todo: it should be reordered to try again only if agent is blocked
+                if(agentGoalResultSolution.isError()) continue;
+
+                var agentSolution = agentGoalResultSolution.get();
+
+                // add agent's solutions at the end of box solutions
+                solutions.add(agentSolution);
                 break;
             }
         }
-
-
-//        // all boxes should now be solved
-//
-//        IO.debug("solving agent...");
-//        for(var agentGoal: fullProblem.agentGoals){
-//            subGoal[agentGoal.destination.row][agentGoal.destination.col] = agentGoal.label;
-//            var iterativeProblem = fullProblem.copyWith(agents, boxes, subGoal);
-//
-//            // solve partial solution
-//            var start = Stopwatch.getTimeMs();
-//            var solutionResult = subSolver.solve(iterativeProblem).map(s -> (StateSolution)s);
-//            IO.debug("agent solve time: %d ms", Stopwatch.getTimeSinceMs(start));
-//            if(solutionResult.isError()) return Result.passError(solutionResult);
-//
-//            // save solution and iterate on next sub goal
-//            var solution = solutionResult.get();
-//            solutions.add(solution);
-//        }
-
-        // revert color changes
+        
         resetBoxColors(solutions, agent.color);
-
 
         // merge partial solutions
         IO.debug("Merging solutions...");
@@ -213,6 +212,40 @@ public class WalledFinishedBoxes implements Solver {
         return new SolutionGoalPair(Result.ok(solutions), null);
     }
 
+    private Result<StateSolution> solveAgent(Goal agentGoal, Problem fullProblem, State initial) {
+        var agents = new ArrayList<>(initial.agents);
+        var boxes = new ArrayList<>(initial.boxes);
+
+        IO.debug("solving agent...");
+        var subGoal = new char[fullProblem.goals.length][fullProblem.goals[0].length];
+
+        var walls = new boolean[fullProblem.walls.length][fullProblem.walls[0].length];
+        for(var i = 0; i < walls.length; i++){
+            for(var j = 0; j < walls[0].length; j++){
+                walls[i][j] = fullProblem.walls[i][j];
+            }
+        }
+
+        // add agent's goal
+        subGoal[agentGoal.destination.row][agentGoal.destination.col] = agentGoal.label;
+        var iterativeProblem = fullProblem.copyWith(agents, boxes, subGoal, walls);
+        IO.debug("#agent goal: %d", iterativeProblem.agentGoals.size());
+        IO.debug("problem:\n" + iterativeProblem.toString());
+
+        // check if agent did not close himself while solving all box goals (could be done earlier)
+        var solvable = isSolvable(iterativeProblem, initial.agents, agentGoal);
+        if(!solvable) return Result.empty();
+
+        // solve partial solution
+        var start = Stopwatch.getTimeMs();
+        var solutionResult = subSolver.solve(iterativeProblem).map(s -> (StateSolution)s);
+        IO.debug("solve time: %d ms", Stopwatch.getTimeSinceMs(start));
+        
+        return solutionResult;
+    }
+        
+    
+
     private static boolean isSolvable(Problem problem, ArrayList<Agent> agents, ArrayList<Box> boxes, Goal boxGoal) {
         for(var agent: agents){
             for (var box: boxes){
@@ -225,6 +258,14 @@ public class WalledFinishedBoxes implements Solver {
         }
 
         return false;
+    }
+
+    private static boolean isSolvable(Problem problem, ArrayList<Agent> agents, Goal agentGoal) {
+        var agent = agents.stream().filter(a -> a.label == agentGoal.label).findFirst().get();
+        if(problem.admissibleDist(agent.pos, agentGoal.destination) == problem.MAX_DISTANCE)
+            return false;
+        else
+            return true;
     }
 }
 

@@ -8,12 +8,16 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.Solver;
 import org.junit.Assert;
 
+import java.nio.file.Path;
 import java.util.concurrent.*;
 
 public class LevelSolver {
-    public static Result<Solution> solve(String levelName, LevelParser parser, Solver solver, boolean logOutputToFile) {
+    public static Result<Solution> solve(String levelName, Path directory, LevelParser parser, Solver solver, boolean logOutputToFile) {
         if (logOutputToFile) IO.logOutputToFile(solver.getClass().getSimpleName() + "_" + levelName);
-        var solution = FileHelper.loadLevel(levelName, parser).flatMap(solver::solve);
+        IO.debug("Solving level: %s", levelName);
+        var solution = FileHelper.loadLevel(levelName, directory, parser)
+                .map(p -> {IO.debug("Problem:\n" + p); return p;})
+                .flatMap(solver::solve);
         solution.ifOk(s -> {
             IO.debug("Solution:");
             s.serializeSteps().forEach(IO::debug);
@@ -21,38 +25,45 @@ public class LevelSolver {
         return solution;
     }
 
-    public static Result<Solution> solve(String levelName, Solver solver) {
-        return solve(levelName, CourseLevelParser.Instance, solver, false);
+    public static Result<Solution> solve(String levelName, Path directory, Solver solver) {
+        return solve(levelName, directory, CourseLevelParser.Instance, solver, false);
     }
 
-    public static void testMap(String levelName, Solver solver){
-        var solution = solve(levelName, solver);
+    public static void testMap(String levelName, Path directory, Solver solver){
+        var solution = solve(levelName, directory ,solver);
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
 
-    public static void testMap(String levelName, Solver solver, long timeout, TimeUnit timeUnit) {
-        testMap(levelName, solver, timeout, timeUnit, CourseLevelParser.Instance, false);
+    public static void testMap(String levelName, Solver solver){
+        testMap(levelName, IO.LevelDir, solver);
     }
 
-    public static void testMap(String levelName, Solver solver, long timeout, TimeUnit timeUnit, LevelParser parser, boolean logOutputToFile) {
+    public static void testMap(String levelName, Solver solver, long timeout, TimeUnit timeUnit) {
+        testMap(levelName, IO.LevelDir, solver, timeout, timeUnit);
+    }
+
+    public static void testMap(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit) {
+        var solution = solve(levelName, directory, solver, timeout, timeUnit, CourseLevelParser.Instance, false);
+        Assert.assertTrue(solution.toString(), solution.isOk());
+    }
+
+    public static Result<Solution> solve(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit, LevelParser parser, boolean logOutputToFile) {
         try {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<Result<Solution>> future = executor.submit(new SolveLevelTask(levelName, parser, solver, logOutputToFile));
+            Future<Result<Solution>> future = executor.submit(new SolveLevelTask(levelName, directory, parser, solver, logOutputToFile));
 
             try {
-                var solution = future.get(timeout, timeUnit);
-                Assert.assertTrue(solution.toString(), solution.isOk());
+                return future.get(timeout, timeUnit);
             } catch (TimeoutException e) {
                 future.cancel(true);
-                IO.logException(e);
-                Assert.fail("Timeout exceeded");
+                IO.error("Time limit exceeded " + timeout + " " + timeUnit);
+                return Result.error(e);
             } finally {
                 executor.shutdownNow();
             }
 
         } catch (Exception e) {
-            IO.logException(e);
-            Assert.fail("Unexpected error occurred: " + e.getMessage());
+            return Result.error(e);
         }
     }
 }

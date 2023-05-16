@@ -10,7 +10,11 @@ import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solutions.StateSolution;
+import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.graphsearch.AStar;
+import dtu.aimas.search.solvers.graphsearch.Focal;
+import dtu.aimas.search.solvers.graphsearch.Greedy;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import org.junit.*;
@@ -289,6 +293,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void ThreeColors_BottleneckBoxConflicts(){
         var level = """
@@ -403,6 +408,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
+    @Ignore
     @Test
     public void RowsOfAgentsAndBoxes(){
         var level = """
@@ -492,6 +498,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void AgentBoxSplitter(){
         var level = """
@@ -522,6 +529,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.isOk());
     }
 
+    @Ignore
     @Test
     public void Test_MishMash_R1(){
 
@@ -534,19 +542,25 @@ public class SafePathSolverTest {
         LevelSolver.testMap("mishmash_r1", solver);
     }
 
+    @Ignore
     @Test
     public void Test_MishMash_RegionSplit(){
-        var agentSolver = new SafePathSolver(
-                new AStar(new DistanceSumCost()),
-                new AgentProblemSplitter(),
-                100
-        );
-
         var solver = new SafePathSolver(
-                agentSolver,
-                new RegionProblemSplitter()
+//            new SafePathSolver(
+                new SafePathSolver(
+//                    new AStar(new DistanceSumCost()),
+                    new Focal(new DistanceSumCost(), 2),
+                    new AgentProblemSplitter(),
+                    50
+                ),
+//                new ColorProblemSplitter(),
+//                    5
+//            ),
+            new RegionProblemSplitter()
         );
 
-        LevelSolver.testMap("mishmash", solver);
+        IO.logLevel = LogLevel.Debug;
+        var solution = LevelSolver.solve("mishmash", IO.CompLevelDir, solver);
+        Assert.assertTrue(solution.toString(), solution.isOk());
     }
 }

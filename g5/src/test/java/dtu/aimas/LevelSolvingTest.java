@@ -2,9 +2,12 @@ package dtu.aimas;
 
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
+import dtu.aimas.helpers.FileHelper;
 import dtu.aimas.helpers.LevelSolver;
+import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
+import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
@@ -16,6 +19,7 @@ import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SAOrderedSolver;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.Solver;
+import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
 import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 
 import org.junit.Ignore;
@@ -146,12 +150,12 @@ public class LevelSolvingTest {
     public void TestMishMash_SafePath(){
         var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter(),
+                new RegionProblemSplitter(),
                 100
         );
 
         IO.logLevel = LogLevel.Information;
-        LevelSolver.testMap("mishmash", solver);
+        LevelSolver.testMap("mishmash", IO.CompLevelDir, solver);
     }
 
     @Ignore
@@ -205,5 +209,49 @@ public class LevelSolvingTest {
 
         IO.logLevel = LogLevel.Information;
         LevelSolver.testMap("mishmash_r4", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_Group80(){
+        var solver = new SafePathSolver(
+                new WalledFinishedBoxes(new AStar(new DistanceSumCost())),
+                new AgentProblemSplitter(),
+                1000
+        );
+
+        LevelSolver.testMap("Group80", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_Comp23(){
+        var subSolver = new SafePathSolver(
+//                new Focal(new DistanceSumCost(), 2.0),
+                new AStar(new DistanceSumCost()),
+                new AgentProblemSplitter(),
+                5
+        );
+
+        var solver = new SafePathSolver(
+                subSolver,
+                new RegionProblemSplitter()
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        var dir = IO.CompLevelDir;
+        for(var level: FileHelper.listDirectory(dir, ".lvl")){
+            var solution = LevelSolver.solve(level, dir, solver,
+                    5, TimeUnit.SECONDS,
+                    CourseLevelParser.Instance, false);
+            IO.debug(solution);
+        }
+    }
+
+    @Test
+    public void Test_comp_Colada(){
+        // Colada
+//        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("Colada", IO.CompLevelDir, new Focal(new SingleGoalDistanceCost(), 2));
     }
 }

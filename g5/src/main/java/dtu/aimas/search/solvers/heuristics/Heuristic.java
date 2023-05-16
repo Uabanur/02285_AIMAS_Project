@@ -22,10 +22,9 @@ public abstract class Heuristic implements Comparator<State> {
     public abstract int f(State s, StateSpace space);
     public abstract Cost getCost();
 
+    public void reset(){cache.clear();};
     public int compare(State fst, State snd) {
-        var ftsCost = cache.computeIfAbsent(fst, s -> f(s, space));
-        var sndCost = cache.computeIfAbsent(snd, s -> f(s, space));
-        return Integer.compare(ftsCost, sndCost);
+        return Integer.compare(f(fst), f(snd));
     }
 
     public int f(State s) {
