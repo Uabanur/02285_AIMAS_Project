@@ -5,8 +5,8 @@ import dtu.aimas.communication.IO;
 import dtu.aimas.errors.UnknownArguments;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.ProblemSplitter;
+import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solvers.Solver;
-import dtu.aimas.search.solvers.agent.IterativeBoxSolver;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
@@ -27,7 +27,9 @@ public class SafePathConfigOption extends ConfigOption{
         IO.debug("tokens: " + tokens);
         for(var token: tokens){
             switch(token){
-                default-> {
+                case "split:region" -> splitter = new RegionProblemSplitter();
+                case "split:color"-> splitter = new ColorProblemSplitter();
+                default -> {
                     return Result.error(new UnknownArguments(tokens));
                 }
             }

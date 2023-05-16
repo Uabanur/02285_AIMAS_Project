@@ -2,9 +2,12 @@ package dtu.aimas;
 
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
+import dtu.aimas.helpers.FileHelper;
 import dtu.aimas.helpers.LevelSolver;
+import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
+import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
@@ -147,12 +150,12 @@ public class LevelSolvingTest {
     public void TestMishMash_SafePath(){
         var solver = new SafePathSolver(
                 new AStar(new DistanceSumCost()),
-                new ColorProblemSplitter(),
+                new RegionProblemSplitter(),
                 100
         );
 
         IO.logLevel = LogLevel.Information;
-        LevelSolver.testMap("mishmash", solver);
+        LevelSolver.testMap("mishmash", IO.CompLevelDir, solver);
     }
 
     @Ignore
@@ -218,5 +221,29 @@ public class LevelSolvingTest {
         );
 
         LevelSolver.testMap("Group80", solver);
+    }
+
+    @Ignore
+    @Test
+    public void Test_Comp23(){
+        var subSolver = new SafePathSolver(
+//                new Focal(new DistanceSumCost(), 2.0),
+                new AStar(new DistanceSumCost()),
+                new AgentProblemSplitter(),
+                5
+        );
+
+        var solver = new SafePathSolver(
+                subSolver,
+                new RegionProblemSplitter()
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        var dir = IO.CompLevelDir;
+        for(var level: FileHelper.listDirectory(dir, ".lvl")){
+            LevelSolver.testMap(level, dir, solver,
+                    5, TimeUnit.SECONDS,
+                    CourseLevelParser.Instance, false);
+        }
     }
 }

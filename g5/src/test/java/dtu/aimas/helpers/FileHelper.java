@@ -5,15 +5,30 @@ import dtu.aimas.communication.IO;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 public class FileHelper {
-    public static Result<Reader> getFileReader(String levelName){
+
+    public static List<String> listDirectory(Path directory, String extensionFilter){
+        var filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+
+                return name.endsWith(extensionFilter);
+            }
+        };
+        var files = directory.toFile().listFiles(filter);
+        assert files != null : "Invalid directory given: " + directory;
+        return Arrays.stream(files).map(File::getName).toList();
+    }
+
+    public static Result<Reader> getFileReader(String levelName, File directory) {
         try {
-            var levelFile = new File(IO.LevelDir.toFile(), levelName + ".lvl");
+            var fileName = levelName.endsWith(".lvl") ? levelName : levelName + ".lvl";
+            var levelFile = new File(directory, fileName);
             var buffer = new FileReader(levelFile);
             return Result.ok(buffer);
         } catch (FileNotFoundException e) {
@@ -21,8 +36,7 @@ public class FileHelper {
         }
     }
 
-
-    public static Result<Problem> loadLevel(String levelName, LevelParser parser) {
-        return getFileReader(levelName).flatMap(parser::parse);
+    public static Result<Problem> loadLevel(String levelName, Path directory, LevelParser parser) {
+        return getFileReader(levelName, directory.toFile()).flatMap(parser::parse);
     }
 }

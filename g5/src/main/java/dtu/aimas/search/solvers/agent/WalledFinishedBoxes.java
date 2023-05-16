@@ -36,8 +36,8 @@ public class WalledFinishedBoxes implements Solver {
     private Result<Solution> solve(StateSpace space) {
         var fullProblem = space.getProblem();
         var initial = space.getInitialState();
-        assert initial.agents.size() == 1 : "Single agent solver";
-        assert fullProblem.agentGoals.size() <= 1 : "Single agent solver";
+        assert initial.agents.size() <= 1 : "Single agent solver. Got %d agents".formatted(initial.agents.size());
+        assert fullProblem.agentGoals.size() <= 1 : "Single agent solver. Got %d agent goals".formatted(fullProblem.agentGoals.size());
 
         var agent = initial.agents.iterator().next();
 
