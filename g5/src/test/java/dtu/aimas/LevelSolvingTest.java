@@ -241,9 +241,10 @@ public class LevelSolvingTest {
         IO.logLevel = LogLevel.Debug;
         var dir = IO.CompLevelDir;
         for(var level: FileHelper.listDirectory(dir, ".lvl")){
-            LevelSolver.testMap(level, dir, solver,
+            var solution = LevelSolver.solve(level, dir, solver,
                     5, TimeUnit.SECONDS,
                     CourseLevelParser.Instance, false);
+            IO.debug(solution);
         }
     }
 }

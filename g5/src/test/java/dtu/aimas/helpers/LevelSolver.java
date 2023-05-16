@@ -43,28 +43,27 @@ public class LevelSolver {
     }
 
     public static void testMap(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit) {
-        testMap(levelName, directory, solver, timeout, timeUnit, CourseLevelParser.Instance, false);
+        var solution = solve(levelName, directory, solver, timeout, timeUnit, CourseLevelParser.Instance, false);
+        Assert.assertTrue(solution.toString(), solution.isOk());
     }
 
-    public static void testMap(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit, LevelParser parser, boolean logOutputToFile) {
+    public static Result<Solution> solve(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit, LevelParser parser, boolean logOutputToFile) {
         try {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<Result<Solution>> future = executor.submit(new SolveLevelTask(levelName, directory, parser, solver, logOutputToFile));
 
             try {
-                var solution = future.get(timeout, timeUnit);
-//                Assert.assertTrue(solution.toString(), solution.isOk());
+                return future.get(timeout, timeUnit);
             } catch (TimeoutException e) {
                 future.cancel(true);
-                IO.error("Time limit exceeded " + timeout + " " + timeUnit.toString());
-//                Assert.fail("Timeout exceeded");
+                IO.error("Time limit exceeded " + timeout + " " + timeUnit);
+                return Result.error(e);
             } finally {
                 executor.shutdownNow();
             }
 
         } catch (Exception e) {
-            IO.logException(e);
-            Assert.fail("Unexpected error occurred: " + e.getMessage());
+            return Result.error(e);
         }
     }
 }
