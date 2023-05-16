@@ -1,0 +1,27 @@
+#domain
+hospital
+#levelname
+AgentBlockingHimself
+#colors
+blue: 0, A, B, C
+#initial
+++++++++++
++0       +
++C      ++
++        +
++      +++
++      BA+
++++    +++
++        +
+++++++++++
+#goal
+++++++++++
++        +
++       ++
++        +
++      +++
++        +
++++    +++
++AB     0+
+++++++++++
+#end

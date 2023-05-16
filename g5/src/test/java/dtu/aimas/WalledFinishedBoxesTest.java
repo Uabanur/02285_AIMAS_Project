@@ -4,6 +4,7 @@ import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
 import dtu.aimas.helpers.LevelSolver;
 import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
+import dtu.aimas.search.solvers.graphsearch.Focal;
 import dtu.aimas.search.solvers.graphsearch.Greedy;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import org.junit.Before;
@@ -31,6 +32,20 @@ public class WalledFinishedBoxesTest {
     @Test
     public void Test_Saigon03() {
         LevelSolver.testMap("SAtowersOfSaigon03", new WalledFinishedBoxes(new Greedy(new DistanceSumCost())));
+    }
+
+    @Ignore 
+    @Test
+    public void AgentGoalAfterBoxGoals(){
+        LevelSolver.testMap("AgentGoalAfterBoxGoals", new WalledFinishedBoxes());
+    }
+
+    // caution - not passing
+    // case to discuss
+    @Ignore 
+    @Test
+    public void AgentBlockingHimself(){
+        LevelSolver.testMap("AgentBlockingHimself", new WalledFinishedBoxes());
     }
 
 }
