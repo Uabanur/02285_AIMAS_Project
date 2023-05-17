@@ -45,8 +45,10 @@ public class SAOrderedSolver implements Solver {
         var agents = initial.agents;
         var boxes = initial.boxes;
         //var boxGoals = orderedGoalsByPriority(initial);
-        var boxGoals = WalledFinishedBoxes.getSolvablyOrderedBoxGoals(initial.boxGoals, new ArrayList<>(agents), new ArrayList<>(boxes), initial);
-        for(var goal : boxGoals) {
+        var boxGoalsResult = WalledFinishedBoxes.getSolvablyOrderedBoxGoals(initial.boxGoals, new ArrayList<>(agents), new ArrayList<>(boxes), initial);
+        // todo: quickfix for the purpose of walled finished only
+        var boxGoal = boxGoalsResult.get();
+        for(var goal : boxGoal) {
             IO.debug("Solving goal %c",goal.label);
             //add one goal at a time
             goals[goal.destination.row][goal.destination.col] = goal.label;

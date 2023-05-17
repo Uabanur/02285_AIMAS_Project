@@ -41,39 +41,48 @@ public class WalledFinishedBoxes implements Solver {
 
         var agent = initial.agents.iterator().next();
 
-        ArrayList<StateSolution> solutions;
+        ArrayList<StateSolution> solutions = new ArrayList<StateSolution>();
 
-        // get box goals in solvable order
-        var boxGoals = getSolvablyOrderedBoxGoals(fullProblem.boxGoals, initial.agents, initial.boxes, fullProblem);
+        State stateAfterBoxesGoals;
 
-        while(true){
+        // box goals solver
+        if(!fullProblem.boxGoals.isEmpty())
+        {
+            // get solvably ordered boxes
+            var boxGoalsResult = getSolvablyOrderedBoxGoals(fullProblem.boxGoals, initial.agents, initial.boxes, fullProblem);
+            
+            // no solvable order -> no solution
+            if(boxGoalsResult.isEmpty()) return Result.error(new SolutionNotFound("No solvable order of box goals found"));
+            var boxGoals = boxGoalsResult.get();
+
+            // solve boxes goals
             var solutionGoalPair = solveBoxes(boxGoals, fullProblem, initial);
             var solutionsResult = solutionGoalPair.solutions();
-            if(solutionsResult.isOk()) {
-                // todo: there can be the case, that last solution blocks the agent so he cannot complete his goal
-                // could be solved with the hack of putting agent goal before last goal then
+            
+            // some error in solutions -> no solution
+            if(solutionsResult.isError()) return Result.passError(solutionsResult);
+            solutions.addAll(solutionsResult.get());
 
-                solutions = solutionsResult.get();
-                
-                // no agent goal to solve
-                if(fullProblem.agentGoals.size() == 0) break;
+            // set the initial state for agent goal
+            stateAfterBoxesGoals = solutions.get(solutions.size()-1).getLastState();
+        }
+        else
+        {
+            // no box goals -> initial state is initial
+            stateAfterBoxesGoals = initial;
+        }
+        
+        // agent goal solver
+        if(!fullProblem.agentGoals.isEmpty()){
+            // get agent goal
+            var agentGoal = fullProblem.agentGoals.iterator().next();
 
-                // initial state for agent goals solver
-                var stateAfterBoxesGoals = solutions.get(solutions.size()-1).getLastState();
-                var agentGoal = fullProblem.agentGoals.iterator().next();
-                
-                var agentGoalResultSolution = solveAgent(agentGoal, fullProblem, stateAfterBoxesGoals);
-                
-                // if agent goal is not solvable, try again
-                // todo: it should be reordered to try again only if agent is blocked
-                if(agentGoalResultSolution.isError()) continue;
+            // solve agent goal starting from state after boxes goals or the initial
+            var agentGoalResultSolution = solveAgent(agentGoal, fullProblem, stateAfterBoxesGoals);
 
-                var agentSolution = agentGoalResultSolution.get();
-
-                // add agent's solutions at the end of box solutions
-                solutions.add(agentSolution);
-                break;
-            }
+            // some error in solution -> no solution
+            if(agentGoalResultSolution.isError()) return Result.passError(agentGoalResultSolution);
+            solutions.add(agentGoalResultSolution.get());
         }
         
         resetBoxColors(solutions, agent.color);
@@ -104,16 +113,17 @@ public class WalledFinishedBoxes implements Solver {
 
         var mergedSolution = mergedSolutionResult.get();
         var valid = SolutionChecker.validSolution(mergedSolution, space);
-        assert valid : "Combined solution should be valid";
+        if(!valid) return Result.error(new SolutionNotFound("Combined solution is not valid"));
+        // assert valid : "Combined solution should be valid";
 
         return Result.ok(mergedSolution);
     }
 
-    public static Collection<Goal> getSolvablyOrderedBoxGoals(Collection<Goal> goals, ArrayList<Agent> initialAgents, ArrayList<Box> initialBoxes, Problem fullProblem){
+    public static Optional<Collection<Goal>> getSolvablyOrderedBoxGoals(Collection<Goal> goals, ArrayList<Agent> initialAgents, ArrayList<Box> initialBoxes, Problem fullProblem){
         // we still need to recreate the problems, so it's a big duplication of code.
         // on the other hand - it saves some subsolver runs what is pretty nice
         var boxGoals = new ArrayDeque<>(fullProblem.boxGoals);
-        while(true){
+        // while(true){
             var agents = new ArrayList<>(initialAgents);
             var boxes = new ArrayList<>(initialBoxes);
 
@@ -137,8 +147,9 @@ public class WalledFinishedBoxes implements Solver {
                 }
                 walls[boxGoal.destination.row][boxGoal.destination.col] = true;
             }
-            if(solvableOrder) return Collections.unmodifiableCollection(boxGoals);
-        }
+            if(solvableOrder) return Optional.of(Collections.unmodifiableCollection(boxGoals));
+            else return Optional.empty();
+        // }
     }
 
     private void resetBoxColors(ArrayList<StateSolution> solutions, Color color) {
@@ -178,8 +189,8 @@ public class WalledFinishedBoxes implements Solver {
 
             // check if box is reachable for the new goal
             // maciek: this is still necessary yet, cause we could have unfortunatelly locked an agent...
-            var solvable = isSolvable(iterativeProblem, agents, boxes, boxGoal);
-            if(!solvable) return new SolutionGoalPair(Result.empty(), boxGoal);
+            // var solvable = isSolvable(iterativeProblem, agents, boxes, boxGoal);
+            // if(!solvable) return new SolutionGoalPair(Result.e(), boxGoal);
 
             // solve partial solution
             var start = Stopwatch.getTimeMs();
@@ -238,6 +249,8 @@ public class WalledFinishedBoxes implements Solver {
 
         // solve partial solution
         var start = Stopwatch.getTimeMs();
+        // var newSubSolver = new AStar(new DistanceSumCost());
+        // var solutionResult = newSubSolver.solve(iterativeProblem).map(s -> (StateSolution)s);
         var solutionResult = subSolver.solve(iterativeProblem).map(s -> (StateSolution)s);
         IO.debug("solve time: %d ms", Stopwatch.getTimeSinceMs(start));
         

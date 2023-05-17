@@ -31,12 +31,18 @@ public class SafePathSolver implements Solver {
     private final ProblemSplitter splitter;
     private final int attemptThreshold;
     private final boolean allowMerges;
+    private Solver saSubSolver;
 
     public SafePathSolver(Solver subSolver, ProblemSplitter splitter, boolean allowMerges, int attemptThreshold){
         this.allowMerges = allowMerges;
         this.subSolver = subSolver;
         this.splitter = splitter;
         this.attemptThreshold = attemptThreshold;
+    }
+    public SafePathSolver(Solver saSubSolver, Solver maSubSolver, ProblemSplitter splitter, int attemptThreshold)
+    {
+        this(maSubSolver, splitter, true, attemptThreshold);
+        this.saSubSolver = saSubSolver;
     }
     public SafePathSolver(Solver subSolver, ProblemSplitter splitter, int attemptThreshold){this(subSolver, splitter, true, attemptThreshold);}
     public SafePathSolver(Solver subSolver, ProblemSplitter splitter, boolean allowMerges){this(subSolver, splitter, allowMerges, Integer.MAX_VALUE);}
@@ -111,7 +117,9 @@ public class SafePathSolver implements Solver {
 
             for(var i = 0; i < plans.length; i++){
                 var subProblem = subProblems.get(i);
-                var solution = subSolver.solve(subProblem).map(s -> (StateSolution)s);
+                var solution = this.saSubSolver != null && subProblem.agents.size() == 1 ? 
+                saSubSolver.solve(subProblem).map(s -> (StateSolution)s) 
+                : subSolver.solve(subProblem).map(s -> (StateSolution)s);
                 plans[i] = new SafePlan(subProblem, solution);
             }
             IO.debug("Average time per naive solution: %,.2f ms", Stopwatch.getTimeSinceMs(start)/(float)planCount);
@@ -151,7 +159,9 @@ public class SafePathSolver implements Solver {
 
                 var restrictedProblem = restrictedProblemResult.get();
                 IO.spam("New restricted problem:\n"+restrictedProblem);
-                var solution = subSolver.solve(restrictedProblem).map(s -> (StateSolution)s);
+                var solution = this.saSubSolver != null && restrictedProblem.agents.size() == 1 ? 
+                saSubSolver.solve(restrictedProblem).map(s -> (StateSolution)s)
+                 : subSolver.solve(restrictedProblem).map(s -> (StateSolution)s);
                 if(solution.isError()){
                     continue; // unsolvable sub problem
                 }

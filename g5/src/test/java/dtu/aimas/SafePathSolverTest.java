@@ -14,6 +14,7 @@ import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
+import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.GuidedDistanceSumCost;
@@ -681,5 +682,27 @@ public class SafePathSolverTest {
         IO.logLevel = LogLevel.Debug;
         solution = new AStar(new DistanceSumCost()).solve(safeProblem);
         Assert.assertTrue(solution.isOk());
+    }
+
+    @Ignore
+    @Test
+    public void SafePath_WalledFinished(){
+        var solver = new SafePathSolver(
+                new SafePathSolver(
+                    new SafePathSolver(
+                            new WalledFinishedBoxes(new AStar(new GuidedDistanceSumCost())),
+                            new AStar(new GuidedDistanceSumCost()),
+                            new AgentBoxAssignationSplitter(),
+                            10
+                    ),
+                    new ColorProblemSplitter(),
+                    10
+            ),
+            new RegionProblemSplitter()
+    );
+
+        IO.logLevel = LogLevel.Debug;
+        var solution = LevelSolver.solve("Naevis", IO.CompLevelDir, solver);
+        Assert.assertTrue(solution.toString(), solution.isOk());    
     }
 }
