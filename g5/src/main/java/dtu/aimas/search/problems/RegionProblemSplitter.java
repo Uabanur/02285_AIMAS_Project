@@ -1,13 +1,18 @@
 package dtu.aimas.search.problems;
 
+import dtu.aimas.common.Agent;
+import dtu.aimas.common.Box;
 import dtu.aimas.common.Position;
 import dtu.aimas.search.Problem;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RegionProblemSplitter implements ProblemSplitter {
+    private static final char WALL = 255;
     @Override
     public List<Problem> split(Problem problem) {
         var height = problem.goals.length;
@@ -15,6 +20,11 @@ public class RegionProblemSplitter implements ProblemSplitter {
 
         final char[][] world = new char[height][width];
         fillWalls(problem, height, width, world);
+
+        var orphanedBoxes = filterOrphanedBoxes(problem.agents, problem.boxes);
+        for(var orphanedBox: orphanedBoxes){
+            world[orphanedBox.pos.row][orphanedBox.pos.col] = WALL;
+        }
 
         var regions = fillRegions(height, width, world);
 
@@ -25,11 +35,20 @@ public class RegionProblemSplitter implements ProblemSplitter {
             var boxes = problem.boxes.stream().filter(b -> world[b.pos.row][b.pos.col] == regionId).toList();
             var goals = extractRegionGoals(problem, height, width, world, regionId);
             var walls = extractRegionWalls(height, width, world, regionId);
+            var orphanedRegionBoxes = filterOrphanedBoxes(agents, boxes);
+            for(var orphanedBox: orphanedRegionBoxes){
+                walls[orphanedBox.pos.row][orphanedBox.pos.col] = true;
+            }
 
             problems.add(problem.copyWith(agents, boxes, goals, walls));
         }
 
         return problems;
+    }
+
+    private List<Box> filterOrphanedBoxes(Collection<Agent> agents, Collection<Box> boxes) {
+        var colors = agents.stream().map(a -> a.color).collect(Collectors.toSet());
+        return boxes.stream().filter(b -> !colors.contains(b.color)).toList();
     }
 
     private static boolean[][] extractRegionWalls(int height, int width, char[][] world, char regionId) {
@@ -71,7 +90,7 @@ public class RegionProblemSplitter implements ProblemSplitter {
         for(var row = 0; row < height; row++){
             for(var col = 0; col < width; col++) {
                 if(problem.walls[row][col])
-                    world[row][col] = 255;
+                    world[row][col] = WALL;
             }
         }
     }

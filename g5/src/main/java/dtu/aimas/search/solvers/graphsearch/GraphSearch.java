@@ -37,7 +37,7 @@ public abstract class GraphSearch
         {
             //Print a status message every 10000 iteration
             if (++iterations % 10000 == 0) {
-                IO.debug(getSearchStatus(expanded, frontier));
+                IO.spam(getSearchStatus(expanded, frontier));
             }
 
             if(frontier.isEmpty()) 

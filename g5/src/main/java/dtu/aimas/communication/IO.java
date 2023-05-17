@@ -78,11 +78,20 @@ public class IO {
         }
     }
 
+
+    public static void spam(Object o) {spam(o.toString());}
+    public static void spam(String msg){
+        if (logLevel.ordinal() > LogLevel.Spam.ordinal()) return;
+        log("[spam] "+msg);
+    }
+    public static void spam(String format, Object... args){
+        spam(String.format(format, args));
+    }
+
     public static void debug(Object o) {debug(o.toString());}
     public static void debug(String msg){
-        if (logLevel == LogLevel.Debug){
-            log("[debug] "+msg);
-        }
+        if (logLevel.ordinal() > LogLevel.Debug.ordinal()) return;
+        log("[debug] "+msg);
     }
     public static void debug(String format, Object... args){
         debug(String.format(format, args));
@@ -90,9 +99,8 @@ public class IO {
 
     public static void info(Object o){info(o.toString());}
     public static void info(String msg){
-        if (logLevel == LogLevel.Information || logLevel == LogLevel.Debug) {
-            log("[info] "+msg);
-        }
+        if (logLevel.ordinal() > LogLevel.Information.ordinal()) return;
+        log("[info] "+msg);
     }
     public static void info(String format, Object... args){
         info(String.format(format, args));
@@ -100,7 +108,7 @@ public class IO {
 
     public static void warn(Object o){warn(o.toString());}
     public static void warn(String msg){
-        if (logLevel == LogLevel.Error) return;
+        if (logLevel.ordinal() > LogLevel.Warning.ordinal()) return;
         log("[warn] "+msg);
     }
     public static void warn(String format, Object... args){

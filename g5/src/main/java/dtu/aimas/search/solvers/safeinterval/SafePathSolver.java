@@ -61,7 +61,7 @@ public class SafePathSolver implements Solver {
             var solution = result.solution();
             if(solution.isOk() || !allowMerges || subProblems.size() == 1) return solution.map(Function.identity());
 
-            IO.debug("Merging conflicting problems and trying again");
+            IO.debug("Merging conflicting problems and trying again. Splitter: %s", splitter.getClass().getSimpleName());
             subProblems = mergeMostConflictingProblems(subProblems, fullProblem, result.plans());
         }
     }
@@ -126,18 +126,18 @@ public class SafePathSolver implements Solver {
         while(true){
             // Verify that we can continue
             if(queue.isEmpty()){
-                IO.error("All unique solution combinations have been exhausted");
+                IO.debug("All unique solution combinations have been exhausted. Splitter: %s", splitter.getClass().getSimpleName());
                 return new SolutionPlansPair(Result.error(new SolutionNotFound("No more attempt permutations")), plans);
             }
 
             // Check if goal is found
             var attemptPermutation = queue.poll();
             var attempts = attemptPermutation.getAttempts(plans);
-//            IO.debug("Next solution permutation: %s", attemptPermutation);
+            IO.spam("Next solution permutation: %s", attemptPermutation);
 
             var baseAttempts = attempts.stream().map(a -> (Attempt)a).toList();
-//            IO.debug(fullProblem);
             if(SolutionChecker.validAttempts(baseAttempts, space)){
+                IO.debug("Valid solution. Splitter: %s", splitter.getClass().getSimpleName());
                 return new SolutionPlansPair(Result.ok(SolutionMerger.mergeAttempts(baseAttempts)), plans);
             }
 
@@ -150,7 +150,7 @@ public class SafePathSolver implements Solver {
                 if(restrictedProblemResult.isEmpty()) continue; // no new restrictions added
 
                 var restrictedProblem = restrictedProblemResult.get();
-//                IO.debug("New restricted problem:\n"+restrictedProblem);
+                IO.spam("New restricted problem:\n"+restrictedProblem);
                 var solution = subSolver.solve(restrictedProblem).map(s -> (StateSolution)s);
                 if(solution.isError()){
                     continue; // unsolvable sub problem
@@ -180,14 +180,25 @@ public class SafePathSolver implements Solver {
                 .map(Result::get)
                 .toList();
 
+        var staticReserveDuration = 2;
         for(var solution: foreignSolutions){
             var initialState = solution.getState(0);
-            intervals.addAll(getStaticReserves(initialState));
+
+            {
+                var duration = solution.size() == 1
+                        ? Integer.MAX_VALUE
+                        : staticReserveDuration;
+                intervals.addAll(getStaticReserves(initialState, duration));
+            }
 
             for(var step = 1; step < solution.size(); step++){
                 var state = solution.getState(step);
                 assert state.parent != null : "Only initial state should be orphaned";
-                intervals.addAll(getStaticReserves(state));
+                var duration = step == solution.size() -1
+                        ? Integer.MAX_VALUE
+                        : staticReserveDuration;
+
+                intervals.addAll(getStaticReserves(state, duration));
                 intervals.addAll(getActionReserves(state, state.parent, space));
             }
         }

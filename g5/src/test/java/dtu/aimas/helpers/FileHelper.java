@@ -2,6 +2,7 @@ package dtu.aimas.helpers;
 
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
+import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.parsers.LevelParser;
 import dtu.aimas.search.Problem;
 
@@ -34,6 +35,10 @@ public class FileHelper {
         } catch (FileNotFoundException e) {
             return Result.error(e);
         }
+    }
+
+    public static Result<Problem> loadLevel(String levelName, Path directory) {
+        return loadLevel(levelName, directory, CourseLevelParser.Instance);
     }
 
     public static Result<Problem> loadLevel(String levelName, Path directory, LevelParser parser) {
