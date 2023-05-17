@@ -1,8 +1,5 @@
 @echo off
 
 set /p file=Choose level file: 
-set classesDir=.\g5\target\classes
-set clientName=dtu.aimas.SearchClient
-set arguments=-safepath  -log debug
 set flags=-g -f
-java -jar .\mavis.jar -l %file% -c "java -cp %classesDir% %clientName% %arguments%" %flags%
+java -jar .\mavis.jar -l %file% -c "java -jar g5-1.0.jar" %flags%

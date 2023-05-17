@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static dtu.aimas.TestUtils.assertTypeIs;
 
+import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import org.junit.Test;
 
 import dtu.aimas.config.Configuration;
@@ -24,7 +25,7 @@ public class ArgumentParserTest {
     @Test
     public void NoArguments_Should_Pass() {
         var conf = assertParseOk();
-        assertTypeIs(conf.getSolver().getClass(), BFS.class);
+        assertTypeIs(conf.getSolver().getClass(), SafePathSolver.class);
     }
 
     @Test

@@ -36,3 +36,5 @@ hs_err_pid*
 
 # local running config
 run_local.sh
+
+!g5-1.0.jar

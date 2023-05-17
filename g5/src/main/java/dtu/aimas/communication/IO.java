@@ -26,11 +26,35 @@ import dtu.aimas.search.solutions.Solution;
 public class IO {
     private final static String CurrentClassPathString = getClassPath();
     private final static Path TargetsPath = Paths.get(CurrentClassPathString).getParent();
-    private final static Path TargetClassesPath = Paths.get(TargetsPath.toString(), "classes");
 
-    public final static Path LogDir = Paths.get(TargetsPath.toString(), "logs");
-    public final static Path LevelDir = Paths.get(TargetClassesPath.toString(), "levels");
-    public final static Path CompLevelDir = Paths.get(LevelDir.toString(), "complevels");
+    private final static Path TargetClassesPath = getTargetClassesPath();
+
+    private static Path getTargetClassesPath() {
+        if (TargetsPath == null) return null;
+        return Paths.get(TargetsPath.toString(), "classes");
+    }
+
+    public final static Path LogDir = getLogDir();
+
+    private static Path getLogDir() {
+        if(TargetsPath == null) return null;
+        return Paths.get(TargetsPath.toString(), "logs");
+    }
+
+    public final static Path LevelDir = getLevelDir();
+
+    private static Path getLevelDir() {
+        if (TargetClassesPath == null) return null;
+        return Paths.get(TargetClassesPath.toString(), "levels");
+    }
+
+    public final static Path CompLevelDir = getCompLevelDir();
+
+    private static Path getCompLevelDir() {
+        if(LevelDir == null) return null;
+        return Paths.get(LevelDir.toString(), "complevels");
+    }
+
 
     public static LogLevel logLevel = LogLevel.Information;
     public static boolean debugServerMessages = false;
