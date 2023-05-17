@@ -343,7 +343,7 @@ public record StateSpace(
             if (done) break;
         }
 
-//        Collections.shuffle(expandedStates, StateSpace.RNG);
+        Collections.shuffle(expandedStates, StateSpace.RNG);
 
         return expandedStates;
     }

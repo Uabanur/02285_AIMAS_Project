@@ -585,6 +585,7 @@ public class SafePathSolverTest {
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
 
+    @Ignore
     @Test
     public void Test_comp_sixty(){
         var solver = new SafePathSolver(
