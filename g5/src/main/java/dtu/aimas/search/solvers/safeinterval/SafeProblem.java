@@ -101,7 +101,12 @@ public class SafeProblem extends Problem {
 
     @Override
     public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals) {
-        return new SafeProblem(agents, boxes, walls, goals, conflictingIntervals);
+        return new SafeProblem(agents, boxes, this.walls, goals, conflictingIntervals);
+    }
+
+    @Override
+    public Problem copyWith(List<Agent> agents, List<Box> boxes, char[][] goals, boolean[][] walls) {
+        return new SafeProblem(agents, boxes, walls, goals, conflictingIntervals).precompute();
     }
 
     public SafeProblem copy(){

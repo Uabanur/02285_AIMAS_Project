@@ -343,7 +343,7 @@ public record StateSpace(
             if (done) break;
         }
 
-        Collections.shuffle(expandedStates, StateSpace.RNG);
+//        Collections.shuffle(expandedStates, StateSpace.RNG);
 
         return expandedStates;
     }
@@ -357,7 +357,10 @@ public record StateSpace(
             if (!occupiedPositions.add(box.pos)) return false;
         }
         if (problem instanceof SafeProblem){
-            for( Box box: state.boxes){
+            for(var agent: state.agents){
+                if(!problem.isFree(agent.pos, null, state.g())) return false;
+            }
+            for(var box: state.boxes){
                 if(!problem.isFree(box.pos, null, state.g())) return false;
             }
         }

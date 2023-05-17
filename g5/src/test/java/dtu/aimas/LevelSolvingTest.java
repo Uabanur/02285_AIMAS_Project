@@ -10,10 +10,7 @@ import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
-import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
-import dtu.aimas.search.solvers.heuristics.GoalCount;
-import dtu.aimas.search.solvers.heuristics.MAAdmissibleCost;
-import dtu.aimas.search.solvers.heuristics.SingleGoalDistanceCost;
+import dtu.aimas.search.solvers.heuristics.*;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.SAOrderedSolver;
@@ -226,32 +223,27 @@ public class LevelSolvingTest {
     @Ignore
     @Test
     public void Test_Comp23(){
-        var subSolver = new SafePathSolver(
-//                new Focal(new DistanceSumCost(), 2.0),
-                new AStar(new DistanceSumCost()),
-                new AgentProblemSplitter(),
-                5
-        );
-
         var solver = new SafePathSolver(
-                subSolver,
+                new SafePathSolver(
+                        new SafePathSolver(
+                                new AStar(new GuidedDistanceSumCost()),
+                                new AgentProblemSplitter(),
+                                10
+                        ),
+                        new ColorProblemSplitter(),
+                        10
+                ),
                 new RegionProblemSplitter()
         );
 
-        IO.logLevel = LogLevel.Debug;
+//        IO.logLevel = LogLevel.Debug;
         var dir = IO.CompLevelDir;
         for(var level: FileHelper.listDirectory(dir, ".lvl")){
+            IO.info("Solving: " + level);
             var solution = LevelSolver.solve(level, dir, solver,
                     5, TimeUnit.SECONDS,
                     CourseLevelParser.Instance, false);
-            IO.debug(solution);
+            IO.info("Solved: " + solution.isOk());
         }
-    }
-
-    @Test
-    public void Test_comp_Colada(){
-        // Colada
-//        IO.logLevel = LogLevel.Debug;
-        LevelSolver.testMap("Colada", IO.CompLevelDir, new Focal(new SingleGoalDistanceCost(), 2));
     }
 }

@@ -1,5 +1,6 @@
 package dtu.aimas;
 
+import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
@@ -10,14 +11,16 @@ import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
-import dtu.aimas.search.solutions.StateSolution;
-import dtu.aimas.search.solvers.SolutionMerger;
 import dtu.aimas.search.solvers.graphsearch.AStar;
-import dtu.aimas.search.solvers.graphsearch.Focal;
-import dtu.aimas.search.solvers.graphsearch.Greedy;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.GuidedDistanceSumCost;
+import dtu.aimas.search.solvers.safeinterval.ReservedCell;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
+import dtu.aimas.search.solvers.safeinterval.SafeProblem;
+import dtu.aimas.search.solvers.safeinterval.TimeInterval;
 import org.junit.*;
+
+import java.util.List;
 
 import static dtu.aimas.helpers.LevelHelper.getProblem;
 
@@ -531,36 +534,119 @@ public class SafePathSolverTest {
 
     @Ignore
     @Test
-    public void Test_MishMash_R1(){
+    public void Test_MishMash_R2(){
 
-        var solver = new SafePathSolver(
-                new AStar(new DistanceSumCost()),
-                new AgentProblemSplitter(),
-                true
+        var solver =
+                new SafePathSolver(
+
+                        new SafePathSolver(
+                                new AStar(new DistanceSumCost()),
+                                new AgentProblemSplitter(),
+                                50
+                ),
+                new RegionProblemSplitter()
         );
 
-        LevelSolver.testMap("mishmash_r1", solver);
+        IO.logLevel = LogLevel.Debug;
+        LevelSolver.testMap("mishmash_r2", solver);
+    }
+
+    @Test
+    public void Test_MishMash_Region_With_AStar(){
+        var solver = new SafePathSolver(
+                new AStar(new DistanceSumCost()),
+                new RegionProblemSplitter()
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        var solution = LevelSolver.solve("mishmash", IO.CompLevelDir, solver);
+        Assert.assertTrue(solution.toString(), solution.isOk());
     }
 
     @Ignore
     @Test
     public void Test_MishMash_RegionSplit(){
         var solver = new SafePathSolver(
-//            new SafePathSolver(
+            new SafePathSolver(
                 new SafePathSolver(
-//                    new AStar(new DistanceSumCost()),
-                    new Focal(new DistanceSumCost(), 2),
+                    new AStar(new DistanceSumCost()),
+//                    new Focal(new DistanceSumCost(), 2),
                     new AgentProblemSplitter(),
                     50
                 ),
-//                new ColorProblemSplitter(),
-//                    5
-//            ),
+                new ColorProblemSplitter(),
+                    10
+            ),
             new RegionProblemSplitter()
         );
 
         IO.logLevel = LogLevel.Debug;
-        var solution = LevelSolver.solve("mishmash", IO.CompLevelDir, solver);
+        var solution = LevelSolver.solve("mishmash", IO.LevelDir, solver);
         Assert.assertTrue(solution.toString(), solution.isOk());
+    }
+
+    @Test
+    public void Test_comp_sixty(){
+        var solver = new SafePathSolver(
+                new SafePathSolver(
+                        new SafePathSolver(
+                                new AStar(new GuidedDistanceSumCost()),
+//                    new Focal(new DistanceSumCost(), 2),
+//                                new WalledFinishedBoxes(),
+                                new AgentProblemSplitter(),
+                                10
+                        ),
+                        new ColorProblemSplitter(),
+                        10
+                ),
+                new RegionProblemSplitter()
+        );
+
+        IO.logLevel = LogLevel.Debug;
+        for(var level: List.of("colada", "sixty", "mishmash")){
+            var solution = LevelSolver.solve(level, IO.CompLevelDir, solver);
+            Assert.assertTrue(solution.toString(), solution.isOk());
+        }
+    }
+
+    @Test
+    public void Test_Nested_SafeProblem(){
+
+        var level = """
+                #initial
+                +++++
+                +0  +
+                +A  +
+                +   +
+                +++++
+                #goal
+                +++++
+                +   +
+                +   +
+                +A  +
+                +++++
+                #end
+                """;
+
+        var problem = getProblem(level, "red: 0, A");
+
+
+        var end = Integer.MAX_VALUE;
+        var restrictions = List.of(
+                new ReservedCell(
+                        new Position(3, 1),
+                        new TimeInterval(0, 2)
+                )
+                ,new ReservedCell(
+                        new Position(2, 1),
+                        new TimeInterval(1, end)
+                )
+        );
+
+        var safeProblem = SafeProblem.from(problem, restrictions).orElseThrow();
+
+        IO.logLevel = LogLevel.Debug;
+        solution = new AStar(new DistanceSumCost()).solve(safeProblem);
+        Assert.assertTrue(solution.isOk());
     }
 }

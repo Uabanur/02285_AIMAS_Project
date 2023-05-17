@@ -50,7 +50,7 @@ public class SafePathSolver implements Solver {
     }
 
     private Result<Solution> solve(StateSpace space) {
-        IO.debug("Starting safe path search");
+        IO.debug("Starting safe path search with splitter: %s", splitter.getClass().getSimpleName());
         var initialState = space.initialState();
         var fullProblem = space.problem();
 
@@ -94,6 +94,7 @@ public class SafePathSolver implements Solver {
             }
         }
 
+        agents.sort(Comparator.comparingInt(o -> o.label));
         return fullProblem.copyWith(agents, boxes, goals);
     }
 
@@ -132,9 +133,10 @@ public class SafePathSolver implements Solver {
             // Check if goal is found
             var attemptPermutation = queue.poll();
             var attempts = attemptPermutation.getAttempts(plans);
-            IO.debug("Next solution permutation: %s", attemptPermutation);
+//            IO.debug("Next solution permutation: %s", attemptPermutation);
 
             var baseAttempts = attempts.stream().map(a -> (Attempt)a).toList();
+//            IO.debug(fullProblem);
             if(SolutionChecker.validAttempts(baseAttempts, space)){
                 return new SolutionPlansPair(Result.ok(SolutionMerger.mergeAttempts(baseAttempts)), plans);
             }
@@ -160,7 +162,9 @@ public class SafePathSolver implements Solver {
                     return new SolutionPlansPair(Result.error(new SolutionNotFound("Attempt threshold exceeded")), plans);
 
                 var next = attemptPermutation.transfer(i, plans[i].lastAttemptIndex(), plans, space);
-                if (set.contains(next)) continue;
+                if (set.contains(next)) {
+                    continue;
+                }
                 queue.add(next);
                 set.add(next);
             }
@@ -192,7 +196,7 @@ public class SafePathSolver implements Solver {
     }
 
     private List<ReservedCell> getStaticReserves(State state){
-        return getStaticReserves(state, 1);
+        return getStaticReserves(state, 2);
     }
     private List<ReservedCell> getStaticReserves(State state, int duration){
         var reserves = new ArrayList<ReservedCell>();
