@@ -117,7 +117,7 @@ public class SafePathSolver implements Solver {
             IO.debug("Average time per naive solution: %,.2f ms", Stopwatch.getTimeSinceMs(start)/(float)planCount);
         }
 
-        IO.debug("Searching for conflict free solution permutations");
+        IO.debug("Searching for conflict free solution permutations. Splitter: %s", splitter.getClass().getSimpleName());
 
         var set = new HashSet<SafeAttemptPermutation>();
         var queue = new PriorityQueue<SafeAttemptPermutation>();
@@ -133,7 +133,7 @@ public class SafePathSolver implements Solver {
             // Check if goal is found
             var attemptPermutation = queue.poll();
             var attempts = attemptPermutation.getAttempts(plans);
-            IO.spam("Next solution permutation: %s", attemptPermutation);
+            IO.spam("Next solution permutation: %s. Splitter: %s", attemptPermutation, splitter.getClass().getSimpleName());
 
             var baseAttempts = attempts.stream().map(a -> (Attempt)a).toList();
             if(SolutionChecker.validAttempts(baseAttempts, space)){
@@ -142,7 +142,9 @@ public class SafePathSolver implements Solver {
             }
 
             // Calculate all neighbor attempts
-            for(var i = 0; i < planCount; i++) {
+            var indices = IntStream.range(0, planCount).boxed().toArray(Integer[]::new);
+            Arrays.sort(indices, new PlanAttemptSizeComparator(plans, attemptPermutation));
+            for(var i: indices) {
                 if(attempts.get(i).getConflicts().isEmpty()) continue;
 
                 var foreignPathIntervals = getForeignPathIntervals(attempts, i, space);
@@ -150,7 +152,7 @@ public class SafePathSolver implements Solver {
                 if(restrictedProblemResult.isEmpty()) continue; // no new restrictions added
 
                 var restrictedProblem = restrictedProblemResult.get();
-                IO.spam("New restricted problem:\n"+restrictedProblem);
+                IO.spam("New restricted problem. Splitter: %s.\n%s", splitter.getClass().getSimpleName(), restrictedProblem);
                 var solution = subSolver.solve(restrictedProblem).map(s -> (StateSolution)s);
                 if(solution.isError()){
                     continue; // unsolvable sub problem
@@ -240,5 +242,29 @@ class SafePlanAttemptSizeComparator implements Comparator<SafePlan> {
     @Override
     public int compare(SafePlan o1, SafePlan o2) {
         return Integer.compare(o1.lastAttemptIndex(), o2.lastAttemptIndex());
+    }
+}
+
+class PlanAttemptSizeComparator implements Comparator<Integer>
+{
+    private final SafePlan[] plans;
+    private final SafeAttemptPermutation permutation;
+
+    PlanAttemptSizeComparator(SafePlan[] plans, SafeAttemptPermutation permutation) {
+        this.plans = plans;
+        this.permutation = permutation;
+    }
+
+    @Override
+    public int compare(Integer first, Integer second) {
+        return Integer.compare(attemptSize(first), attemptSize(second));
+    }
+
+    private int attemptSize(int index){
+        var plan = plans[index];
+        var attempt = plan.getAttempt(permutation.getAttemptIndex(index));
+        return attempt.getSolution()
+                .map(StateSolution::size)
+                .getOrElse(() -> Integer.MAX_VALUE);
     }
 }

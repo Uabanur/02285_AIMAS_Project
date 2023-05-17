@@ -4,6 +4,7 @@ import dtu.aimas.common.Position;
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
+import dtu.aimas.communication.Stopwatch;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.helpers.FileHelper;
 import dtu.aimas.helpers.LevelHelper;
@@ -597,6 +598,7 @@ public class SafePathSolverTest {
                 new SafePathSolver(
                         new SafePathSolver(
                                 new AStar(new GuidedDistanceSumCost()),
+//                                new AgentProblemSplitter(),
                                 new AgentBoxAssignationSplitter(),
                                 10
                         ),
@@ -606,14 +608,22 @@ public class SafePathSolverTest {
                 new RegionProblemSplitter()
         );
 
-        IO.logLevel = LogLevel.Debug;
-//        for(var level: List.of("mishmash")){
-            for(var level: List.of("wallies", "treotres", "colada", "sixty", "mishmash")){
+        IO.logLevel = LogLevel.Information;
+            for(var level: List.of(
+//                    "cinnamon",
+//                    "colada",
+//                    "fastcipka",
+//                    "minotaur",
+//                    "mishmash",
+                    "nhl",
+                    "persian"
+//                    "sixty",
+//                    "wallies"
+            )){
             IO.info("Solving level: " + level);
-            var solution = LevelSolver.solve(level, IO.CompLevelDir, solver,
-                    2000, TimeUnit.SECONDS,
-                    CourseLevelParser.Instance,  false);
-            IO.info("Level solved: " + solution.isOk());
+            var start = Stopwatch.getTimeMs();
+            var solution = LevelSolver.solve(level, IO.CompLevelDir, solver);
+            IO.info("Level solved: " + solution.isOk() + ". Time: %d ms", Stopwatch.getTimeSinceMs(start));
             Assert.assertTrue(solution.toString(), solution.isOk());
         }
     }
@@ -628,12 +638,13 @@ public class SafePathSolverTest {
                 new SafePathSolver(
                         new SafePathSolver(
                                 new AStar(new GuidedDistanceSumCost()),
-                                new AgentBoxAssignationSplitter()),
+                                new AgentBoxAssignationSplitter(),
+                                10),
                         new ColorProblemSplitter(),
                         10);
 
-//        for(var problem : new RegionProblemSplitter().split(wallies)){
-        { var problem = new RegionProblemSplitter().split(wallies).get(2);
+        for(var problem : new RegionProblemSplitter().split(wallies)){
+//        { var problem = new RegionProblemSplitter().split(wallies).get(2);
             IO.debug("Problem:\n");
             IO.debug(problem);
             var solution = solver.solve(problem);

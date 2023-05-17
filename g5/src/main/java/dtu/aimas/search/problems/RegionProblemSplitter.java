@@ -18,17 +18,21 @@ public class RegionProblemSplitter implements ProblemSplitter {
         var height = problem.goals.length;
         var width = problem.goals[0].length;
 
+        var problems = new ArrayList<Problem>();
         final char[][] world = new char[height][width];
         fillWalls(problem, height, width, world);
 
         var orphanedBoxes = filterOrphanedBoxes(problem.agents, problem.boxes);
-        for(var orphanedBox: orphanedBoxes){
-            world[orphanedBox.pos.row][orphanedBox.pos.col] = WALL;
+        if(!orphanedBoxes.isEmpty()){
+            var orphanedBoxProblem = createGoallessProblem(orphanedBoxes, problem);
+            problems.add(orphanedBoxProblem);
+            for(var orphanedBox: orphanedBoxes){
+                world[orphanedBox.pos.row][orphanedBox.pos.col] = WALL;
+            }
         }
 
         var regions = fillRegions(height, width, world);
 
-        var problems = new ArrayList<Problem>();
         for(char region = 1; region <= regions; region++){
             final char regionId = region;
             var agents = problem.agents.stream().filter(a -> world[a.pos.row][a.pos.col] == regionId).toList();
@@ -44,6 +48,11 @@ public class RegionProblemSplitter implements ProblemSplitter {
         }
 
         return problems;
+    }
+
+    private Problem createGoallessProblem(List<Box> orphanedBoxes, Problem problem) {
+        var goals = new char[problem.goals.length][problem.goals[0].length];
+        return problem.copyWith(List.of(), orphanedBoxes, goals);
     }
 
     private List<Box> filterOrphanedBoxes(Collection<Agent> agents, Collection<Box> boxes) {

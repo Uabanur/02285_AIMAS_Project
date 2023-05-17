@@ -40,6 +40,9 @@ public class SafeAttemptPermutation implements Comparable<SafeAttemptPermutation
                 .mapToObj(i -> plans[i].getAttempt(indices[i]))
                 .toList();
     }
+    public int getAttemptIndex(int plan){
+        return indices[plan];
+    }
 
     public SafeAttemptPermutation transfer(int position, int value, SafePlan[] plans, StateSpace space){
         var indices = this.indices.clone();
