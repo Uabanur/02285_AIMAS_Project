@@ -24,7 +24,7 @@ set OUTPUT_PATH="%LOG_DIR%/%LOG_NAME%"
 set levelDir=.\g5\src\main\resources\levels\complevels
 set classesDir=.\g5\target\classes
 set clientName=dtu.aimas.SearchClient
-set arguments=-safepath region:color:agent:guided -log debug
+set arguments=-safepath attempt2:region:color:agentassign:guided -log debug
 
 : -l            level file or directory
 : -g            start in gui mode

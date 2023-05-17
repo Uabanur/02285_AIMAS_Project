@@ -3,6 +3,7 @@ package dtu.aimas.config;
 import dtu.aimas.common.Result;
 import dtu.aimas.communication.IO;
 import dtu.aimas.errors.UnknownArguments;
+import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
@@ -28,7 +29,7 @@ public class SafePathConfigOption extends ConfigOption{
         IO.debug("tokens: " + tokens);
         for(var token: tokens){
             switch(token){
-                case "region:color:agent:guided" -> {
+                case "attempt1:region:color:agent:guided" -> {
                     solver = new SafePathSolver(
                             new SafePathSolver(
                                     new SafePathSolver(
@@ -41,6 +42,20 @@ public class SafePathConfigOption extends ConfigOption{
                             ),
                                 new RegionProblemSplitter()
                         );
+                }
+                case "attempt2:region:color:agentassign:guided" -> {
+                    solver = new SafePathSolver(
+                            new SafePathSolver(
+                                new SafePathSolver(
+                                        new AStar(new GuidedDistanceSumCost()),
+                                        new AgentBoxAssignationSplitter(),
+                                        10
+                                ),
+                                new ColorProblemSplitter(),
+                                10
+                        ),
+                        new RegionProblemSplitter()
+                );
                 }
                 default -> {
                     return Result.error(new UnknownArguments(tokens));
