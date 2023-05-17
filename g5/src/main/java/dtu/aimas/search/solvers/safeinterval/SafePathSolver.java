@@ -183,12 +183,13 @@ public class SafePathSolver implements Solver {
                 .toList();
 
         var staticReserveDuration = 2;
+        var maxDuration = Integer.MAX_VALUE/2;
         for(var solution: foreignSolutions){
             var initialState = solution.getState(0);
 
             {
                 var duration = solution.size() == 1
-                        ? Integer.MAX_VALUE
+                        ? maxDuration
                         : staticReserveDuration;
                 intervals.addAll(getStaticReserves(initialState, duration));
             }
@@ -197,7 +198,7 @@ public class SafePathSolver implements Solver {
                 var state = solution.getState(step);
                 assert state.parent != null : "Only initial state should be orphaned";
                 var duration = step == solution.size() -1
-                        ? Integer.MAX_VALUE
+                        ? maxDuration
                         : staticReserveDuration;
 
                 intervals.addAll(getStaticReserves(state, duration));
