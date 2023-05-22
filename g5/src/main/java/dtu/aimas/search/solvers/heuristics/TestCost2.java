@@ -44,7 +44,7 @@ public class TestCost2 implements Cost{
             }
         }
 
-        if(unfinishedBoxes.size() > 1){
+        if(!unfinishedBoxes.isEmpty()){
             var closestUnfinishedBox = unfinishedBoxes.stream().min(Comparator.comparingInt(b -> problem.admissibleDist(agent.pos, b.pos)));
             cost += problem.admissibleDist(agent.pos, closestUnfinishedBox.get().pos);
             cost += (unfinishedBoxes.size()-1)*problem.mapSize();
