@@ -111,6 +111,7 @@ public class SafePathSolver implements Solver {
 
             for(var i = 0; i < plans.length; i++){
                 var subProblem = subProblems.get(i);
+                IO.spam("Sub problem #%d:\n%s", i, subProblem);
                 var solution = subSolver.solve(subProblem).map(s -> (StateSolution)s);
                 plans[i] = new SafePlan(subProblem, solution);
             }

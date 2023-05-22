@@ -23,6 +23,7 @@ public class LoggingConfigOption extends ConfigOption {
     public Result<ConfigOption> bindInner(List<String> tokens) {
         for(var token : tokens){
             switch(token){
+                case "spam" -> {logLevel = LogLevel.Spam;}
                 case "debug" -> {logLevel = LogLevel.Debug;}
                 case "info" -> {logLevel = LogLevel.Information;}
                 case "warn" -> {logLevel = LogLevel.Warning;}

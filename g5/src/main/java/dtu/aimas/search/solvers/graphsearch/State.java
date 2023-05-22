@@ -77,6 +77,7 @@ public class State {
         if(!Arrays.equals(other.jointAction, this.jointAction)) return false;
 
         // All boxes must be there, but order may vary
+        if(other.boxes.size() != this.boxes.size()) return false;
         for(var box: other.boxes) if(!this.boxes.contains(box)) return false;
 
         return true;
@@ -85,8 +86,7 @@ public class State {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof State)) return false;
-        return hashCode() == o.hashCode();
+        return o instanceof State s && equivalent(s);
     }
 
     @Override

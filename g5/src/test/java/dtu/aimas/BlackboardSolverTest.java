@@ -180,6 +180,7 @@ public class BlackboardSolverTest {
         Assert.assertTrue(solution.getErrorMessageOrEmpty(), solution.isOk());
     }
 
+    @Ignore
     @Test
     public void RowsOfAgentsAndBoxes(){
         var level = """

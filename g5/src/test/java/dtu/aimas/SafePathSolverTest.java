@@ -7,26 +7,24 @@ import dtu.aimas.communication.LogLevel;
 import dtu.aimas.communication.Stopwatch;
 import dtu.aimas.errors.SolutionNotFound;
 import dtu.aimas.helpers.FileHelper;
-import dtu.aimas.helpers.LevelHelper;
 import dtu.aimas.helpers.LevelSolver;
-import dtu.aimas.parsers.CourseLevelParser;
 import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solutions.Solution;
 import dtu.aimas.search.solvers.graphsearch.AStar;
+import dtu.aimas.search.solvers.graphsearch.Focal;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
 import dtu.aimas.search.solvers.heuristics.GuidedDistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.TestCost2;
 import dtu.aimas.search.solvers.safeinterval.ReservedCell;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 import dtu.aimas.search.solvers.safeinterval.SafeProblem;
 import dtu.aimas.search.solvers.safeinterval.TimeInterval;
 import org.junit.*;
 
-import java.io.File;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static dtu.aimas.helpers.LevelHelper.getProblem;
 
@@ -351,9 +349,9 @@ public class SafePathSolverTest {
                     """;
         var problem = getProblem(level, "red: 0, A", "blue: 1, B");
         var solver = new SafePathSolver(
-                new AStar(new DistanceSumCost()),
+                new Focal(new TestCost2(), 2),
                 new ColorProblemSplitter(),
-                true
+                10
         );
         solution = solver.solve(problem);
         Assert.assertTrue(solution.isOk());
@@ -610,20 +608,21 @@ public class SafePathSolverTest {
 
         IO.logLevel = LogLevel.Information;
             for(var level: List.of(
-//                    "cinnamon",
+                    "cinnamon",
 //                    "colada",
-//                    "fastcipka",
+//                    "fastcipka"
 //                    "minotaur",
-//                    "mishmash",
-                    "nhl",
-                    "persian"
-//                    "sixty",
+//                    "mishmash"
+//                    "nhl",
+//                    "persian"
+                    "sixty"
 //                    "wallies"
             )){
             IO.info("Solving level: " + level);
             var start = Stopwatch.getTimeMs();
             var solution = LevelSolver.solve(level, IO.CompLevelDir, solver);
             IO.info("Level solved: " + solution.isOk() + ". Time: %d ms", Stopwatch.getTimeSinceMs(start));
+            solution.ifOk(s -> IO.info("Solution size: %d", s.size()));
             Assert.assertTrue(solution.toString(), solution.isOk());
         }
     }
@@ -639,7 +638,7 @@ public class SafePathSolverTest {
                         new SafePathSolver(
                                 new AStar(new GuidedDistanceSumCost()),
                                 new AgentBoxAssignationSplitter(),
-                                10),
+                                100),
                         new ColorProblemSplitter(),
                         10);
 

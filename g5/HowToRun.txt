@@ -1,0 +1,3 @@
+The client is packaged as a jar exeuctable called g5-1.0.jar
+
+See "run_file.bat" on how to run it from the server.

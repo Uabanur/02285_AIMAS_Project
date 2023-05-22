@@ -47,6 +47,14 @@ public class LevelSolver {
         Assert.assertTrue(solution.toString(), solution.isOk());
     }
 
+    public static Result<Solution> solve(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit) {
+        return solve(levelName, directory, solver, timeout, timeUnit, false);
+    }
+
+    public static Result<Solution> solve(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit, boolean logOutputToFile) {
+        return solve(levelName, directory, solver, timeout, timeUnit, CourseLevelParser.Instance, logOutputToFile);
+    }
+
     public static Result<Solution> solve(String levelName, Path directory, Solver solver, long timeout, TimeUnit timeUnit, LevelParser parser, boolean logOutputToFile) {
         try {
             ExecutorService executor = Executors.newSingleThreadExecutor();

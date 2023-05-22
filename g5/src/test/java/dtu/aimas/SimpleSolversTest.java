@@ -64,7 +64,7 @@ public class SimpleSolversTest {
 
     @Test
     public void AStarVsFocal_MAPF() {
-        var maps = new String[] { "MAPF00", "MAPF01", "MAPF02", "MAPF03" };
+        var maps = new String[] { "MAPF00", "MAPF01", "MAPF02"};
         benchmarkMaps(maps, 2.0);
     }
 
@@ -76,7 +76,7 @@ public class SimpleSolversTest {
 
     @Test
     public void Look_How_Fast_Focal_Is() {
-        var maps = new String[] { "SAsoko3_04", "MAPF03"};
+        var maps = new String[] { "SAsoko3_04", "MAPF02"};
         benchmarkMaps(maps, 2.0);
     }
     

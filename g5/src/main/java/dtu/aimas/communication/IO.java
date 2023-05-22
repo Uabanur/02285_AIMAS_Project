@@ -25,9 +25,14 @@ import dtu.aimas.search.solutions.Solution;
 
 public class IO {
     private final static String CurrentClassPathString = getClassPath();
-    private final static Path TargetsPath = Paths.get(CurrentClassPathString).getParent();
+    private final static Path TargetsPath = getTargetsPath();
 
-    private final static Path TargetClassesPath = getTargetClassesPath();
+    private static Path getTargetsPath() {
+        if(CurrentClassPathString == null) return null;
+        return Paths.get(CurrentClassPathString).getParent();
+    }
+
+    public final static Path TargetClassesPath = getTargetClassesPath();
 
     private static Path getTargetClassesPath() {
         if (TargetsPath == null) return null;
@@ -55,6 +60,12 @@ public class IO {
         return Paths.get(LevelDir.toString(), "complevels");
     }
 
+    public final static Path G5Dir = getG5Dir();
+    private static Path getG5Dir() {
+        if(TargetsPath == null) return null;
+        return TargetsPath.getParent();
+    }
+
 
     public static LogLevel logLevel = LogLevel.Information;
     public static boolean debugServerMessages = false;
@@ -69,8 +80,7 @@ public class IO {
     private static String getClassPath(){
         var classPaths = System.getProperty("java.class.path").split(OsClassPathSeparator.get());
         var path = Arrays.stream(classPaths).filter(p -> p.contains("g5")).findAny();
-        if(path.isEmpty()) throw new IllegalStateException("Class path not found");
-        return path.get();
+        return path.orElse(null);
     }
 
     private static void sendToServerRaw(String msg){

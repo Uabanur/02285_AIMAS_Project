@@ -10,6 +10,7 @@ import dtu.aimas.search.problems.RegionProblemSplitter;
 import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.graphsearch.AStar;
 import dtu.aimas.search.solvers.heuristics.GuidedDistanceSumCost;
+import dtu.aimas.search.solvers.heuristics.TestCost2;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
 
 import java.util.List;
@@ -57,6 +58,19 @@ public class SafePathConfigOption extends ConfigOption{
                         new RegionProblemSplitter()
                 );
                 }
+
+                    case "attempt3:region:color:agentassign:TestCost2" -> solver = new SafePathSolver(
+                            new SafePathSolver(
+                                    new SafePathSolver(
+                                            new AStar(new TestCost2()),
+                                            new AgentBoxAssignationSplitter(),
+                                            10
+                                    ),
+                                    new ColorProblemSplitter(),
+                                    10
+                            ),
+                            new RegionProblemSplitter()
+                    );
                 default -> {
                     return Result.error(new UnknownArguments(tokens));
                 }

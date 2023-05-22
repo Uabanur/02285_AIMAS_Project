@@ -109,6 +109,10 @@ public class Problem {
         }
     }
 
+    public int mapSize(){
+        return walls.length * walls[0].length;
+    }
+
     public Problem precompute(){
         for(int x = 0; x < walls.length; x++) {
             for(int y = 0; y < walls[x].length; y++) {
@@ -185,7 +189,7 @@ public class Problem {
             for(var col = 0; col < width; col++ ){
                 sb.append(goal[row][col]);
             }
-            if(row < width-1) sb.append(newline);
+            sb.append(newline);
         }
 
         return sb.toString();

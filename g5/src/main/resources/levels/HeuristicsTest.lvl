@@ -1,0 +1,23 @@
+#domain
+hospital
+#levelname
+HeuristicsTest
+#colors
+red: 0, A, B, C
+#initial
+++++++++
++0    A+
++++++ C+
++     C+
++  +++++
++      +
+++++++++
+#goal
+++++++++
++0     +
++++++  +
++A     +
++  +++++
++C    C+
+++++++++
+#end

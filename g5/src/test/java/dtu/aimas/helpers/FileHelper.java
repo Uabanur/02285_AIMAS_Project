@@ -26,11 +26,18 @@ public class FileHelper {
         return Arrays.stream(files).map(File::getName).toList();
     }
 
+    public static File getFile(String levelName, Path directory){
+        assert directory != null;
+        return getFile(levelName, directory.toFile());
+    }
+    public static File getFile(String levelName, File directory){
+        var fileName = levelName.endsWith(".lvl") ? levelName : levelName + ".lvl";
+        return new File(directory, fileName);
+    }
+
     public static Result<Reader> getFileReader(String levelName, File directory) {
         try {
-            var fileName = levelName.endsWith(".lvl") ? levelName : levelName + ".lvl";
-            var levelFile = new File(directory, fileName);
-            var buffer = new FileReader(levelFile);
+            var buffer = new FileReader(getFile(levelName, directory));
             return Result.ok(buffer);
         } catch (FileNotFoundException e) {
             return Result.error(e);

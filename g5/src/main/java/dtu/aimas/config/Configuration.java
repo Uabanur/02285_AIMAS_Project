@@ -22,7 +22,7 @@ public class Configuration {
                             new SafePathSolver(
                                     new AStar(new GuidedDistanceSumCost()),
                                     new AgentBoxAssignationSplitter(),
-                                    10),
+                                    100),
                             new ColorProblemSplitter(),
                             10),
                     new RegionProblemSplitter());

@@ -7,6 +7,7 @@ import dtu.aimas.search.Problem;
 import dtu.aimas.search.solvers.graphsearch.State;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SafeProblem extends Problem {
     private final Map<Position, List<TimeInterval>> conflictingIntervals;
@@ -63,7 +64,9 @@ public class SafeProblem extends Problem {
                     safeProblem.boxes,
                     safeProblem.walls,
                     safeProblem.goals,
-                    safeProblem.conflictingIntervals);
+                    safeProblem.conflictingIntervals.entrySet().stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey, e->new ArrayList<>(e.getValue())))
+            );
         }
 
         return new SafeProblem(

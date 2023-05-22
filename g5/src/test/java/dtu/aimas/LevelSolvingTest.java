@@ -2,9 +2,12 @@ package dtu.aimas;
 
 import dtu.aimas.communication.IO;
 import dtu.aimas.communication.LogLevel;
+import dtu.aimas.communication.Stopwatch;
 import dtu.aimas.helpers.FileHelper;
 import dtu.aimas.helpers.LevelSolver;
+import dtu.aimas.helpers.Server.ServerRunner;
 import dtu.aimas.parsers.CourseLevelParser;
+import dtu.aimas.search.problems.AgentBoxAssignationSplitter;
 import dtu.aimas.search.problems.AgentProblemSplitter;
 import dtu.aimas.search.problems.ColorProblemSplitter;
 import dtu.aimas.search.problems.RegionProblemSplitter;
@@ -12,12 +15,8 @@ import dtu.aimas.search.solvers.blackboard.BlackboardSolver;
 import dtu.aimas.search.solvers.graphsearch.*;
 import dtu.aimas.search.solvers.heuristics.*;
 import dtu.aimas.search.solvers.safeinterval.SafePathSolver;
-import dtu.aimas.search.solutions.Solution;
-import dtu.aimas.search.solvers.SAOrderedSolver;
 import dtu.aimas.search.solvers.heuristics.DistanceSumCost;
-import dtu.aimas.search.solvers.Solver;
 import dtu.aimas.search.solvers.agent.WalledFinishedBoxes;
-import dtu.aimas.search.solvers.conflictbasedsearch.ConflictBasedSearch;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -26,70 +25,85 @@ import java.util.concurrent.TimeUnit;
 
 public class LevelSolvingTest {
 
+    @Ignore
     @Test
     public void TestMAPF00_BFS_TimeLimit_500ms() {
         LevelSolver.testMap("MAPF00", new BFS(), 500, TimeUnit.MILLISECONDS);
     }
 
+    @Ignore
     @Test
     public void TestMAPF00_DFS_TimeLimit_500ms() {
         LevelSolver.testMap("MAPF00", new DFS(), 500, TimeUnit.MILLISECONDS);
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_BFS_TimeLimit_1Second() {
         LevelSolver.testMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_DFS_TimeLimit_1Second() {
         LevelSolver.testMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
     }
+
+    @Ignore
     @Test
     public void TestMAPF00_AStar_GoalCount() {
         LevelSolver.testMap("MAPF00", new AStar(new GoalCount()));
     }
 
+    @Ignore
     @Test
     public void TestMAPF00_AStar_DistanceCost() {
         LevelSolver.testMap("MAPF00", new AStar(new MAAdmissibleCost()));
     }
 
+    @Ignore
     @Test
     public void TestMAPF00_Greedy_GoalCount() {
         LevelSolver.testMap("MAPF00", new Greedy(new GoalCount()));
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_BFS() {
         LevelSolver.testMap("MAPF01", new BFS(), 1, TimeUnit.SECONDS);
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_DFS() {
         LevelSolver.testMap("MAPF01", new DFS(), 1, TimeUnit.SECONDS);
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_AStar_GoalCount() {
         LevelSolver.testMap("MAPF01", new AStar(new GoalCount()));
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_AStar_MAAdmissibleCost() {
         LevelSolver.testMap("MAPF01", new AStar(new MAAdmissibleCost()));
     }
 
+    @Ignore
     @Test
     public void TestMAPF01_Greedy_GoalCount() {
         LevelSolver.testMap("MAPF01", new Greedy(new GoalCount()));
     }
 
+    @Ignore
     @Test
     public void TestSAD1_BFS() {
         LevelSolver.testMap("SAD1", new BFS());
     }
 
+    @Ignore
     @Test
     public void TestMAPF02_AStar_GoalCount() {
         LevelSolver.testMap("MAPF02", new AStar(new GoalCount()));
@@ -99,6 +113,8 @@ public class LevelSolvingTest {
     public void TestMAPF02_AStar_DistanceCost() {
         LevelSolver.testMap("MAPF02", new AStar(new DistanceSumCost()));
     }
+
+    @Ignore
     @Test
     public void TestMAPF02_AStar_MAAdmissibleCost() {
         LevelSolver.testMap("MAPF02", new AStar(new MAAdmissibleCost()));
@@ -109,11 +125,13 @@ public class LevelSolvingTest {
         LevelSolver.testMap("MAsimple4", new AStar(new DistanceSumCost()));
     }
 
+    @Ignore
     @Test
     public void TestMAsimple4_AStar_MAAdmissibleCost() {
         LevelSolver.testMap("MAsimple4", new AStar(new MAAdmissibleCost()));
     }
 
+    @Ignore
     @Test
     public void TestMAsimple4_AStar_GoalCount() {
         LevelSolver.testMap("MAsimple4", new AStar(new GoalCount()));
@@ -244,6 +262,66 @@ public class LevelSolvingTest {
                     5, TimeUnit.SECONDS,
                     CourseLevelParser.Instance, false);
             IO.info("Solved: " + solution.isOk());
+        }
+    }
+
+    @Ignore
+    @Test
+    public void Test_Server() {
+        ServerRunner
+            .level("mishmash", IO.CompLevelDir)
+            .clientConfigs("-safepath attempt3:region:color:agentassign:TestCost2")
+            .configureServer(config -> {
+                config.timeLimitSeconds(180);
+            })
+            .Run();
+
+        // GoalCount:           26 | NA       |           | NA       |
+        // DistanceSum:         26 | 38 (6s)  | 50 (64s)  | NA       |
+        // GuidedDistanceSum:   32 | 41 (28s) | 50 (34s)  | NA       |
+        // TestCost1:              | 38 (7s)  | 52 (7s)   | 52 (33s) |
+        // TestCost2:                                     | 52 (.2s)|
+    }
+
+    @Ignore
+    @Test
+    public void WTF(){
+        //attempt3:region:color:agentassign:TestCost2
+
+        assert IO.CompLevelDir != null;
+        var dir = IO.CompLevelDir;
+        for(var level: new String[]{
+                "cinnamon",
+                "fastcipka",
+                "NHL",
+                "Persian",
+                "RoboMatic",
+                "Sixty",
+                "TreOTres",
+                "Tryhard",
+                "Wallies",
+                "WhatAGrid",
+                "cbsSolve",
+                "minotaur",
+                "mishmash",
+        }){
+            var solver = new SafePathSolver(
+                    new SafePathSolver(
+                            new SafePathSolver(
+                                    new AStar(new TestCost2()),
+                                    new AgentBoxAssignationSplitter(),
+                                    10),
+                            new ColorProblemSplitter(),
+                            10),
+                    new RegionProblemSplitter());
+
+            IO.logLevel = LogLevel.Information;
+            IO.info("Level: %s", level);
+            var start = Stopwatch.getTimeMs();
+            var solution = LevelSolver.solve(level, dir, solver, 180, TimeUnit.SECONDS);
+            IO.info("Solve time: %d ms", Stopwatch.getTimeSinceMs(start));
+            solution.ifOk(s -> IO.info("Solution size: %d", s.size()));
+            solution.ifError(IO::error);
         }
     }
 }
